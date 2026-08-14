@@ -1,8 +1,8 @@
 /**
- * TravelOne Service Worker - Cache-First Offline Engine
+ * TravelOne Service Worker - Cache-First Offline Engine - Costa Rica Edition 🇨🇷
  */
 
-const CACHE_NAME = 'travelone-v1';
+const CACHE_NAME = 'travelone-cr-v2';
 
 const ASSETS_TO_CACHE = [
   './',
@@ -17,6 +17,7 @@ const ASSETS_TO_CACHE = [
   './js/components/nav.js',
   './js/components/modal.js',
   './js/components/quickTools.js',
+  './js/views/auth.js',
   './js/views/home.js',
   './js/views/dashboard.js',
   './js/views/itinerary.js',
@@ -55,7 +56,6 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Offline-first strategy
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
@@ -70,7 +70,6 @@ self.addEventListener('fetch', (event) => {
         }
         return networkResponse;
       }).catch(() => {
-        // Fallback for navigation requests
         if (event.request.mode === 'navigate') {
           return caches.match('./index.html');
         }

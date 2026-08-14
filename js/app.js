@@ -1,5 +1,5 @@
 /**
- * TravelOne PWA Application Controller
+ * TravelOne PWA Application Controller - Costa Rica Edition 🇨🇷
  */
 
 import { seedDemoDataIfNeeded } from './seed.js';
@@ -7,6 +7,7 @@ import { getAllFromStore, getItemById } from './db.js';
 import { renderNavigation } from './components/nav.js';
 import { renderQuickToolsFAB, openCurrencyConverterModal } from './components/quickTools.js';
 
+import { renderAuthView } from './views/auth.js';
 import { renderHomeView } from './views/home.js';
 import { renderDashboardView } from './views/dashboard.js';
 import { renderItineraryView } from './views/itinerary.js';
@@ -24,16 +25,26 @@ import { renderSummaryView } from './views/summary.js';
 class TravelOneApp {
   constructor() {
     this.activeView = 'home';
-    this.currentTripId = localStorage.getItem('travelone_current_trip_id') || 'trip-gt-2026';
+    this.currentUser = JSON.parse(localStorage.getItem('travelone_current_user')) || null;
+    this.currentTripId = localStorage.getItem('travelone_current_trip_id') || 'trip-cr-2026';
     this.currentTrip = null;
     this.appLayout = document.getElementById('app-layout');
   }
 
   async init() {
-    // 1. Seed demo data if first time
+    // 1. Seed demo user & data if needed
     await seedDemoDataIfNeeded();
 
-    // 2. Load active trip
+    // 2. Load default user if none set
+    if (!this.currentUser) {
+      const users = await getAllFromStore('users');
+      if (users.length > 0) {
+        this.currentUser = users[0];
+        localStorage.setItem('travelone_current_user', JSON.stringify(this.currentUser));
+      }
+    }
+
+    // 3. Load active trip
     if (this.currentTripId) {
       this.currentTrip = await getItemById('trips', this.currentTripId);
       if (!this.currentTrip) {
@@ -43,14 +54,36 @@ class TravelOneApp {
       }
     }
 
-    // 3. Register Service Worker for offline PWA functionality
+    // 4. Register Service Worker for offline PWA functionality
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./sw.js').catch(err => {
         console.log('Service Worker registration skipped/failed:', err);
       });
     }
 
-    // 4. Render main application view
+    // 5. Render main application view
+    await this.render();
+  }
+
+  async setAuthUser(user) {
+    this.currentUser = user;
+    localStorage.setItem('travelone_current_user', JSON.stringify(user));
+    
+    // Find user's last trip or first trip
+    const trips = await getAllFromStore('trips');
+    const userTrips = trips.filter(t => !t.userId || t.userId === user.id);
+    this.currentTrip = userTrips[0] || null;
+    this.currentTripId = this.currentTrip ? this.currentTrip.id : null;
+    if (this.currentTripId) {
+      localStorage.setItem('travelone_current_trip_id', this.currentTripId);
+    }
+    this.activeView = 'home';
+    await this.render();
+  }
+
+  async logout() {
+    this.currentUser = null;
+    localStorage.removeItem('travelone_current_user');
     await this.render();
   }
 
@@ -76,8 +109,16 @@ class TravelOneApp {
   }
 
   async render() {
+    // If not authenticated, render AuthView
+    if (!this.currentUser) {
+      this.appLayout.innerHTML = '';
+      const authElem = renderAuthView((user) => this.setAuthUser(user));
+      this.appLayout.appendChild(authElem);
+      return;
+    }
+
     // Render navigation (sidebar + bottom nav)
-    const navHTML = renderNavigation(this.activeView, this.currentTrip);
+    const navHTML = renderNavigation(this.activeView, this.currentTrip, this.currentUser);
     const fabHTML = this.currentTrip ? renderQuickToolsFAB() : '';
 
     this.appLayout.innerHTML = `
@@ -93,7 +134,7 @@ class TravelOneApp {
 
     switch (this.activeView) {
       case 'home':
-        viewElement = await renderHomeView((tripId) => this.setTrip(tripId));
+        viewElement = await renderHomeView((tripId) => this.setTrip(tripId), this.currentUser);
         break;
       case 'dashboard':
         viewElement = await renderDashboardView(this.currentTrip, (v) => this.setView(v));
@@ -132,7 +173,7 @@ class TravelOneApp {
         viewElement = await renderSummaryView(this.currentTrip, refreshCurrentView);
         break;
       default:
-        viewElement = await renderHomeView((tripId) => this.setTrip(tripId));
+        viewElement = await renderHomeView((tripId) => this.setTrip(tripId), this.currentUser);
     }
 
     viewContainer.appendChild(viewElement);
@@ -144,6 +185,11 @@ class TravelOneApp {
         const targetView = btn.getAttribute('data-view');
         this.setView(targetView);
       });
+    });
+
+    // Logout listener
+    document.getElementById('btn-app-logout')?.addEventListener('click', () => {
+      this.logout();
     });
 
     // Attach Quick Tools FAB listener

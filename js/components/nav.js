@@ -1,17 +1,24 @@
 /**
- * TravelOne Responsive Navigation Component
+ * TravelOne Responsive Navigation Component - Costa Rica Edition 🇨🇷
  */
 
-export function renderNavigation(activeView, currentTrip) {
+export function renderNavigation(activeView, currentTrip, currentUser) {
   const tripName = currentTrip ? currentTrip.name : 'Sin Viaje';
+  const userName = currentUser ? currentUser.name : 'Usuario';
   
   // Desktop Sidebar HTML
   const sidebarHTML = `
     <aside class="sidebar">
-      <div class="sidebar-header">
-        <div class="brand-logo">
-          <span>✈️ TravelOne</span>
-          <span class="brand-badge">PWA</span>
+      <div class="sidebar-header" style="flex-direction: column; align-items: flex-start; gap: 0.5rem;">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <img src="./app-logo.png" alt="TravelOne Logo" style="width: 42px; height: 42px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0, 242, 254, 0.3); border: 1px solid rgba(255, 255, 255, 0.2);">
+          <div class="brand-logo">
+            <span>TravelOne</span>
+            <span class="brand-badge">Pura Vida 🇨🇷</span>
+          </div>
+        </div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.1rem;">
+          👤 Hola, <strong>${userName}</strong>
         </div>
       </div>
 
@@ -75,6 +82,12 @@ export function renderNavigation(activeView, currentTrip) {
             <span>Resumen</span>
           </a>
         ` : ''}
+      </div>
+
+      <div style="border-top: 1px solid var(--border-color); padding-top: 0.75rem; margin-top: auto;">
+        <button class="btn btn-danger btn-sm" id="btn-app-logout" style="width: 100%;">
+          🚪 Cerrar Sesión
+        </button>
       </div>
     </aside>
   `;

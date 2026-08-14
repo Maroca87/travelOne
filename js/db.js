@@ -1,9 +1,9 @@
 /**
- * TravelOne Local Database Engine (IndexedDB Native)
+ * TravelOne Local Database Engine (IndexedDB Native) - Costa Rica Edition 🇨🇷
  */
 
 const DB_NAME = 'TravelOneDB';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 let dbInstance = null;
 
@@ -16,10 +16,22 @@ export function openDB() {
     request.onupgradeneeded = (event) => {
       const db = event.target.result;
 
+      // Users store
+      if (!db.objectStoreNames.contains('users')) {
+        const userStore = db.createObjectStore('users', { keyPath: 'id' });
+        userStore.createIndex('username', 'username', { unique: true });
+      }
+
       // Trips store
       if (!db.objectStoreNames.contains('trips')) {
         const store = db.createObjectStore('trips', { keyPath: 'id' });
         store.createIndex('status', 'status', { unique: false });
+        store.createIndex('userId', 'userId', { unique: false });
+      } else {
+        const store = request.transaction.objectStore('trips');
+        if (!store.indexNames.contains('userId')) {
+          store.createIndex('userId', 'userId', { unique: false });
+        }
       }
 
       // Itinerary store
@@ -93,6 +105,38 @@ export function openDB() {
       reject(event.target.error);
     };
   });
+}
+
+// User Management Methods
+export async function registerUser(username, name, password) {
+  const db = await openDB();
+  const existingUsers = await getAllFromStore('users');
+  const normalizedUsername = username.trim().toLowerCase();
+  
+  if (existingUsers.some(u => u.username.toLowerCase() === normalizedUsername)) {
+    throw new Error('El nombre de usuario ya está registrado');
+  }
+
+  const newUser = {
+    id: 'usr-' + Date.now(),
+    username: normalizedUsername,
+    name: name.trim(),
+    password: password.trim(),
+    createdAt: new Date().toISOString()
+  };
+
+  await saveItem('users', newUser);
+  return newUser;
+}
+
+export async function loginUser(username, password) {
+  const users = await getAllFromStore('users');
+  const normalizedUsername = username.trim().toLowerCase();
+  const user = users.find(u => u.username.toLowerCase() === normalizedUsername && u.password === password.trim());
+  if (!user) {
+    throw new Error('Usuario o contraseña incorrectos');
+  }
+  return user;
 }
 
 // Generic Store Access Methods
@@ -197,13 +241,17 @@ export async function exportTripJSON(tripId) {
 }
 
 // Import Trip Data from JSON object
-export async function importTripJSON(data) {
+export async function importTripJSON(data, currentUserId = null) {
   if (!data || !data.trip || !data.trip.id) {
     throw new Error('Formato de datos de viaje no válido');
   }
 
-  // Save main trip
-  await saveItem('trips', data.trip);
+  const tripToSave = { ...data.trip };
+  if (currentUserId) {
+    tripToSave.userId = currentUserId;
+  }
+
+  await saveItem('trips', tripToSave);
 
   const saveCollection = async (storeName, collection) => {
     if (Array.isArray(collection)) {
@@ -224,5 +272,5 @@ export async function importTripJSON(data) {
   await saveCollection('contacts', data.contacts);
   await saveCollection('journal', data.journal);
 
-  return data.trip;
+  return tripToSave;
 }

@@ -1,13 +1,15 @@
 /**
- * Home View ("Mis Viajes")
+ * Home View ("Mis Viajes") - Costa Rica Edition 🇨🇷
  */
 
 import { getAllFromStore, saveItem, deleteTripAndData, importTripJSON } from '../db.js';
 import { formatDate, calculateDaysLeft, calculateDuration, formatMoney, showToast } from '../utils.js';
 import { openModal } from '../components/modal.js';
 
-export async function renderHomeView(onSelectTrip) {
-  const trips = await getAllFromStore('trips');
+export async function renderHomeView(onSelectTrip, currentUser) {
+  const allTrips = await getAllFromStore('trips');
+  // Filter trips for current logged in user if userId exists
+  const trips = currentUser ? allTrips.filter(t => !t.userId || t.userId === currentUser.id) : allTrips;
 
   const getStatusBadge = (status) => {
     switch (status) {
@@ -20,7 +22,7 @@ export async function renderHomeView(onSelectTrip) {
 
   const tripsListHTML = trips.length === 0 ? `
     <div class="card" style="text-align: center; padding: 3rem 1.5rem; grid-column: 1 / -1;">
-      <div style="font-size: 3rem; margin-bottom: 1rem;">✈️</div>
+      <div style="font-size: 3rem; margin-bottom: 1rem;">🇨🇷 ✈️</div>
       <h3>¡No tienes viajes registrados aún!</h3>
       <p style="color: var(--text-muted); margin: 0.5rem 0 1.5rem 0;">Crea tu primer viaje para organizar tu itinerario, gastos, reservas y más.</p>
       <button class="btn btn-primary" id="btn-create-first-trip">+ Crear mi primer viaje</button>
@@ -43,7 +45,7 @@ export async function renderHomeView(onSelectTrip) {
     return `
       <div class="card card-interactive trip-card" data-id="${trip.id}">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
-          <span style="font-size: 2rem;">${trip.coverEmoji || '✈️'}</span>
+          <span style="font-size: 2rem;">${trip.coverEmoji || '🇨🇷'}</span>
           <div>${getStatusBadge(trip.status)}</div>
         </div>
 
@@ -57,7 +59,7 @@ export async function renderHomeView(onSelectTrip) {
         <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
           <div>
             <div style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase;">Presupuesto</div>
-            <div style="font-family: 'Outfit', sans-serif; font-weight: 700; color: #ffffff;">${formatMoney(trip.budget, trip.mainCurrency || 'Q')}</div>
+            <div style="font-family: 'Outfit', sans-serif; font-weight: 700; color: #ffffff;">${formatMoney(trip.budget, trip.mainCurrency || 'CRC')}</div>
           </div>
           <div>${countdownText}</div>
         </div>
@@ -75,7 +77,7 @@ export async function renderHomeView(onSelectTrip) {
     <div class="page-header">
       <div class="page-title-group">
         <h1>Mis Viajes</h1>
-        <div class="page-subtitle">Organiza tus aventuras personales de forma local y sencilla</div>
+        <div class="page-subtitle">¡Pura Vida! Organiza tus aventuras en Costa Rica o el mundo de forma local</div>
       </div>
       <div class="header-actions">
         <label class="btn btn-secondary" style="cursor: pointer;">
@@ -101,8 +103,8 @@ export async function renderHomeView(onSelectTrip) {
       });
     });
 
-    container.querySelector('#btn-add-trip')?.addEventListener('click', () => openNewTripModal(onSelectTrip));
-    container.querySelector('#btn-create-first-trip')?.addEventListener('click', () => openNewTripModal(onSelectTrip));
+    container.querySelector('#btn-add-trip')?.addEventListener('click', () => openNewTripModal(onSelectTrip, currentUser));
+    container.querySelector('#btn-create-first-trip')?.addEventListener('click', () => openNewTripModal(onSelectTrip, currentUser));
 
     // Delete trip listener
     container.querySelectorAll('.btn-delete-trip').forEach(btn => {
@@ -125,7 +127,7 @@ export async function renderHomeView(onSelectTrip) {
       try {
         const text = await file.text();
         const json = JSON.parse(text);
-        const importedTrip = await importTripJSON(json);
+        const importedTrip = await importTripJSON(json, currentUser ? currentUser.id : null);
         showToast(`Viaje "${importedTrip.name}" importado exitosamente`);
         onSelectTrip(importedTrip.id);
       } catch (err) {
@@ -137,16 +139,16 @@ export async function renderHomeView(onSelectTrip) {
   return container;
 }
 
-function openNewTripModal(onSelectTrip) {
+function openNewTripModal(onSelectTrip, currentUser) {
   const bodyHTML = `
     <div class="form-group">
       <label>Nombre del Viaje *</label>
-      <input type="text" id="trip-name" class="form-control" placeholder="Ej: Guatemala 2026, Costa Rica..." required>
+      <input type="text" id="trip-name" class="form-control" placeholder="Ej: Guanacaste 2026, Manuel Antonio..." required>
     </div>
 
     <div class="form-group">
       <label>Destino Principal *</label>
-      <input type="text" id="trip-destination" class="form-control" placeholder="Ej: Antigua & Atitlán, San José..." required>
+      <input type="text" id="trip-destination" class="form-control" placeholder="Ej: La Fortuna & Monteverde..." required>
     </div>
 
     <div class="form-row">
@@ -164,17 +166,17 @@ function openNewTripModal(onSelectTrip) {
     <div class="form-row">
       <div class="form-group">
         <label>Presupuesto Total Estimado</label>
-        <input type="number" step="0.01" id="trip-budget" class="form-control" placeholder="3000">
+        <input type="number" step="1" id="trip-budget" class="form-control" placeholder="1500000">
       </div>
 
       <div class="form-group">
         <label>Moneda Principal</label>
         <select id="trip-currency" class="form-select">
-          <option value="GTQ" selected>GTQ (Q - Quetzales)</option>
+          <option value="CRC" selected>CRC (₡ - Colones Costarricenses)</option>
           <option value="USD">USD ($ - Dólares)</option>
           <option value="EUR">EUR (€ - Euros)</option>
           <option value="MXN">MXN ($ - Pesos MX)</option>
-          <option value="CRC">CRC (₡ - Colones CR)</option>
+          <option value="GTQ">GTQ (Q - Quetzales)</option>
         </select>
       </div>
     </div>
@@ -182,7 +184,7 @@ function openNewTripModal(onSelectTrip) {
     <div class="form-row">
       <div class="form-group">
         <label>Emoji del Viaje</label>
-        <input type="text" id="trip-emoji" class="form-control" value="✈️" maxLength="4">
+        <input type="text" id="trip-emoji" class="form-control" value="🇨🇷" maxLength="4">
       </div>
 
       <div class="form-group">
@@ -203,7 +205,7 @@ function openNewTripModal(onSelectTrip) {
     const endDate = document.getElementById('trip-end-date').value;
     const budget = parseFloat(document.getElementById('trip-budget').value) || 0;
     const mainCurrency = document.getElementById('trip-currency').value;
-    const coverEmoji = document.getElementById('trip-emoji').value.trim() || '✈️';
+    const coverEmoji = document.getElementById('trip-emoji').value.trim() || '🇨🇷';
     const status = document.getElementById('trip-status').value;
 
     if (!name || !destination || !startDate || !endDate) {
@@ -213,6 +215,7 @@ function openNewTripModal(onSelectTrip) {
 
     const newTrip = {
       id: 'trip-' + Date.now(),
+      userId: currentUser ? currentUser.id : null,
       name,
       destination,
       startDate,
@@ -220,14 +223,14 @@ function openNewTripModal(onSelectTrip) {
       budget,
       mainCurrency,
       secondaryCurrencies: ['USD'],
-      exchangeRates: { USD: 7.70 },
+      exchangeRates: { USD: 500 },
       coverEmoji,
       status,
       createdAt: new Date().toISOString()
     };
 
     await saveItem('trips', newTrip);
-    showToast(`¡Viaje "${name}" creado!`);
+    showToast(`¡Viaje "${name}" creado! ¡Pura Vida!`);
     onSelectTrip(newTrip.id);
     return true;
   });

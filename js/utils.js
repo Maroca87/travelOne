@@ -1,27 +1,29 @@
 /**
- * TravelOne Helpers & Utility Functions
+ * TravelOne Helpers & Utility Functions - Costa Rica Edition 🇨🇷
  */
 
-// Format Currency
-export function formatMoney(amount, currencySymbol = 'Q') {
+// Format Currency (Default symbol ₡ CRC)
+export function formatMoney(amount, currencySymbol = '₡') {
   const num = parseFloat(amount) || 0;
-  return `${currencySymbol} ${num.toLocaleString('es-GT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  // If currency symbol is CRC or ₡, use ₡ prefix
+  const symbol = (currencySymbol === 'CRC' || currencySymbol === '₡') ? '₡' : currencySymbol;
+  return `${symbol} ${num.toLocaleString('es-CR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
 }
 
-// Format Date (e.g. "15 de agosto, 2026")
+// Format Date (e.g. "15 de noviembre, 2026")
 export function formatDate(dateString) {
   if (!dateString) return '';
   const date = new Date(dateString + 'T00:00:00');
   if (isNaN(date.getTime())) return dateString;
-  return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+  return date.toLocaleDateString('es-CR', { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
-// Format Short Date (e.g. "15 ago")
+// Format Short Date (e.g. "15 nov")
 export function formatShortDate(dateString) {
   if (!dateString) return '';
   const date = new Date(dateString + 'T00:00:00');
   if (isNaN(date.getTime())) return dateString;
-  return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+  return date.toLocaleDateString('es-CR', { day: 'numeric', month: 'short' });
 }
 
 // Calculate Days Left Countdown
@@ -76,7 +78,7 @@ export function getCategoryBadgeClass(category) {
   return 'badge-default';
 }
 
-// Simple Toast Notification
+// Toast Notification
 export function showToast(message, type = 'success') {
   let toast = document.getElementById('travelone-toast');
   if (!toast) {
