@@ -117,7 +117,7 @@ class TravelOneApp {
       return;
     }
 
-    // Render navigation (sidebar + bottom nav)
+    // Render navigation (sidebar + bottom nav + mobile top bar)
     const navHTML = renderNavigation(this.activeView, this.currentTrip, this.currentUser);
     const fabHTML = this.currentTrip ? renderQuickToolsFAB() : '';
 
@@ -187,10 +187,9 @@ class TravelOneApp {
       });
     });
 
-    // Logout listener
-    document.getElementById('btn-app-logout')?.addEventListener('click', () => {
-      this.logout();
-    });
+    // Logout listeners (desktop & mobile)
+    document.getElementById('btn-app-logout')?.addEventListener('click', () => this.logout());
+    document.getElementById('btn-mobile-logout')?.addEventListener('click', () => this.logout());
 
     // Attach Quick Tools FAB listener
     const fabBtn = document.getElementById('fab-quick-tools');

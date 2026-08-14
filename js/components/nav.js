@@ -5,6 +5,24 @@
 export function renderNavigation(activeView, currentTrip, currentUser) {
   const tripName = currentTrip ? currentTrip.name : 'Sin Viaje';
   const userName = currentUser ? currentUser.name : 'Usuario';
+
+  // Mobile Top Bar HTML
+  const mobileTopBarHTML = `
+    <header class="mobile-top-bar">
+      <div class="mobile-brand">
+        <img src="./app-logo.png" class="mobile-brand-img" alt="Logo">
+        <div>
+          <div class="mobile-brand-title">TravelOne 🇨🇷</div>
+          <div style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500;">👤 ${userName}</div>
+        </div>
+      </div>
+      <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <button class="btn btn-danger btn-sm" id="btn-mobile-logout" style="padding: 0.3rem 0.65rem; font-size: 0.75rem;">
+          🚪 Salir
+        </button>
+      </div>
+    </header>
+  `;
   
   // Desktop Sidebar HTML
   const sidebarHTML = `
@@ -120,5 +138,5 @@ export function renderNavigation(activeView, currentTrip, currentUser) {
     </nav>
   `;
 
-  return sidebarHTML + bottomNavHTML;
+  return mobileTopBarHTML + sidebarHTML + bottomNavHTML;
 }
