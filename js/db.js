@@ -1,5 +1,5 @@
 /**
- * TravelOne Local Database Engine (IndexedDB Native) - Costa Rica Edition 🇨🇷
+ * TravelOne Local Database Engine (IndexedDB Native)
  */
 
 const DB_NAME = 'TravelOneDB';
@@ -34,64 +34,13 @@ export function openDB() {
         }
       }
 
-      // Itinerary store
-      if (!db.objectStoreNames.contains('itinerary')) {
-        const store = db.createObjectStore('itinerary', { keyPath: 'id', autoIncrement: true });
-        store.createIndex('tripId', 'tripId', { unique: false });
-        store.createIndex('date', 'date', { unique: false });
-      }
-
-      // Reservations store
-      if (!db.objectStoreNames.contains('reservations')) {
-        const store = db.createObjectStore('reservations', { keyPath: 'id', autoIncrement: true });
-        store.createIndex('tripId', 'tripId', { unique: false });
-        store.createIndex('type', 'type', { unique: false });
-      }
-
-      // Expenses store
-      if (!db.objectStoreNames.contains('expenses')) {
-        const store = db.createObjectStore('expenses', { keyPath: 'id', autoIncrement: true });
-        store.createIndex('tripId', 'tripId', { unique: false });
-        store.createIndex('category', 'category', { unique: false });
-      }
-
-      // Places store
-      if (!db.objectStoreNames.contains('places')) {
-        const store = db.createObjectStore('places', { keyPath: 'id', autoIncrement: true });
-        store.createIndex('tripId', 'tripId', { unique: false });
-        store.createIndex('visited', 'visited', { unique: false });
-      }
-
-      // Shopping list store
-      if (!db.objectStoreNames.contains('shopping')) {
-        const store = db.createObjectStore('shopping', { keyPath: 'id', autoIncrement: true });
-        store.createIndex('tripId', 'tripId', { unique: false });
-        store.createIndex('bought', 'bought', { unique: false });
-      }
-
-      // Checklist store
-      if (!db.objectStoreNames.contains('checklists')) {
-        const store = db.createObjectStore('checklists', { keyPath: 'id', autoIncrement: true });
-        store.createIndex('tripId', 'tripId', { unique: false });
-        store.createIndex('group', 'group', { unique: false });
-      }
-
-      // Documents store
-      if (!db.objectStoreNames.contains('documents')) {
-        const store = db.createObjectStore('documents', { keyPath: 'id', autoIncrement: true });
-        store.createIndex('tripId', 'tripId', { unique: false });
-      }
-
-      // Contacts store
-      if (!db.objectStoreNames.contains('contacts')) {
-        const store = db.createObjectStore('contacts', { keyPath: 'id', autoIncrement: true });
-        store.createIndex('tripId', 'tripId', { unique: false });
-      }
-
-      // Journal store
-      if (!db.objectStoreNames.contains('journal')) {
-        const store = db.createObjectStore('journal', { keyPath: 'id', autoIncrement: true });
-        store.createIndex('tripId', 'tripId', { unique: false });
+      // Child stores
+      const childStores = ['itinerary', 'reservations', 'expenses', 'places', 'shopping', 'checklists', 'documents', 'contacts', 'journal'];
+      for (const storeName of childStores) {
+        if (!db.objectStoreNames.contains(storeName)) {
+          const store = db.createObjectStore(storeName, { keyPath: 'id', autoIncrement: true });
+          store.createIndex('tripId', 'tripId', { unique: false });
+        }
       }
     };
 
@@ -109,7 +58,6 @@ export function openDB() {
 
 // User Management Methods
 export async function registerUser(username, name, password) {
-  const db = await openDB();
   const existingUsers = await getAllFromStore('users');
   const normalizedUsername = username.trim().toLowerCase();
   
@@ -136,6 +84,18 @@ export async function loginUser(username, password) {
   if (!user) {
     throw new Error('Usuario o contraseña incorrectos');
   }
+  return user;
+}
+
+export async function resetPassword(username, newPassword) {
+  const users = await getAllFromStore('users');
+  const normalizedUsername = username.trim().toLowerCase();
+  const user = users.find(u => u.username.toLowerCase() === normalizedUsername);
+  if (!user) {
+    throw new Error('El nombre de usuario no existe');
+  }
+  user.password = newPassword.trim();
+  await saveItem('users', user);
   return user;
 }
 
@@ -195,11 +155,35 @@ export async function deleteItem(storeName, id) {
   });
 }
 
-export async function deleteTripAndData(tripId) {
+// Trash & Restoration Operations
+export async function moveToTrash(tripId) {
+  const trip = await getItemById('trips', tripId);
+  if (!trip) throw new Error('Viaje no encontrado');
+
+  trip.previousStatus = trip.status !== 'papelera' ? trip.status : 'planificando';
+  trip.status = 'papelera';
+  trip.deletedAt = new Date().toISOString();
+
+  await saveItem('trips', trip);
+  return trip;
+}
+
+export async function restoreTrip(tripId) {
+  const trip = await getItemById('trips', tripId);
+  if (!trip) throw new Error('Viaje no encontrado');
+
+  trip.status = trip.previousStatus || 'planificando';
+  delete trip.deletedAt;
+
+  await saveItem('trips', trip);
+  return trip;
+}
+
+export async function permanentDeleteTrip(tripId) {
   const db = await openDB();
-  const stores = ['itinerary', 'reservations', 'expenses', 'places', 'shopping', 'checklists', 'documents', 'contacts', 'journal'];
+  const childStores = ['itinerary', 'reservations', 'expenses', 'places', 'shopping', 'checklists', 'documents', 'contacts', 'journal'];
   
-  for (const storeName of stores) {
+  for (const storeName of childStores) {
     const items = await getAllFromStore(storeName, tripId);
     for (const item of items) {
       await deleteItem(storeName, item.id);
@@ -209,68 +193,154 @@ export async function deleteTripAndData(tripId) {
   return true;
 }
 
-// Export full Trip Data to JSON object
-export async function exportTripJSON(tripId) {
-  const trip = await getItemById('trips', tripId);
-  if (!trip) throw new Error('Viaje no encontrado');
+export async function emptyTrash(userId) {
+  const trips = await getAllFromStore('trips');
+  const trashTrips = trips.filter(t => t.status === 'papelera' && (!userId || !t.userId || t.userId === userId));
 
-  const itinerary = await getAllFromStore('itinerary', tripId);
-  const reservations = await getAllFromStore('reservations', tripId);
-  const expenses = await getAllFromStore('expenses', tripId);
-  const places = await getAllFromStore('places', tripId);
-  const shopping = await getAllFromStore('shopping', tripId);
-  const checklists = await getAllFromStore('checklists', tripId);
-  const documents = await getAllFromStore('documents', tripId);
-  const contacts = await getAllFromStore('contacts', tripId);
-  const journal = await getAllFromStore('journal', tripId);
-
-  return {
-    version: '1.0',
-    exportDate: new Date().toISOString(),
-    trip,
-    itinerary,
-    reservations,
-    expenses,
-    places,
-    shopping,
-    checklists,
-    documents,
-    contacts,
-    journal
-  };
+  for (const trip of trashTrips) {
+    await permanentDeleteTrip(trip.id);
+  }
+  return true;
 }
 
-// Import Trip Data from JSON object
-export async function importTripJSON(data, currentUserId = null) {
-  if (!data || !data.trip || !data.trip.id) {
-    throw new Error('Formato de datos de viaje no válido');
+// XML Backup Export Engine
+export async function exportTripsXML(tripId = null, userId = null) {
+  let trips = [];
+  if (tripId) {
+    const singleTrip = await getItemById('trips', tripId);
+    if (singleTrip) trips = [singleTrip];
+  } else {
+    trips = await getAllFromStore('trips');
+    if (userId) {
+      trips = trips.filter(t => !t.userId || t.userId === userId);
+    }
   }
 
-  const tripToSave = { ...data.trip };
-  if (currentUserId) {
-    tripToSave.userId = currentUserId;
+  let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+  xml += `<travelone_backup version="1.0" exportDate="${new Date().toISOString()}">\n`;
+  xml += `  <trips>\n`;
+
+  for (const trip of trips) {
+    xml += `    <trip id="${escapeXML(trip.id)}">\n`;
+    xml += `      <name>${escapeXML(trip.name)}</name>\n`;
+    xml += `      <destination>${escapeXML(trip.destination)}</destination>\n`;
+    xml += `      <startDate>${escapeXML(trip.startDate)}</startDate>\n`;
+    xml += `      <endDate>${escapeXML(trip.endDate)}</endDate>\n`;
+    xml += `      <status>${escapeXML(trip.status)}</status>\n`;
+    xml += `      <previousStatus>${escapeXML(trip.previousStatus || '')}</previousStatus>\n`;
+    xml += `      <deletedAt>${escapeXML(trip.deletedAt || '')}</deletedAt>\n`;
+    xml += `      <budget>${trip.budget || 0}</budget>\n`;
+    xml += `      <mainCurrency>${escapeXML(trip.mainCurrency || 'CRC')}</mainCurrency>\n`;
+    xml += `      <coverEmoji>${escapeXML(trip.coverEmoji || '✈️')}</coverEmoji>\n`;
+
+    // Export child collections
+    const collections = {
+      itinerary: await getAllFromStore('itinerary', trip.id),
+      reservations: await getAllFromStore('reservations', trip.id),
+      expenses: await getAllFromStore('expenses', trip.id),
+      places: await getAllFromStore('places', trip.id),
+      shopping: await getAllFromStore('shopping', trip.id),
+      checklists: await getAllFromStore('checklists', trip.id),
+      documents: await getAllFromStore('documents', trip.id),
+      contacts: await getAllFromStore('contacts', trip.id),
+      journal: await getAllFromStore('journal', trip.id)
+    };
+
+    for (const [colName, items] of Object.entries(collections)) {
+      xml += `      <${colName}>\n`;
+      for (const item of items) {
+        xml += `        <item>\n`;
+        for (const [key, val] of Object.entries(item)) {
+          if (key === 'tripId') continue;
+          xml += `          <${key}>${escapeXML(val)}</${key}>\n`;
+        }
+        xml += `        </item>\n`;
+      }
+      xml += `      </${colName}>\n`;
+    }
+
+    xml += `    </trip>\n`;
   }
 
-  await saveItem('trips', tripToSave);
+  xml += `  </trips>\n`;
+  xml += `</travelone_backup>`;
+  return xml;
+}
 
-  const saveCollection = async (storeName, collection) => {
-    if (Array.isArray(collection)) {
-      for (const item of collection) {
-        const itemCopy = { ...item, tripId: data.trip.id };
-        await saveItem(storeName, itemCopy);
+// XML Import Engine
+export async function importTripsXML(xmlString, currentUserId = null) {
+  const parser = new DOMParser();
+  const xmlDoc = parser.parseFromString(xmlString, 'text/xml');
+
+  const parserError = xmlDoc.querySelector('parsererror');
+  if (parserError) {
+    throw new Error('Error de lectura en el archivo XML de respaldo');
+  }
+
+  const tripNodes = xmlDoc.querySelectorAll('trips > trip');
+  if (tripNodes.length === 0) {
+    throw new Error('No se encontraron viajes válidos en el archivo XML');
+  }
+
+  let importedCount = 0;
+  let lastTripId = null;
+
+  for (const tripNode of tripNodes) {
+    const tripId = tripNode.getAttribute('id') || ('trip-' + Date.now());
+    lastTripId = tripId;
+
+    const getTagVal = (parent, tag) => {
+      const el = parent.querySelector(tag);
+      return el ? el.textContent : '';
+    };
+
+    const tripObj = {
+      id: tripId,
+      userId: currentUserId || null,
+      name: getTagVal(tripNode, 'name'),
+      destination: getTagVal(tripNode, 'destination'),
+      startDate: getTagVal(tripNode, 'startDate'),
+      endDate: getTagVal(tripNode, 'endDate'),
+      status: getTagVal(tripNode, 'status') || 'planificando',
+      previousStatus: getTagVal(tripNode, 'previousStatus') || '',
+      deletedAt: getTagVal(tripNode, 'deletedAt') || null,
+      budget: parseFloat(getTagVal(tripNode, 'budget')) || 0,
+      mainCurrency: getTagVal(tripNode, 'mainCurrency') || 'CRC',
+      coverEmoji: getTagVal(tripNode, 'coverEmoji') || '✈️'
+    };
+
+    await saveItem('trips', tripObj);
+
+    // Child collections
+    const colNames = ['itinerary', 'reservations', 'expenses', 'places', 'shopping', 'checklists', 'documents', 'contacts', 'journal'];
+    for (const colName of colNames) {
+      const itemNodes = tripNode.querySelectorAll(`${colName} > item`);
+      for (const itemNode of itemNodes) {
+        const itemObj = { tripId };
+        for (const child of itemNode.children) {
+          const key = child.tagName;
+          let val = child.textContent;
+          if (val === 'true') val = true;
+          else if (val === 'false') val = false;
+          else if (!isNaN(val) && val.trim() !== '') val = Number(val);
+          itemObj[key] = val;
+        }
+        await saveItem(colName, itemObj);
       }
     }
-  };
 
-  await saveCollection('itinerary', data.itinerary);
-  await saveCollection('reservations', data.reservations);
-  await saveCollection('expenses', data.expenses);
-  await saveCollection('places', data.places);
-  await saveCollection('shopping', data.shopping);
-  await saveCollection('checklists', data.checklists);
-  await saveCollection('documents', data.documents);
-  await saveCollection('contacts', data.contacts);
-  await saveCollection('journal', data.journal);
+    importedCount++;
+  }
 
-  return tripToSave;
+  return { importedCount, lastTripId };
+}
+
+function escapeXML(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
 }

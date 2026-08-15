@@ -1,9 +1,10 @@
 /**
- * Auth View (Local Login & User Registration) - Costa Rica Edition 🇨🇷
+ * Auth View (Local Login & User Registration)
  */
 
-import { registerUser, loginUser } from '../db.js';
+import { registerUser, loginUser, resetPassword } from '../db.js';
 import { showToast } from '../utils.js';
+import { openModal } from '../components/modal.js';
 
 export function renderAuthView(onAuthSuccess) {
   let isRegisterTab = false;
@@ -23,16 +24,13 @@ export function renderAuthView(onAuthSuccess) {
     container.innerHTML = `
       <div class="card" style="width: 100%; max-width: 440px; border-color: rgba(0, 242, 254, 0.3); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);">
         <div style="text-align: center; margin-bottom: 1.5rem;">
-          <img src="./app-logo.png" alt="TravelOne iOS Icon" style="width: 90px; height: 90px; border-radius: 22px; margin-bottom: 0.75rem; box-shadow: 0 10px 25px rgba(0, 242, 254, 0.35); border: 2px solid rgba(255, 255, 255, 0.2);">
+          <img src="./app-logo.png" alt="TravelOne Logo" style="width: 90px; height: 90px; border-radius: 22px; margin-bottom: 0.75rem; box-shadow: 0 10px 25px rgba(0, 242, 254, 0.35); border: 2px solid rgba(255, 255, 255, 0.2);">
           
           <h1 style="font-size: 1.9rem; background: linear-gradient(135deg, var(--primary-cyan), #00b09b); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
             TravelOne
           </h1>
-          <div style="font-size: 0.85rem; color: var(--accent-amber); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.2rem;">
-            ¡Pura Vida! • Edición Costa Rica 🇨🇷
-          </div>
           <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.4rem;">
-            Tu organizador personal de viajes local y offline
+            Organizador personal de viajes local y offline
           </div>
         </div>
 
@@ -51,28 +49,32 @@ export function renderAuthView(onAuthSuccess) {
           ${isRegisterTab ? `
             <div class="form-group">
               <label>Nombre Completo *</label>
-              <input type="text" id="auth-name" class="form-control" placeholder="Ej: Juan Carlos, María..." required>
+              <input type="text" id="auth-name" class="form-control" required>
             </div>
           ` : ''}
 
           <div class="form-group">
             <label>Nombre de Usuario *</label>
-            <input type="text" id="auth-username" class="form-control" placeholder="Ej: tico_viajero" required>
+            <input type="text" id="auth-username" class="form-control" required>
           </div>
 
           <div class="form-group">
             <label>Contraseña / PIN *</label>
-            <input type="password" id="auth-password" class="form-control" placeholder="••••••••" required>
+            <input type="password" id="auth-password" class="form-control" required>
           </div>
 
           <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem; padding: 0.75rem;">
-            ${isRegisterTab ? '✨ Crear mi Cuenta Local' : '🚀 Iniciar Sesión'}
+            ${isRegisterTab ? '✨ Crear Cuenta' : '🚀 Iniciar Sesión'}
           </button>
         </form>
 
-        <div style="margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1rem; text-align: center; font-size: 0.75rem; color: var(--text-dim);">
-          🔒 Tus usuarios y datos se guardan exclusivamente en tu dispositivo (IndexedDB local).
-        </div>
+        ${!isRegisterTab ? `
+          <div style="text-align: center; margin-top: 1rem;">
+            <button class="btn btn-secondary btn-sm" id="btn-forgot-password" style="font-size: 0.8rem; background: transparent; border: none; color: var(--primary-cyan);">
+              🔑 ¿Olvidaste tu contraseña?
+            </button>
+          </div>
+        ` : ''}
       </div>
     `;
 
@@ -87,6 +89,10 @@ export function renderAuthView(onAuthSuccess) {
       renderCard();
     });
 
+    container.querySelector('#btn-forgot-password')?.addEventListener('click', () => {
+      openPasswordRecoveryModal();
+    });
+
     container.querySelector('#auth-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const username = container.querySelector('#auth-username').value;
@@ -96,7 +102,7 @@ export function renderAuthView(onAuthSuccess) {
         if (isRegisterTab) {
           const name = container.querySelector('#auth-name').value;
           const user = await registerUser(username, name, password);
-          showToast(`¡Bienvenido Pura Vida, ${user.name}!`);
+          showToast(`¡Bienvenido, ${user.name}!`);
           onAuthSuccess(user);
         } else {
           const user = await loginUser(username, password);
@@ -111,4 +117,37 @@ export function renderAuthView(onAuthSuccess) {
 
   renderCard();
   return container;
+}
+
+function openPasswordRecoveryModal() {
+  const bodyHTML = `
+    <div class="form-group">
+      <label>Ingresa tu Nombre de Usuario registrado *</label>
+      <input type="text" id="rec-username" class="form-control" required>
+    </div>
+
+    <div class="form-group">
+      <label>Nueva Contraseña / PIN *</label>
+      <input type="password" id="rec-new-password" class="form-control" required>
+    </div>
+  `;
+
+  openModal('🔑 Recuperar / Restablecer Contraseña', bodyHTML, async () => {
+    const username = document.getElementById('rec-username').value.trim();
+    const newPassword = document.getElementById('rec-new-password').value.trim();
+
+    if (!username || !newPassword) {
+      alert('Por favor ingresa usuario y nueva contraseña.');
+      return false;
+    }
+
+    try {
+      await resetPassword(username, newPassword);
+      showToast('Contraseña restablecida exitosamente');
+      return true;
+    } catch (err) {
+      alert(err.message);
+      return false;
+    }
+  });
 }

@@ -1,5 +1,5 @@
 /**
- * TravelOne Responsive Navigation Component - Costa Rica Edition 🇨🇷
+ * TravelOne Responsive Navigation Component
  */
 
 export function renderNavigation(activeView, currentTrip, currentUser) {
@@ -12,7 +12,7 @@ export function renderNavigation(activeView, currentTrip, currentUser) {
       <div class="mobile-brand">
         <img src="./app-logo.png" class="mobile-brand-img" alt="Logo">
         <div>
-          <div class="mobile-brand-title">TravelOne 🇨🇷</div>
+          <div class="mobile-brand-title">TravelOne</div>
           <div style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500;">👤 ${userName}</div>
         </div>
       </div>
@@ -32,7 +32,7 @@ export function renderNavigation(activeView, currentTrip, currentUser) {
           <img src="./app-logo.png" alt="TravelOne Logo" style="width: 42px; height: 42px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0, 242, 254, 0.3); border: 1px solid rgba(255, 255, 255, 0.2);">
           <div class="brand-logo">
             <span>TravelOne</span>
-            <span class="brand-badge">Pura Vida 🇨🇷</span>
+            <span class="brand-badge">PWA</span>
           </div>
         </div>
         <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.1rem;">

@@ -1,8 +1,8 @@
 /**
- * Trip Summary & Backup Export View
+ * Trip Summary & Backup Export View (XML Support)
  */
 
-import { getAllFromStore, exportTripJSON } from '../db.js';
+import { getAllFromStore, exportTripsXML } from '../db.js';
 import { formatDate, calculateDuration, formatMoney, showToast } from '../utils.js';
 
 export async function renderSummaryView(trip, refreshView) {
@@ -18,7 +18,6 @@ export async function renderSummaryView(trip, refreshView) {
   const duration = calculateDuration(trip.startDate, trip.endDate);
   const totalSpent = expenses.reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
   const budget = parseFloat(trip.budget) || 0;
-  const available = budget - totalSpent;
 
   const visitedPlacesCount = places.filter(p => p.visited).length;
   const completedChecklistCount = checklists.filter(c => c.completed).length;
@@ -31,7 +30,7 @@ export async function renderSummaryView(trip, refreshView) {
         <div class="page-subtitle">Vista consolidada e imprimible de todas las secciones de tu viaje</div>
       </div>
       <div class="header-actions">
-        <button class="btn btn-secondary" id="btn-export-json">💾 Exportar JSON</button>
+        <button class="btn btn-secondary" id="btn-export-xml">💾 Respaldo XML</button>
         <button class="btn btn-primary" id="btn-print-summary">🖨️ Imprimir / Guardar PDF</button>
       </div>
     </div>
@@ -129,20 +128,19 @@ export async function renderSummaryView(trip, refreshView) {
       window.print();
     });
 
-    container.querySelector('#btn-export-json')?.addEventListener('click', async () => {
+    container.querySelector('#btn-export-xml')?.addEventListener('click', async () => {
       try {
-        const data = await exportTripJSON(trip.id);
-        const jsonStr = JSON.stringify(data, null, 2);
-        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const xmlStr = await exportTripsXML(trip.id);
+        const blob = new Blob([xmlStr], { type: 'application/xml' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `TravelOne_Respaldo_${trip.name.replace(/\s+/g, '_')}.json`;
+        a.download = `TravelOne_Respaldo_${trip.name.replace(/\s+/g, '_')}.xml`;
         a.click();
         URL.revokeObjectURL(url);
-        showToast('Respaldo descargado');
+        showToast('Respaldo XML descargado');
       } catch (err) {
-        alert('Error al exportar viaje: ' + err.message);
+        alert('Error al exportar XML: ' + err.message);
       }
     });
   }, 50);

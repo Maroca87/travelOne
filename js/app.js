@@ -1,5 +1,5 @@
 /**
- * TravelOne PWA Application Controller - Costa Rica Edition 🇨🇷
+ * TravelOne PWA Application Controller
  */
 
 import { seedDemoDataIfNeeded } from './seed.js';
@@ -26,42 +26,34 @@ class TravelOneApp {
   constructor() {
     this.activeView = 'home';
     this.currentUser = JSON.parse(localStorage.getItem('travelone_current_user')) || null;
-    this.currentTripId = localStorage.getItem('travelone_current_trip_id') || 'trip-cr-2026';
+    this.currentTripId = localStorage.getItem('travelone_current_trip_id') || null;
     this.currentTrip = null;
     this.appLayout = document.getElementById('app-layout');
   }
 
   async init() {
-    // 1. Seed demo user & data if needed
+    // 1. Seed initial data if first time
     await seedDemoDataIfNeeded();
 
-    // 2. Load default user if none set
-    if (!this.currentUser) {
-      const users = await getAllFromStore('users');
-      if (users.length > 0) {
-        this.currentUser = users[0];
-        localStorage.setItem('travelone_current_user', JSON.stringify(this.currentUser));
-      }
-    }
-
-    // 3. Load active trip
-    if (this.currentTripId) {
+    // 2. Load active trip if user is authenticated
+    if (this.currentUser && this.currentTripId) {
       this.currentTrip = await getItemById('trips', this.currentTripId);
       if (!this.currentTrip) {
         const trips = await getAllFromStore('trips');
-        this.currentTrip = trips[0] || null;
+        const userTrips = trips.filter(t => !t.userId || t.userId === this.currentUser.id);
+        this.currentTrip = userTrips[0] || null;
         this.currentTripId = this.currentTrip ? this.currentTrip.id : null;
       }
     }
 
-    // 4. Register Service Worker for offline PWA functionality
+    // 3. Register Service Worker for offline PWA functionality
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./sw.js').catch(err => {
         console.log('Service Worker registration skipped/failed:', err);
       });
     }
 
-    // 5. Render main application view
+    // 4. Render main application view
     await this.render();
   }
 
@@ -69,9 +61,9 @@ class TravelOneApp {
     this.currentUser = user;
     localStorage.setItem('travelone_current_user', JSON.stringify(user));
     
-    // Find user's last trip or first trip
+    // Find user's last trip or first active trip
     const trips = await getAllFromStore('trips');
-    const userTrips = trips.filter(t => !t.userId || t.userId === user.id);
+    const userTrips = trips.filter(t => (!t.userId || t.userId === user.id) && t.status !== 'papelera');
     this.currentTrip = userTrips[0] || null;
     this.currentTripId = this.currentTrip ? this.currentTrip.id : null;
     if (this.currentTripId) {
@@ -83,7 +75,10 @@ class TravelOneApp {
 
   async logout() {
     this.currentUser = null;
+    this.currentTrip = null;
+    this.currentTripId = null;
     localStorage.removeItem('travelone_current_user');
+    localStorage.removeItem('travelone_current_trip_id');
     await this.render();
   }
 
@@ -109,7 +104,7 @@ class TravelOneApp {
   }
 
   async render() {
-    // If not authenticated, render AuthView
+    // If not authenticated, force AuthView
     if (!this.currentUser) {
       this.appLayout.innerHTML = '';
       const authElem = renderAuthView((user) => this.setAuthUser(user));
