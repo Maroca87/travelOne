@@ -2,27 +2,1161 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#0b1326">
-  <meta name="description" content="TravelOne - Tu organizador personal de viajes offline y PWA local. Itinerario, reservas, gastos, presupuesto y más. Pura Vida 🇨🇷">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>GarageOne</title>
   
-  <title>TravelOne — Organizador Personal de Viajes</title>
-
-  <!-- PWA Manifest & iOS App Icons -->
-  <link rel="manifest" href="./manifest.json">
-  <link rel="icon" type="image/png" href="./favicon.png">
-  <link rel="apple-touch-icon" href="./icon-192.png">
-
-  <!-- Stylesheets -->
-  <link rel="stylesheet" href="./css/main.css">
-  <link rel="stylesheet" href="./css/components.css">
+  <!-- iOS PWA Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="GarageOne">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="color-scheme" content="dark">
+  
+  <link rel="manifest" href="manifest.json?v=108">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png?v=108">
+  <link rel="apple-touch-icon-precomposed" href="icons/apple-touch-icon.png?v=108">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png?v=108">
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg?v=108">
+  
+  <!-- Font & CSS Cache Buster v108 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=401">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
 
-  <!-- Root Layout Container -->
-  <div id="app-layout"></div>
+  <!-- SPLASH SCREEN ENTRANCE ANIMATION -->
+  <div id="splashScreen" class="splash-screen-overlay" style="display:none;">
+    <div class="splash-content">
+      <div class="splash-logo-container">
+        <img src="icons/icon-512.png?v=108" alt="GarageOne Logo" class="splash-logo-img">
+      </div>
+      <h2 class="splash-title">GarageOne</h2>
+      <p class="splash-subtitle" id="splashSubtitle">Cargando tu garaje...</p>
+      <div class="splash-loader-bar">
+        <div class="splash-loader-progress"></div>
+      </div>
+    </div>
+  </div>
 
-  <!-- Main JavaScript Module -->
-  <script type="module" src="./js/app.js"></script>
+  <!-- AUTH SCREEN (LOGIN / REGISTER) -->
+  <div id="authScreen" class="auth-screen" style="display:none;">
+    <div class="auth-card">
+      <div class="auth-header">
+        <div class="auth-symbol">
+          <img src="icons/icon.svg?v=107" alt="GarageOne Logo">
+        </div>
+        <h2 id="authTitle">GarageOne</h2>
+        <p class="subtitle" id="authSubtitle">Crea tu cuenta e ingresa tu PIN</p>
+      </div>
+
+      <!-- Login Form -->
+      <form id="formLogin" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label>Correo electrónico o Usuario</label>
+          <input type="text" id="loginUser" class="form-control" placeholder="correo@ejemplo.com o usuario" autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label id="loginPassLabel">Contraseña</label>
+          <input type="password" id="loginPin" class="form-control pin-input text-center" placeholder="••••" autocomplete="current-password">
+          <div id="loginError" class="error-text"></div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Ingresar</button>
+        <div style="margin-top:12px; display:flex; flex-direction:column; gap:6px; text-align:center;">
+          <button type="button" class="btn btn-tertiary btn-block" onclick="showRegisterForm()" style="font-size:0.8rem; color:#38bdf8;">¿No tienes cuenta? Registrar Cuenta</button>
+          <button type="button" class="btn btn-tertiary btn-block" onclick="showForgotPasswordForm()" style="font-size:0.8rem; color:var(--text-secondary);">¿Olvidaste tu contraseña?</button>
+        </div>
+      </form>
+
+      <!-- Register Form -->
+      <form id="formRegister" onsubmit="handleRegister(event)" style="display:none;">
+        <div class="form-group">
+          <label>Nombre de Usuario</label>
+          <input type="text" id="regUser" class="form-control" placeholder="Ingresa un usuario único" autocomplete="username">
+          <div id="userError" class="error-text"></div>
+        </div>
+        <div class="form-group">
+          <label>Correo Electrónico</label>
+          <input type="email" id="regEmail" class="form-control" placeholder="correo@ejemplo.com" autocomplete="email">
+          <div id="emailError" class="error-text"></div>
+        </div>
+        <div class="form-group">
+          <label>Contraseña</label>
+          <input type="password" id="regPassword" class="form-control" placeholder="Ingresa tu contraseña" autocomplete="new-password">
+          <div id="passError" class="error-text"></div>
+        </div>
+        <div class="form-group">
+          <label>Confirmar Contraseña</label>
+          <input type="password" id="regConfirmPassword" class="form-control" placeholder="Repite tu contraseña" autocomplete="new-password">
+          <div id="confirmPassError" class="error-text"></div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Crear Cuenta</button>
+        <div style="margin-top:12px; text-align:center;" id="alreadyHasUserContainer">
+          <button type="button" class="btn btn-tertiary btn-block" onclick="showLoginForm()" style="font-size:0.8rem; color:var(--text-secondary);">¿Ya tienes cuenta? Iniciar Sesión</button>
+        </div>
+      </form>
+
+      <!-- Forgot Password Form (Simple Local 2-Step) -->
+      <form id="formForgotPass" onsubmit="handleForgotPassword(event)" style="display:none;">
+        <div id="forgotStep1">
+          <div class="form-group">
+            <label>Correo Electrónico o Usuario Registrado</label>
+            <input type="text" id="forgotUserOrEmail" class="form-control" placeholder="correo@ejemplo.com o tu usuario" autocomplete="username">
+            <div id="forgotUserError" class="error-text"></div>
+          </div>
+          <button type="button" class="btn btn-primary btn-block" onclick="verifyRecoveryUser()">
+            Buscar Cuenta y Continuar
+          </button>
+        </div>
+
+        <div id="forgotStep2" style="display:none;">
+          <div style="background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.3); padding:10px 12px; border-radius:10px; font-size:0.83rem; margin-bottom:12px; color:#38bdf8; text-align:center;">
+            Cuenta verificada para:<br>
+            <strong id="forgotEmailSentTarget" style="color:#ffffff; font-size:0.9rem;">-</strong>
+          </div>
+          <div class="form-group">
+            <label>Nueva Contraseña</label>
+            <input type="password" id="forgotNewPassword" class="form-control" placeholder="Ingresa tu nueva contraseña" autocomplete="new-password">
+          </div>
+          <div class="form-group">
+            <label>Confirmar Nueva Contraseña</label>
+            <input type="password" id="forgotConfirmPassword" class="form-control" placeholder="Confirma tu nueva contraseña" autocomplete="new-password">
+            <div id="forgotPassError" class="error-text"></div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Guardar Nueva Contraseña</button>
+        </div>
+
+        <div style="margin-top:14px; text-align:center;">
+          <button type="button" class="btn btn-tertiary btn-block" onclick="showLoginForm()" style="font-size:0.8rem; color:var(--text-secondary);">Volver al Inicio de Sesión</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- APP SHELL MAIN -->
+  <div id="appShell" style="display:block;">
+
+    <!-- TOP HEADER APP BAR -->
+    <header class="app-top-header">
+      <div class="header-action-left" style="display:flex; align-items:center; gap:12px;">
+        <button class="header-icon-btn" onclick="switchTab('tabReminders')" title="Recordatorios" id="btnHeaderReminders">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </button>
+        <button class="header-icon-btn" onclick="lockApp()" title="Bloquear Aplicación" id="btnHeaderLock">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </button>
+      </div>
+      <div class="header-brand-center" onclick="switchTab('tabGarage')">
+        <img src="icons/icon.svg?v=107" alt="GarageOne Logo" class="header-logo-img">
+        <span class="header-brand-title">GarageOne</span>
+      </div>
+      <div class="header-action-right">
+        <button class="header-icon-btn" onclick="switchTab('tabSettings')" title="Ajustes" id="btnHeaderSettings">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main View Containers -->
+    <main class="app-body">
+      
+      <!-- TAB 1: Garaje & Recordatorios -->
+      <section id="tabGarage" class="tab-content active">
+        
+        <!-- Vehicle Quick Selector Pills Bar -->
+        <div class="filter-pills" id="vehicleSelectorPills" style="margin-bottom:12px;">
+          <!-- Dynamically rendered vehicle pills -->
+        </div>
+
+        <div class="hero-card" id="activeVehicleHero">
+          <!-- Dynamic Hero Content -->
+        </div>
+
+        <!-- User Configured Reminders Section -->
+        <div class="section-title-row" style="margin-top:20px;">
+          <h2>Mis Recordatorios</h2>
+        </div>
+
+        <div id="userRemindersList" class="log-list">
+          <!-- Dynamically populated user configured reminders -->
+        </div>
+
+        <div class="section-title-row" style="margin-top:24px;">
+          <h2>Mis Vehículos</h2>
+          <button class="btn btn-secondary btn-sm" onclick="openVehicleModal()">+ Nuevo</button>
+        </div>
+        <div id="allVehiclesList" class="vehicles-mini-grid">
+          <!-- Dynamic Mini Vehicle List -->
+        </div>
+      </section>
+
+      <!-- TAB: Módulo de Recordatorios -->
+      <section id="tabReminders" class="tab-content">
+        <div class="section-header" style="flex-wrap:wrap; gap:10px;">
+          <div class="section-header-title">
+            <h1>Recordatorios</h1>
+            <p class="subtitle">Alertas personalizadas y mantenimientos programados</p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openReminderModal()">+ Nuevo Recordatorio</button>
+        </div>
+
+        <div id="fullRemindersList" class="log-list" style="margin-top:14px;">
+          <!-- Dynamic list of user reminders -->
+        </div>
+      </section>
+
+      <!-- TAB 2: Historial de Mantenimientos & Facturas -->
+      <section id="tabMaintenance" class="tab-content">
+        <div class="section-header">
+          <div class="section-header-title">
+            <h1>Mantenimientos</h1>
+            <p class="subtitle">Servicios mecánicos y facturas</p>
+          </div>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button class="btn btn-secondary btn-sm" onclick="openNewCategoryModal()">+ Crear servicio</button>
+            <button class="btn btn-primary btn-sm" onclick="openServiceModal()">+ Registrar Servicio</button>
+          </div>
+        </div>
+
+        <div class="filter-pills" id="maintenanceFilterPills">
+          <!-- Dynamic Filter Pills -->
+        </div>
+
+        <div id="serviceLogList" class="log-list">
+          <!-- Dynamic Maintenance List -->
+        </div>
+      </section>
+
+      <!-- TAB 3: Bitácora de Combustible -->
+      <section id="tabFuel" class="tab-content">
+        <div class="section-header">
+          <div class="section-header-title">
+            <h1>Combustible</h1>
+            <p class="subtitle">Rendimiento y costo por distancia</p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openFuelModal()">+ Registrar Recarga</button>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat-card">
+            <span class="stat-label">Rendimiento Prom.</span>
+            <span class="stat-value" id="fuelEfficiencyVal">0 km/L</span>
+            <span class="stat-sub">Eficiencia estimada</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Costo por KM</span>
+            <span class="stat-value" id="costPerKmVal">₡0/km</span>
+            <span class="stat-sub">Gasto por distancia</span>
+          </div>
+        </div>
+
+        <div class="section-title-row">
+          <h2>Registros de Tanqueada</h2>
+        </div>
+
+        <div id="fuelLogList" class="log-list">
+          <!-- Dynamic Fuel List -->
+        </div>
+      </section>
+
+      <!-- TAB: Guantera Digital -->
+      <section id="tabGuantera" class="tab-content">
+        <div class="section-header">
+          <div class="section-header-title">
+            <h1 data-i18n="guanteraTitle">Guantera Digital</h1>
+            <p class="subtitle" data-i18n="guanteraSubtitle">Papeles, seguro, RTV y directorio de asistencia</p>
+          </div>
+        </div>
+
+        <!-- Directory of Saved Important Phone Numbers -->
+        <div class="chart-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
+            <div>
+              <h3 style="margin:0 0 2px 0; font-size:1rem;" data-i18n="contactsTitle">Números Importantes</h3>
+              <p class="subtitle" style="margin:0; font-size:0.8rem;" data-i18n="contactsSubtitle">Desliza para borrar. Toca para llamar a talleres, grúa o seguro</p>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="openContactModal()" data-i18n="btnAddContact">+ Guardar Número</button>
+          </div>
+          <div id="emergencyContactsList" class="contacts-grid">
+            <!-- Dynamic contacts rendering -->
+          </div>
+        </div>
+
+        <div style="margin-top:20px; margin-bottom:16px; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;">
+          <h2 data-i18n="docsTitle" style="margin:0; text-align:center;">Documentos del Vehículo</h2>
+          <button class="btn btn-primary btn-sm" onclick="openDocumentModal()" data-i18n="btnAddDoc" style="padding:10px 18px; font-weight:700;">+ Agregar Documento</button>
+        </div>
+
+        <div id="documentList" class="log-list">
+          <!-- Dynamic Document Cards -->
+        </div>
+      </section>
+
+      <!-- TAB 4: Salud del Vehículo -->
+      <section id="tabHealth" class="tab-content">
+        <div class="section-header" style="flex-wrap:wrap; gap:10px;">
+          <div class="section-header-title">
+            <h1>Salud del Vehículo</h1>
+            <p class="subtitle">Motor de análisis y estado general del vehículo</p>
+          </div>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="openHealthSettingsModal()" style="display:inline-flex; align-items:center; gap:6px; font-weight:700; color:#38bdf8;">
+            Ajustes de Salud
+          </button>
+        </div>
+
+        <!-- Dynamic Container for Health Hero Card, Confidence Banner, Smart Alerts, and Component Cards -->
+        <div id="healthDashboardContainer">
+          <!-- Dynamic rendering via app.js -->
+        </div>
+      </section>
+
+
+      <!-- TAB 5: Reportes y Finanzas -->
+      <section id="tabReports" class="tab-content">
+        <div class="section-header" style="flex-wrap:wrap; gap:10px;">
+          <div class="section-header-title">
+            <h1>Reportes y Finanzas</h1>
+            <p class="subtitle">Inversión detallada en mantenimientos y combustible</p>
+          </div>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <select id="reportMonthFilter" class="form-control" onchange="renderReports()" style="padding:6px 12px; font-size:0.83rem; width:auto;">
+              <option value="all">Todos los meses (Histórico)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="stats-summary-grid" style="grid-template-columns: repeat(3, minmax(0, 1fr)); gap:6px;">
+          <div class="summary-card" style="padding:10px 8px;">
+            <span class="sum-title">Mantenimiento</span>
+            <span class="sum-num" id="totalServiceSpend">₡0</span>
+          </div>
+          <div class="summary-card" style="padding:10px 8px;">
+            <span class="sum-title">Combustible</span>
+            <span class="sum-num" id="totalFuelSpend">₡0</span>
+          </div>
+          <div class="summary-card" style="border-color:rgba(56,189,248,0.4); padding:10px 8px;">
+            <span class="sum-title">Total Invertido</span>
+            <span class="sum-num" id="totalCombinedSpend" style="color:#38bdf8;">₡0</span>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h3>Desglose de Gastos por Categoría</h3>
+          <div class="chart-container" id="categoryChart">
+            <!-- Dynamic Category Chart -->
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h3>Desglose de Gastos por Mes</h3>
+          <div class="chart-container" id="monthlyExpensesChart">
+            <!-- Dynamic Monthly Breakdown -->
+          </div>
+        </div>
+
+        <div class="report-actions-card">
+          <h3 data-i18n="reportTitle">Expediente Formal de Mantenimientos</h3>
+          <p class="subtitle" data-i18n="reportSubtitle">Genera un documento formal en PDF con la bitácora completa de servicios mecánicos, talleres, fechas y repuestos registrada para este vehículo.</p>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;">
+            <button class="btn btn-primary btn-block" onclick="generateCertifiedReport()" style="flex:1; min-width:180px;">Ver Expediente</button>
+            <button class="btn btn-secondary btn-block" onclick="downloadReportPDFDirect()" style="flex:1; min-width:160px; color:#38bdf8; border-color:rgba(56,189,248,0.3);">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span>Descargar PDF</span>
+            </button>
+            <button class="btn btn-secondary btn-block" onclick="shareReportText()" style="flex:1; min-width:130px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+              <span>Compartir</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 6: Ajustes de la App -->
+      <section id="tabSettings" class="tab-content">
+        <div class="section-header">
+          <div class="section-header-title">
+            <h1>Ajustes Generales</h1>
+            <p class="subtitle">Configuración de cuenta e intervalos</p>
+          </div>
+        </div>
+
+
+        <div class="settings-card">
+          <h3 style="margin-bottom:12px;">Perfil de Usuario</h3>
+          <div class="settings-row">
+            <span>Usuario Actual</span>
+            <strong id="userProfileName">-</strong>
+          </div>
+          <div class="settings-row" style="margin-top:6px;">
+            <span>Correo Registrado</span>
+            <strong id="userProfileEmail" style="color:#38bdf8;">-</strong>
+          </div>
+          
+          <div style="display:flex; flex-direction:column; gap:8px; margin-top:16px;">
+            <button type="button" class="btn btn-secondary btn-block btn-sm" onclick="handleLogout()" style="padding:10px 14px; display:inline-flex; align-items:center; justify-content:center; gap:8px; font-weight:600; color:#ff453a; border-color:rgba(255,69,58,0.3);">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ff453a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Cerrar Sesión
+            </button>
+          </div>
+        </div>
+
+
+        <div class="settings-card">
+          <h3>Seguridad y Autenticación</h3>
+
+          <!-- Change Password Section -->
+          <div id="changePasswordContainer" style="padding:12px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:10px;">
+            <strong style="display:block; font-size:0.88rem; margin-bottom:10px;">Cambiar Contraseña</strong>
+            <div class="form-group" style="margin-bottom:8px;">
+              <label style="font-size:0.8rem;">Contraseña Actual</label>
+              <input type="password" id="currentPasswordInput" class="form-control" placeholder="Tu contraseña actual" autocomplete="current-password">
+            </div>
+            <div class="form-group" style="margin-bottom:8px;">
+              <label style="font-size:0.8rem;">Nueva Contraseña</label>
+              <input type="password" id="newPasswordInput" class="form-control" placeholder="Nueva contraseña (mín. 4 caracteres)" autocomplete="new-password">
+            </div>
+            <div class="form-group" style="margin-bottom:10px;">
+              <label style="font-size:0.8rem;">Confirmar Nueva Contraseña</label>
+              <input type="password" id="confirmNewPasswordInput" class="form-control" placeholder="Repite la nueva contraseña" autocomplete="new-password">
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm btn-block" onclick="saveChangePassword()">Guardar Nueva Contraseña</button>
+            <div id="changePasswordStatus" style="margin-top:6px; font-size:0.8rem; display:none;"></div>
+          </div>
+        </div>
+
+        <div class="settings-card">
+          <h3 data-i18n="prefTitle">Preferencias</h3>
+          <div class="form-group">
+            <label>Moneda del Sistema</label>
+            <select id="settingCurrency" class="form-control" onchange="changeCurrencySetting(this.value)">
+              <option value="CRC">Colones costarricenses (₡)</option>
+              <option value="USD">Dólares estadounidenses ($)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="settings-card" id="backupCard">
+          <h3 style="margin-bottom:8px;">Respaldos</h3>
+          <p class="subtitle" style="margin-bottom:12px; font-size:0.82rem;">Exporta e importa tus datos y configuración en XML.</p>
+          <div id="storageUsageContainer" style="margin-bottom:14px;"></div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('backupImportInput').click()">Importar XML</button>
+            <input id="backupImportInput" type="file" accept=".xml,text/xml,application/xml" style="display:none" onchange="importBackupXml(event)">
+          </div>
+          <div style="margin:14px 0 6px; display:flex; flex-direction:column; gap:10px;">
+            <div class="form-group" style="margin:0;">
+              <label style="font-size:0.8rem;">Respaldo automático</label>
+              <select id="backupFrequency" class="form-control" onchange="updateBackupScheduleSettings()">
+                <option value="off">Desactivado</option>
+                <option value="daily">Diario</option>
+                <option value="weekly">Semanal</option>
+                <option value="monthly">Mensual</option>
+              </select>
+            </div>
+            <div class="form-group" id="backupTimeGroup" style="margin:0; display:none;">
+              <label style="font-size:0.8rem;">Hora programada del respaldo</label>
+              <input type="time" id="backupTime" class="form-control" value="03:00" onchange="updateBackupScheduleSettings()">
+            </div>
+            <div id="backupNextSchedule" style="font-size:0.82rem; color:#38bdf8; background:rgba(56,189,248,0.1); padding:8px 12px; border-radius:10px; border:1px solid rgba(56,189,248,0.25); display:none;"></div>
+          </div>
+          <button type="button" class="btn btn-secondary btn-sm btn-block" onclick="createManualBackup()" style="margin-top:8px;">Respaldar ahora</button>
+          <div id="backupStatus" style="font-size:0.78rem; color:var(--text-secondary); margin-top:4px;"></div>
+          <div id="backupHistory" style="display:flex; flex-direction:column; gap:6px; margin-top:10px;"></div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" onclick="switchTab('tabGarage', this)">
+        <span class="nav-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/><path d="M5 17h2m8 0h2"/></svg>
+        </span>
+        <span class="nav-label" data-i18n="navGarage">Garaje</span>
+      </button>
+
+      <button class="nav-item" onclick="switchTab('tabMaintenance', this)">
+        <span class="nav-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        </span>
+        <span class="nav-label" data-i18n="navServices">Servicios</span>
+      </button>
+
+      <button class="nav-item" onclick="switchTab('tabFuel', this)">
+        <span class="nav-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 22V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v17"/><path d="M15 11h2a2 2 0 0 1 2 2v5a1.5 1.5 0 0 0 3 0V9l-3-3"/><path d="M3 22h12"/><path d="M7 9h4"/></svg>
+        </span>
+        <span class="nav-label" data-i18n="navFuel">Gasolina</span>
+      </button>
+
+      <button class="nav-item" onclick="switchTab('tabGuantera', this)">
+        <span class="nav-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </span>
+        <span class="nav-label" data-i18n="navGlovebox">Guantera</span>
+      </button>
+
+      <button class="nav-item" onclick="switchTab('tabHealth', this)">
+        <span class="nav-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        </span>
+        <span class="nav-label" data-i18n="navHealth">Salud</span>
+      </button>
+
+      <button class="nav-item" onclick="switchTab('tabReports', this)">
+        <span class="nav-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        </span>
+        <span class="nav-label" data-i18n="navReports">Reportes</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- MODALS CONTAINER -->
+
+  <!-- Modal: Registrar / Editar Vehículo -->
+  <div id="modalVehicle" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalVehicleTitle">Registrar Vehículo</h3>
+        <button class="close-btn" onclick="closeModal('modalVehicle')">✕</button>
+      </div>
+      <form id="formVehicle" onsubmit="saveVehicle(event)">
+        <input type="hidden" id="vehId">
+        <div class="form-group">
+          <label>Tipo de Vehículo</label>
+          <select id="vehType" class="form-control" required>
+            <option value="Sedán">Sedán</option>
+            <option value="SUV">SUV</option>
+            <option value="Moto">Moto</option>
+            <option value="Pick-up">Pick-up</option>
+            <option value="Hatchback">Hatchback</option>
+            <option value="Van">Van</option>
+            <option value="Coupé">Coupé</option>
+            <option value="Crossover">Crossover</option>
+            <option value="Cuatrimoto">Cuatrimoto</option>
+            <option value="Camión">Camión</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Marca</label>
+            <input type="text" id="vehMake" class="form-control" placeholder="" required>
+          </div>
+          <div class="form-group">
+            <label>Modelo</label>
+            <input type="text" id="vehModel" class="form-control" placeholder="" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Año</label>
+            <input type="number" id="vehYear" class="form-control" placeholder="" required>
+          </div>
+          <div class="form-group">
+            <label>Placa / Matrícula</label>
+            <input type="text" id="vehPlate" class="form-control" placeholder="">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label id="lblVehKm">Odómetro Inicial</label>
+            <input type="number" id="vehKm" class="form-control" placeholder="" required>
+          </div>
+          <div class="form-group">
+            <label>Unidad de Medida</label>
+            <select id="vehUnit" class="form-control" onchange="updateVehicleModalUnitLabel(this.value)">
+              <option value="km">Kilómetros (km)</option>
+              <option value="mi">Millas (mi)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Número de Chasis / VIN (Opcional)</label>
+          <input type="text" id="vehVin" class="form-control" placeholder="">
+        </div>
+        <div class="form-group">
+          <label>Fotografía del Vehículo (Opcional)</label>
+          <input type="file" id="vehPhotoFile" class="form-control" accept="image/*">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-tertiary" onclick="closeModal('modalVehicle')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar Vehículo</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Registrar / Editar Servicio Mecánico -->
+  <div id="modalService" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalServiceTitle">Registrar Servicio</h3>
+        <button class="close-btn" onclick="closeModal('modalService')">✕</button>
+      </div>
+      <form id="formService" onsubmit="saveService(event)">
+        <input type="hidden" id="servId">
+        <div class="form-group">
+          <label>Tipo / Categoría de Servicio</label>
+          <select id="servCategory" class="form-control" onchange="handleServCategoryChange(this.value)" required>
+            <!-- Dynamic Categories -->
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Fecha</label>
+            <input type="date" id="servDate" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label id="lblServKm">Kilometraje (km)</label>
+            <input type="number" id="servKm" class="form-control" placeholder="" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Costo Total</label>
+          <input type="number" id="servCost" class="form-control" step="0.01" placeholder="" required>
+        </div>
+        <div class="form-group">
+          <label>Taller Mecánico / Tallerista (Opcional)</label>
+          <input type="text" id="servShop" class="form-control" placeholder="">
+        </div>
+        <div class="form-group">
+          <label>Detalles / Repuestos Utilizados (Opcional)</label>
+          <textarea id="servNotes" class="form-control" rows="2" placeholder=""></textarea>
+        </div>
+        <div class="form-group">
+          <label>Foto de Factura / Comprobante (Opcional)</label>
+          <input type="file" id="servReceiptFile" class="form-control" accept="image/*,application/pdf">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-tertiary" onclick="closeModal('modalService')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar Registro</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Registrar Recarga de Gasolina -->
+  <div id="modalFuel" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalFuelTitle">Registrar Gasolina</h3>
+        <button class="close-btn" onclick="closeModal('modalFuel')">✕</button>
+      </div>
+      <form id="formFuel" onsubmit="saveFuel(event)">
+        <input type="hidden" id="fuelId">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Costo Total (Monto)</label>
+            <input type="number" id="fuelCost" class="form-control" step="0.01" placeholder="" required>
+          </div>
+          <div class="form-group">
+            <label>Litros / Galones Cargados</label>
+            <input type="number" id="fuelLiters" class="form-control" step="0.01" placeholder="" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label id="lblFuelKm">Kilometraje en Odómetro</label>
+          <input type="number" id="fuelKm" class="form-control" placeholder="" required>
+        </div>
+        <div class="form-group">
+          <label>Fecha</label>
+          <input type="date" id="fuelDate" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label>Estación / Notas (Opcional)</label>
+          <input type="text" id="fuelNotes" class="form-control" placeholder="">
+        </div>
+        <div class="form-group">
+          <label>Foto de Factura / Comprobante (Opcional)</label>
+          <input type="file" id="fuelReceiptFile" class="form-control" accept="image/*,application/pdf">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-tertiary" onclick="closeModal('modalFuel')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar Recarga</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Visor de Factura -->
+  <div id="modalReceiptViewer" class="modal-backdrop">
+    <div class="modal-card full-media">
+      <div class="modal-header">
+        <h3>Comprobante / Factura</h3>
+        <button class="close-btn" onclick="closeModal('modalReceiptViewer')">✕</button>
+      </div>
+      <div class="receipt-container" id="receiptContainer">
+        <!-- Rendered base64 image or preview -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Expediente Certificado -->
+  <div id="modalCertifiedReport" class="modal-backdrop">
+    <div class="modal-card print-wrapper">
+      <div class="modal-header no-print" style="display:flex; justify-content:space-between; align-items:center;">
+        <h3 data-i18n="certifiedModalTitle" style="margin:0;">Expediente Técnico y Mantenimiento</h3>
+        <button class="close-btn" onclick="closeModal('modalCertifiedReport')">✕</button>
+      </div>
+      
+      <div class="certified-document" id="certifiedDocumentContent">
+        <!-- Printable formal report rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Crear Nuevo Servicio / Categoría -->
+  <div id="modalNewCategory" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalNewCategoryTitle">Crear Nuevo Servicio</h3>
+        <button class="close-btn" onclick="closeModal('modalNewCategory')">✕</button>
+      </div>
+      <form id="formNewCategory" onsubmit="saveNewCategory(event)">
+        <input type="hidden" id="editCatOldName">
+        <div class="form-group">
+          <label>Nombre del Servicio</label>
+          <input type="text" id="newCatName" class="form-control" placeholder="ej. Cambio de aceite del diferencial trasero" required>
+        </div>
+
+        <div style="background:rgba(56,189,248,0.06); border:1px solid rgba(56,189,248,0.25); border-radius:12px; padding:14px; margin-top:14px; margin-bottom:14px;">
+          <h4 style="font-size:0.88rem; font-weight:700; color:#38bdf8; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            <span>Participación en Salud del Vehículo</span>
+          </h4>
+
+          <div class="form-group" style="margin-bottom:10px;">
+            <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:600; font-size:0.85rem;">
+              <input type="checkbox" id="newCatAffectsHealth" onchange="document.getElementById('newCatHealthFieldsContainer').style.display = this.checked ? 'block' : 'none'">
+              <span>Incluir este servicio en Salud</span>
+            </label>
+          </div>
+
+          <div id="newCatHealthFieldsContainer" style="display:none; margin-top:12px; border-top:1px solid rgba(255,255,255,0.08); padding-top:12px;">
+            <div class="form-group" style="margin-bottom:10px;">
+              <label id="lblNewCatIntervalKm" style="font-size:0.8rem;">Intervalo recomendado por kilómetros (Opcional)</label>
+              <input type="number" id="newCatIntervalKm" class="form-control" placeholder="Ej. 40000" min="500" step="500">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label style="font-size:0.8rem;">Intervalo recomendado por meses (Opcional)</label>
+              <input type="number" id="newCatIntervalMonths" class="form-control" placeholder="Ej. 24" min="1" step="1">
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer" style="margin-top:10px;">
+          <button type="button" class="btn btn-tertiary" onclick="closeModal('modalNewCategory')">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="btnSaveCategory">Guardar Servicio</button>
+        </div>
+      </form>
+
+      <div style="margin-top:20px; border-top:1px solid var(--border-color); padding-top:14px;">
+        <h4 style="font-size:0.92rem; font-weight:700; margin-bottom:10px; color:var(--text-primary);">Servicios Disponibles</h4>
+        <div id="customCategoriesListContainer" style="display:flex; flex-direction:column; gap:6px; max-height:200px; overflow-y:auto;">
+          <!-- Dynamically populated categories with edit/delete -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Registrar / Editar Documento -->
+  <div id="modalDocument" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalDocumentTitle">Agregar Documento</h3>
+        <button class="close-btn" onclick="closeModal('modalDocument')">✕</button>
+      </div>
+      <form id="formDocument" onsubmit="saveDocument(event)">
+        <input type="hidden" id="docId">
+        <div class="form-group">
+          <label>Tipo de Documento</label>
+          <select id="docType" class="form-control" required>
+            <option value="Seguro">Póliza de Seguro</option>
+            <option value="RTV">RTV / Inspección Técnica</option>
+            <option value="Marchamo">Marchamo / Impuesto</option>
+            <option value="Licencia">Licencia de Conducir</option>
+            <option value="Circulación">Tarjeta de Circulación</option>
+            <option value="Garantía">Garantía / Repuesto</option>
+            <option value="Otro">Otro Documento</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Nombre o Número de Referencia</label>
+          <input type="text" id="docTitle" class="form-control" placeholder="" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Fecha de Vencimiento</label>
+            <input type="date" id="docExpDate" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label>Tel. Asistencia / Grúa (Opcional)</label>
+            <input type="tel" id="docPhone" class="form-control" placeholder="">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Notas Adicionales (Opcional)</label>
+          <input type="text" id="docNotes" class="form-control" placeholder="">
+        </div>
+        <div class="form-group">
+          <label>Foto / PDF del Documento</label>
+          <input type="file" id="docFile" class="form-control" accept="image/*,application/pdf">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-tertiary" onclick="closeModal('modalDocument')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar Documento</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Crear / Editar Recordatorio -->
+  <div id="modalReminder" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalReminderTitle">Nuevo Recordatorio</h3>
+        <button class="close-btn" onclick="closeModal('modalReminder')">✕</button>
+      </div>
+      <form id="formReminder" onsubmit="saveReminder(event)">
+        <input type="hidden" id="remId">
+        <div class="form-group">
+          <label>Título del Recordatorio</label>
+          <input type="text" id="remTitle" class="form-control" placeholder="" required>
+        </div>
+        <div class="form-group">
+          <label>Categoría / Tipo</label>
+          <select id="remCategory" class="form-control">
+            <option value="Mantenimiento">Mantenimiento General</option>
+            <option value="Aceite">Aceite y Filtros</option>
+            <option value="Frenos">Frenos y Neumáticos</option>
+            <option value="Documento">Marchamo / RTV / Seguro</option>
+            <option value="Otro">Otro Recordatorio</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Fecha Meta</label>
+          <input type="date" id="remTargetDate" class="form-control">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Hora</label>
+            <input type="time" id="remTime" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Frecuencia / Repetición</label>
+            <select id="remRepeat" class="form-control">
+              <option value="none">Una sola vez</option>
+              <option value="daily">Cada día (Diario)</option>
+              <option value="weekly">Cada semana (Semanal)</option>
+              <option value="monthly">Cada mes (Mensual)</option>
+              <option value="yearly">Cada año (Anual)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Nota adicional / Detalle</label>
+          <input type="text" id="remNotes" class="form-control" placeholder="">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-tertiary" onclick="closeModal('modalReminder')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar Recordatorio</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Guardar / Editar Número Telefónico Importante -->
+  <div id="modalContact" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalContactTitle">Nuevo Contacto Importante</h3>
+        <button class="close-btn" onclick="closeModal('modalContact')">✕</button>
+      </div>
+      <form id="formContact" onsubmit="saveEmergencyContact(event)">
+        <input type="hidden" id="contactId">
+        <div class="form-group">
+          <label>Nombre del Servicio / Taller / Grúa</label>
+          <input type="text" id="contactName" class="form-control" placeholder="" required>
+        </div>
+        <div class="form-group">
+          <label>Número Telefónico</label>
+          <input type="tel" id="contactPhone" class="form-control" placeholder="" required>
+        </div>
+        <div class="form-group">
+          <label>Categoría</label>
+          <select id="contactCategory" class="form-control">
+            <option value="Auxilio">Auxilio / Grúa 24/7</option>
+            <option value="Taller">Taller Mecánico</option>
+            <option value="Seguro">Aseguradora</option>
+            <option value="Electromecánico">Electromecánico / Llantas</option>
+            <option value="Emergencia">Contacto de Emergencia</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Notas / Horarios (Opcional)</label>
+          <input type="text" id="contactNotes" class="form-control" placeholder="">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-tertiary" onclick="closeModal('modalContact')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar Contacto</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Ficha Técnica & Banner de Venta -->
+  <div id="modalVehicleShareBanner" class="modal-backdrop">
+    <div class="modal-card" style="max-width:680px; width:92%;">
+      <div class="modal-header">
+        <h2>Ficha Técnica y Banner de Venta</h2>
+        <button class="close-btn" onclick="closeModal('modalVehicleShareBanner')">✕</button>
+      </div>
+
+      <!-- Real-time Preview Poster Card -->
+      <div id="shareBannerPreviewCard" class="share-banner-preview">
+        <!-- Live preview card rendered via JS -->
+      </div>
+
+      <!-- Config Controls Form -->
+      <div style="margin-top:16px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:14px;">
+        <h3 style="font-size:0.9rem; font-weight:700; color:#38bdf8; margin-bottom:12px;">Configurar Detalles del Vehículo</h3>
+        
+        <div class="form-row" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
+          <div class="form-group" style="flex:1; min-width:140px;">
+            <label style="font-size:0.8rem;">Precio de Venta (Opcional)</label>
+            <input type="text" id="sharePriceInput" class="form-control" placeholder="Ej. ₡12,500,000" oninput="updateShareBannerPreview()">
+          </div>
+          <div class="form-group" style="flex:1; min-width:140px;">
+            <label style="font-size:0.8rem;">Cilindrada Motor</label>
+            <input type="text" id="shareEngineInput" class="form-control" placeholder="Ej. 2.0L / 1600 cc" oninput="updateShareBannerPreview()">
+          </div>
+        </div>
+
+        <div class="form-row" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
+          <div class="form-group" style="flex:1; min-width:130px;">
+            <label style="font-size:0.8rem;">Transmisión</label>
+            <select id="shareTransSelect" class="form-control" onchange="updateShareBannerPreview()">
+              <option value="Automático">Automático</option>
+              <option value="Manual">Manual</option>
+              <option value="Secuencial">Secuencial</option>
+            </select>
+          </div>
+          <div class="form-group" style="flex:1; min-width:110px;">
+            <label style="font-size:0.8rem;">Puertas</label>
+            <select id="shareDoorsSelect" class="form-control" onchange="updateShareBannerPreview()">
+              <option value="4 Puertas">4 Puertas</option>
+              <option value="2 Puertas">2 Puertas</option>
+              <option value="5 Puertas">5 Puertas (SUV/Hatchback)</option>
+            </select>
+          </div>
+          <div class="form-group" style="flex:1; min-width:140px;">
+            <label style="font-size:0.8rem;">Sistema de Radio / Audio</label>
+            <input type="text" id="shareRadioInput" class="form-control" placeholder="Ej. Pantalla Apple CarPlay" oninput="updateShareBannerPreview()">
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:10px;">
+          <label style="font-size:0.8rem; display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:600; color:#38bdf8;">
+            <input type="checkbox" id="shareAbsCheck" onchange="updateShareBannerPreview()" checked>
+            <span>Incluye Sistema de Frenos ABS</span>
+          </label>
+        </div>
+
+        <div class="form-group" style="margin-bottom:12px;">
+          <label style="font-size:0.8rem; margin-bottom:6px; display:block;">Equipamiento & Extras Incluidos</label>
+          <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap:6px;" id="shareEquipCheckboxesContainer">
+            <!-- Dynamically populated equip badges -->
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:0;">
+          <label style="font-size:0.8rem;">Notas Adicionales / Puntos Destacados</label>
+          <textarea id="shareNotesInput" class="form-control" rows="2" placeholder="Ej. Un solo dueño, mantenimiento exclusivo en agencia, llantas nuevas..." oninput="updateShareBannerPreview()"></textarea>
+        </div>
+      </div>
+
+      <!-- Action Buttons (Standard System Vector Icons) -->
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:16px;">
+        <button type="button" class="btn btn-primary" onclick="shareBannerViaEmail()" style="flex:1; min-width:130px; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <span>Enviar por Correo</span>
+        </button>
+        <button type="button" class="btn btn-secondary" onclick="shareBannerViaSystemShare()" style="flex:1; min-width:130px; display:inline-flex; align-items:center; justify-content:center; gap:6px; color:#38bdf8; border-color:rgba(56,189,248,0.3);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+          <span>Compartir Ficha</span>
+        </button>
+        <button type="button" class="btn btn-secondary" onclick="copyShareBannerText()" style="flex:1; min-width:120px; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          <span>Copiar Texto</span>
+        </button>
+        <button type="button" class="btn btn-secondary" onclick="downloadShareBannerPDF()" style="flex:1; min-width:120px; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>Descargar PDF</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Crear / Editar Tipo de Servicio Personalizado -->
+  <div id="modalServiceCategory" class="modal-backdrop">
+    <div class="modal-card" style="max-width:500px;">
+      <div class="modal-header">
+        <h2 id="modalCategoryTitle">Nuevo Tipo de Servicio</h2>
+        <button class="close-btn" onclick="closeModal('modalServiceCategory')">✕</button>
+      </div>
+      <form id="formServiceCategory" onsubmit="saveServiceCategory(event)">
+        <input type="hidden" id="catId">
+        <div class="form-group">
+          <label>Nombre del Mantenimiento / Servicio</label>
+          <input type="text" id="catName" class="form-control" placeholder="Ej. Cambio de aceite del diferencial trasero" required>
+        </div>
+
+        <div style="background:rgba(56,189,248,0.06); border:1px solid rgba(56,189,248,0.25); border-radius:12px; padding:14px; margin-top:16px; margin-bottom:16px;">
+          <h3 style="font-size:0.88rem; font-weight:700; color:#38bdf8; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            <span>Participación en Salud del Vehículo</span>
+          </h3>
+
+          <div class="form-group" style="margin-bottom:10px;">
+            <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:600; font-size:0.85rem;">
+              <input type="checkbox" id="catAffectsHealth" onchange="toggleHealthCategoryInputs(this.checked)">
+              <span>Incluir este servicio en Salud</span>
+            </label>
+          </div>
+
+          <div id="catHealthFieldsContainer" style="display:none; margin-top:12px; border-top:1px solid rgba(255,255,255,0.08); padding-top:12px;">
+            <div class="form-group" style="margin-bottom:10px;">
+              <label style="font-size:0.8rem;">Intervalo recomendado por kilómetros (Opcional)</label>
+              <input type="number" id="catIntervalKm" class="form-control" placeholder="Ej. 40000" min="500" step="500">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label style="font-size:0.8rem;">Intervalo recomendado por meses (Opcional)</label>
+              <input type="number" id="catIntervalMonths" class="form-control" placeholder="Ej. 24" min="1" step="1">
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-tertiary" onclick="closeModal('modalServiceCategory')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar Tipo de Servicio</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Ajustes de Salud del Vehículo -->
+  <div id="modalHealthSettings" class="modal-backdrop">
+    <div class="modal-card" style="max-width:520px;">
+      <div class="modal-header">
+        <h2>Ajustes de Salud del Vehículo</h2>
+      </div>
+      <form id="formHealthSettings" onsubmit="saveHealthSettings(event)">
+        <p class="subtitle" style="margin-bottom:14px; font-size:0.83rem;">Personaliza las vidas útiles recomendadas y los pesos de ponderación para el cálculo del estado general del automóvil.</p>
+        
+        <h3 style="font-size:0.88rem; font-weight:700; margin-bottom:10px; color:#38bdf8; border-bottom:1px solid var(--border-color); padding-bottom:4px;">Vidas Útiles Sugeridas</h3>
+        
+        <div class="form-row" style="display:flex; gap:10px; flex-wrap:wrap;">
+          <div class="form-group" style="flex:1; min-width:140px;">
+            <label style="font-size:0.78rem;">Aceite (km)</label>
+            <input type="number" id="hsOilKm" class="form-control" min="1000" step="500" required>
+          </div>
+          <div class="form-group" style="flex:1; min-width:140px;">
+            <label style="font-size:0.78rem;">Llantas (km)</label>
+            <input type="number" id="hsTiresKm" class="form-control" min="5000" step="1000" required>
+          </div>
+        </div>
+
+        <div class="form-row" style="display:flex; gap:10px; flex-wrap:wrap;">
+          <div class="form-group" style="flex:1; min-width:140px;">
+            <label style="font-size:0.78rem;">Pastillas Freno (km)</label>
+            <input type="number" id="hsBrakePadsKm" class="form-control" min="5000" step="1000" required>
+          </div>
+          <div class="form-group" style="flex:1; min-width:140px;">
+            <label style="font-size:0.78rem;">Discos Freno (km)</label>
+            <input type="number" id="hsBrakeDiscsKm" class="form-control" min="10000" step="5000" required>
+          </div>
+        </div>
+
+        <div class="form-row" style="display:flex; gap:10px; flex-wrap:wrap;">
+          <div class="form-group" style="flex:1; min-width:140px;">
+            <label style="font-size:0.78rem;">Batería (Meses)</label>
+            <input type="number" id="hsBatteryMonths" class="form-control" min="6" step="6" required>
+          </div>
+          <div class="form-group" style="flex:1; min-width:140px;">
+            <label style="font-size:0.78rem;">Filtros Promedio (km)</label>
+            <input type="number" id="hsFiltersKm" class="form-control" min="2000" step="1000" required>
+          </div>
+        </div>
+
+        <div class="form-row" style="display:flex; gap:10px; flex-wrap:wrap;">
+          <div class="form-group" style="flex:1; min-width:140px;">
+            <label style="font-size:0.78rem;">Correas (km)</label>
+            <input type="number" id="hsBeltKm" class="form-control" min="10000" step="5000" required>
+          </div>
+          <div class="form-group" style="flex:1; min-width:140px;">
+            <label style="font-size:0.78rem;">Correas (Meses)</label>
+            <input type="number" id="hsBeltMonths" class="form-control" min="12" step="6" required>
+          </div>
+        </div>
+
+        <h3 style="font-size:0.88rem; font-weight:700; margin-top:12px; margin-bottom:10px; color:#38bdf8; border-bottom:1px solid var(--border-color); padding-bottom:4px;">Pesos del Promedio Ponderado (%)</h3>
+        
+        <div class="form-row" style="display:flex; gap:8px; flex-wrap:wrap;">
+          <div class="form-group" style="flex:1; min-width:80px;">
+            <label style="font-size:0.75rem;">Aceite %</label>
+            <input type="number" id="hwOil" class="form-control" min="0" max="100" required>
+          </div>
+          <div class="form-group" style="flex:1; min-width:80px;">
+            <label style="font-size:0.75rem;">Llantas %</label>
+            <input type="number" id="hwTires" class="form-control" min="0" max="100" required>
+          </div>
+          <div class="form-group" style="flex:1; min-width:80px;">
+            <label style="font-size:0.75rem;">Frenos %</label>
+            <input type="number" id="hwBrakes" class="form-control" min="0" max="100" required>
+          </div>
+          <div class="form-group" style="flex:1; min-width:80px;">
+            <label style="font-size:0.75rem;">Batería %</label>
+            <input type="number" id="hwBattery" class="form-control" min="0" max="100" required>
+          </div>
+        </div>
+
+        <div class="form-row" style="display:flex; gap:8px; flex-wrap:wrap;">
+          <div class="form-group" style="flex:1; min-width:80px;">
+            <label style="font-size:0.75rem;">Filtros %</label>
+            <input type="number" id="hwFilters" class="form-control" min="0" max="100" required>
+          </div>
+          <div class="form-group" style="flex:1; min-width:80px;">
+            <label style="font-size:0.75rem;">Correas %</label>
+            <input type="number" id="hwBelts" class="form-control" min="0" max="100" required>
+          </div>
+          <div class="form-group" style="flex:1; min-width:80px;">
+            <label style="font-size:0.75rem;">Docs %</label>
+            <input type="number" id="hwDocs" class="form-control" min="0" max="100" required>
+          </div>
+        </div>
+
+        <div class="modal-footer" style="margin-top:14px;">
+          <button type="button" class="btn btn-tertiary" onclick="closeModal('modalHealthSettings')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar Ajustes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <script src="db.js?v=1040"></script>
+  <script src="auth-service.js?v=1040"></script>
+  <script src="sync-service.js?v=1040"></script>
+  <script src="app.js?v=1040"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js?v=1040').catch(err => console.log('ServiceWorker error: ', err));
+    }
+  </script>
 </body>
 </html>

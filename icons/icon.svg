@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Outer Solid Black Background -->
+  <rect width="512" height="512" fill="#000000" />
+  
+  <!-- Central Crisp White Circle -->
+  <circle cx="256" cy="256" r="185" fill="#ffffff" />
+  
+  <!-- Black Crisp Geometric Square Car Emblem with Hydraulic Jack ("Gata") ATTACHED Directly Underneath -->
+  <g transform="translate(256, 245) scale(0.85) translate(-256, -245)" fill="#000000">
+    <!-- Crisp Roof (Trapezoid) -->
+    <polygon points="140,240 175,145 337,145 372,240" fill="#000000" />
+    
+    <!-- White Windshield Cutout -->
+    <polygon points="165,230 190,160 322,160 347,230" fill="#ffffff" />
+    
+    <!-- Crisp Square Body Base -->
+    <rect x="107" y="240" width="298" height="70" fill="#000000" />
+    
+    <!-- Side Mirrors (Left & Right) -->
+    <rect x="92" y="255" width="30" height="25" fill="#000000" />
+    <rect x="390" y="255" width="30" height="25" fill="#000000" />
+    
+    <!-- Crisp Rectangular Headlights (White) -->
+    <rect x="132" y="260" width="38" height="26" rx="4" fill="#ffffff" />
+    <rect x="342" y="260" width="38" height="26" rx="4" fill="#ffffff" />
+    
+    <!-- Crisp Grille Detail (White) -->
+    <rect x="206" y="265" width="100" height="18" rx="4" fill="#ffffff" />
+    
+    <!-- Tires Underneath -->
+    <rect x="125" y="305" width="50" height="45" fill="#000000" />
+    <rect x="337" y="305" width="50" height="45" fill="#000000" />
+    
+    <!-- Hydraulic Scissor Jack ("Gata") ATTACHED Directly to Chassis Bottom (Y=305) -->
+    <polygon points="256,305 284,335 256,365 228,335" fill="#000000" />
+    <!-- White Inner Cutout for Scissor Jack Mechanism -->
+    <polygon points="256,318 272,335 256,352 240,335" fill="#ffffff" />
+    <!-- Jack Base Plate -->
+    <rect x="216" y="363" width="80" height="14" rx="3" fill="#000000" />
+  </g>
+</svg>

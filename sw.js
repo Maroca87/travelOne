@@ -1,79 +1,55 @@
-/**
- * TravelOne Service Worker - Cache-First Offline Engine - Costa Rica Edition 🇨🇷
- */
+const CACHE_NAME = 'garageone-v635';
 
-const CACHE_NAME = 'travelone-cr-v2';
-
-const ASSETS_TO_CACHE = [
-  './',
-  './index.html',
-  './manifest.json',
-  './css/main.css',
-  './css/components.css',
-  './js/app.js',
-  './js/db.js',
-  './js/seed.js',
-  './js/utils.js',
-  './js/components/nav.js',
-  './js/components/modal.js',
-  './js/components/quickTools.js',
-  './js/views/auth.js',
-  './js/views/home.js',
-  './js/views/dashboard.js',
-  './js/views/itinerary.js',
-  './js/views/reservations.js',
-  './js/views/expenses.js',
-  './js/views/budget.js',
-  './js/views/places.js',
-  './js/views/shopping.js',
-  './js/views/checklist.js',
-  './js/views/documents.js',
-  './js/views/contacts.js',
-  './js/views/journal.js',
-  './js/views/summary.js'
-];
-
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    }).then(() => self.skipWaiting())
-  );
+self.addEventListener('install', (e) => {
+  self.skipWaiting();
 });
 
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
+self.addEventListener('activate', (e) => {
+  e.waitUntil(
     caches.keys().then((keys) => {
-      return Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
-        })
-      );
+      return Promise.all(keys.map((key) => caches.delete(key)));
     }).then(() => self.clients.claim())
   );
 });
 
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(event.request).then((networkResponse) => {
-        if (event.request.method === 'GET' && networkResponse.status === 200) {
+// Network-First Strategy with Cache Invalidation for Instant Updates
+self.addEventListener('fetch', (e) => {
+  if (e.request.method !== 'GET') return;
+  e.respondWith(
+    fetch(e.request)
+      .then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200) {
           const responseClone = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseClone);
-          });
+          caches.open(CACHE_NAME).then((cache) => cache.put(e.request, responseClone));
         }
         return networkResponse;
-      }).catch(() => {
-        if (event.request.mode === 'navigate') {
-          return caches.match('./index.html');
+      })
+      .catch(() => caches.match(e.request))
+  );
+});
+
+// Handler de interacción al presionar una notificación programada
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close();
+  e.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if (client.url && 'focus' in client) {
+          return client.focus();
         }
-      });
+      }
+      if (clients.openWindow) {
+        return clients.openWindow('./');
+      }
     })
   );
+});
+
+// Desactivado: El agendamiento de recordatorios se maneja exclusivamente a través del calendario nativo (.ics)
+function scheduleSWNotification(reminder) {
+  // No-op: Notificaciones push emergentes desactivadas por solicitud del usuario
+}
+
+self.addEventListener('message', (e) => {
+  // No-op: Integración basada 100% en calendario nativo
 });
