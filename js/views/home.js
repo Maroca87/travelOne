@@ -179,17 +179,17 @@ export async function renderHomeView(onSelectTrip, currentUser) {
         </div>
       </div>
 
-      <!-- Main Navigation Tabs -->
-      <div style="display: flex; gap: 0.5rem; border-bottom: 1px solid var(--border-color); margin-bottom: 1.5rem; flex-wrap: wrap;">
-        <button class="btn btn-sm ${activeTab === 'active' ? 'btn-primary' : 'btn-secondary'}" id="tab-active" style="border-radius: var(--radius-md) var(--radius-md) 0 0; display: inline-flex; align-items: center; gap: 0.4rem;">
+      <!-- Main Navigation Tabs (Aligned horizontally in a single line) -->
+      <div style="display: flex; align-items: center; gap: 0.5rem; border-bottom: 1px solid var(--border-color); margin-bottom: 1.5rem; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; padding-bottom: 2px;">
+        <button class="btn btn-sm ${activeTab === 'active' ? 'btn-primary' : 'btn-secondary'}" id="tab-active" style="border-radius: var(--radius-md) var(--radius-md) 0 0; display: inline-flex; align-items: center; gap: 0.4rem; flex-shrink: 0; white-space: nowrap;">
           ${renderIcon('plane', { size: 14 })}
           <span>Mis Viajes (${activeTrips.length})</span>
         </button>
-        <button class="btn btn-sm ${activeTab === 'history' ? 'btn-primary' : 'btn-secondary'}" id="tab-history" style="border-radius: var(--radius-md) var(--radius-md) 0 0; display: inline-flex; align-items: center; gap: 0.4rem;">
+        <button class="btn btn-sm ${activeTab === 'history' ? 'btn-primary' : 'btn-secondary'}" id="tab-history" style="border-radius: var(--radius-md) var(--radius-md) 0 0; display: inline-flex; align-items: center; gap: 0.4rem; flex-shrink: 0; white-space: nowrap;">
           ${renderIcon('history', { size: 14 })}
           <span>Historial (${historyTrips.length})</span>
         </button>
-        <button class="btn btn-sm ${activeTab === 'trash' ? 'btn-primary' : 'btn-secondary'}" id="tab-trash" style="border-radius: var(--radius-md) var(--radius-md) 0 0; display: inline-flex; align-items: center; gap: 0.4rem;">
+        <button class="btn btn-sm ${activeTab === 'trash' ? 'btn-primary' : 'btn-secondary'}" id="tab-trash" style="border-radius: var(--radius-md) var(--radius-md) 0 0; display: inline-flex; align-items: center; gap: 0.4rem; flex-shrink: 0; white-space: nowrap;">
           ${renderIcon('trash', { size: 14 })}
           <span>Papelera (${trashTrips.length})</span>
         </button>

@@ -5,7 +5,7 @@
  * @module sw
  */
 
-const CACHE_NAME = 'travelone-v5';
+const CACHE_NAME = 'travelone-v7';
 
 /**
  * Essential static assets and application modules cached for full offline operation.

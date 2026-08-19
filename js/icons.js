@@ -151,7 +151,7 @@ export function renderIcon(name, options = {}) {
 /**
  * Render the Official TravelOne Master Logo SVG
  * Features edge-to-edge solid emerald green background (#0ea35d), centered white circle container,
- * and modern black travel silhouette (soaring jet, globe coordinates, flight orbit, and luggage).
+ * and a sober, minimalist, elegant black travel jet silhouette.
  * Fully compatible with iOS Dark Mode (opaque solid fill, no transparent margins).
  * 
  * @param {number} [size=42] - Pixel dimensions (width and height)
@@ -166,53 +166,12 @@ export function renderAppLogoSVG(size = 42, className = '') {
          width="${size}" 
          height="${size}" 
          style="display: inline-block; vertical-align: middle; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 14px rgba(14, 163, 93, 0.35);">
-      <defs>
-        <clipPath id="logoClip_${size}">
-          <circle cx="256" cy="256" r="205" />
-        </clipPath>
-      </defs>
       <!-- Solid Green Edge-to-Edge Background -->
       <rect width="512" height="512" fill="#0ea35d" />
       <!-- Center White Circle -->
-      <circle cx="256" cy="256" r="205" fill="#ffffff" />
-      <!-- Vector Travel Silhouette Group -->
-      <g clip-path="url(#logoClip_${size})">
-        <!-- Dashed Orbital Flight Path -->
-        <path d="M 120 310 C 90 220, 160 110, 290 95 C 380 85, 425 150, 420 220 C 415 290, 340 395, 230 405 C 150 412, 105 350, 115 285" 
-              fill="none" stroke="#111827" stroke-width="9" stroke-dasharray="14 12" stroke-linecap="round" />
-        <!-- Stylized Globe -->
-        <circle cx="236" cy="268" r="102" fill="#111827" />
-        <!-- Globe Grid Coordinates -->
-        <path d="M 236 166 C 196 205, 196 331, 236 370" fill="none" stroke="#ffffff" stroke-width="5.5" stroke-linecap="round" />
-        <path d="M 236 166 C 276 205, 276 331, 236 370" fill="none" stroke="#ffffff" stroke-width="5.5" stroke-linecap="round" />
-        <path d="M 134 268 C 170 286, 302 286, 338 268" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" />
-        <path d="M 158 215 C 190 230, 282 230, 314 215" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" />
-        <path d="M 158 321 C 190 306, 282 306, 314 321" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" />
-        <!-- Soaring Jet Airplane -->
-        <g transform="translate(290, 138) rotate(42)">
-          <path d="M 0 -52 C 5 -42, 7 -20, 7 24 L 7 48 L 2 52 L -2 52 L -7 48 L -7 24 C -7 -20, -5 -42, 0 -52 Z" fill="#111827" />
-          <path d="M 0 -8 L 52 18 L 50 28 L 7 15 L -7 15 L -50 28 L -52 18 Z" fill="#111827" />
-          <rect x="18" y="10" width="6" height="15" rx="3" fill="#111827" stroke="#ffffff" stroke-width="1.5" />
-          <rect x="-24" y="10" width="6" height="15" rx="3" fill="#111827" stroke="#ffffff" stroke-width="1.5" />
-          <path d="M 0 38 L 24 50 L 22 56 L 0 50 L -22 56 L -24 50 Z" fill="#111827" />
-          <line x1="0" y1="-28" x2="0" y2="40" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
-        </g>
-        <!-- Modern Executive Luggage -->
-        <g transform="translate(305, 298)">
-          <path d="M 38 0 L 38 -14 C 38 -20, 74 -20, 74 -14 L 74 0" fill="none" stroke="#111827" stroke-width="7.5" stroke-linecap="round" />
-          <rect x="0" y="0" width="112" height="88" rx="14" fill="#111827" />
-          <path d="M 0 12 C 0 5, 5 0, 12 0 L 100 0 C 107 0, 112 5, 112 12 L 112 36 C 112 42, 107 46, 100 46 L 12 46 C 5 46, 0 42, 0 36 Z" fill="#1f2937" />
-          <line x1="4" y1="40" x2="108" y2="40" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" />
-          <rect x="42" y="30" width="28" height="20" rx="5" fill="#111827" stroke="#ffffff" stroke-width="3" />
-          <rect x="51" y="36" width="10" height="8" rx="2" fill="#ffffff" />
-          <circle cx="20" cy="90" r="5" fill="#111827" />
-          <circle cx="92" cy="90" r="5" fill="#111827" />
-        </g>
-        <!-- Compass Sparkle -->
-        <g transform="translate(136, 140) scale(0.9)">
-          <path d="M 0 -18 Q 0 0, 18 0 Q 0 0, 0 18 Q 0 0, -18 0 Q 0 0, 0 -18 Z" fill="#111827" />
-        </g>
-      </g>
+      <circle cx="256" cy="256" r="195" fill="#ffffff" />
+      <!-- Minimalist & Elegant Jet Silhouette -->
+      <polygon points="357.47,154.53 349.21,171.04 331.05,194.15 307.11,219.74 295.56,232.95 326.1,331.18 318.67,338.61 262.54,265.97 232.0,293.21 241.9,332.83 236.13,338.61 213.84,308.07 196.5,320.45 190.73,321.27 191.55,315.5 203.93,298.16 173.39,275.87 179.17,270.1 218.79,280.0 246.03,249.46 173.39,193.33 180.82,185.9 279.05,216.44 292.26,204.89 317.85,180.95 340.96,162.79" fill="#0b1326" />
     </svg>
   `.trim();
 }
