@@ -10,6 +10,7 @@ import { seedDemoDataIfNeeded } from './seed.js';
 import { getAllFromStore, getItemById } from './db.js';
 import { renderNavigation } from './components/nav.js';
 import { renderQuickToolsFAB, openCurrencyConverterModal } from './components/quickTools.js';
+import { renderAppLogoSVG, renderIcon } from './icons.js';
 
 import { renderAuthView } from './views/auth.js';
 import { renderHomeView } from './views/home.js';
@@ -20,7 +21,7 @@ import { renderChecklistView } from './views/checklist.js';
 import { renderJournalView } from './views/journal.js';
 
 /**
- * Main application class controlling view state and user session.
+ * Main application class controlling view state, user session, and transition lifecycles.
  */
 class TravelOneApp {
   /**
@@ -71,6 +72,58 @@ class TravelOneApp {
   }
 
   /**
+   * Play an elegant, professional opening animation with glowing logo and sonar pulses before entering a trip.
+   * 
+   * @param {Object} trip - The trip object being entered
+   * @returns {Promise<void>} Resolves when the transition concludes
+   */
+  playTripTransition(trip) {
+    return new Promise((resolve) => {
+      const overlay = document.createElement('div');
+      overlay.className = 'trip-splash-overlay active';
+      overlay.innerHTML = `
+        <div class="splash-icon-wrapper">
+          <div class="splash-sonar-ring"></div>
+          <div class="splash-sonar-ring"></div>
+          <div class="splash-sonar-ring"></div>
+          <div class="splash-logo-box">
+            ${renderAppLogoSVG(72)}
+          </div>
+        </div>
+
+        <div class="splash-title-group">
+          <div class="splash-badge">
+            ${renderIcon('sparkles', { size: 13, color: 'var(--primary-cyan)' })}
+            <span>Accediendo al Viaje</span>
+          </div>
+          <h2 class="splash-trip-name">${trip.name}</h2>
+          <div class="splash-destination">
+            ${renderIcon('map-pin', { size: 15, color: 'var(--primary-cyan)' })}
+            <span>${trip.destination}</span>
+          </div>
+
+          <div class="splash-progress-track">
+            <div class="splash-progress-bar"></div>
+          </div>
+          <div style="font-size: 0.78rem; color: var(--text-dim); margin-top: 0.75rem; font-weight: 500;">
+            Preparando itinerario, reservas y finanzas...
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(overlay);
+
+      setTimeout(() => {
+        overlay.classList.add('leaving');
+        setTimeout(() => {
+          overlay.remove();
+          resolve();
+        }, 320);
+      }, 750);
+    });
+  }
+
+  /**
    * Set logged-in user profile and transition to home view.
    * 
    * @param {Object} user - User profile object
@@ -107,12 +160,13 @@ class TravelOneApp {
   }
 
   /**
-   * Select an active trip and switch to dashboard view.
+   * Select an active trip, play animated icon transition, and switch to dashboard view.
    * 
    * @param {string|null} tripId - Target trip ID or null to return home
+   * @param {boolean} [showAnimation=true] - Whether to show the icon transition animation
    * @returns {Promise<void>}
    */
-  async setTrip(tripId) {
+  async setTrip(tripId, showAnimation = true) {
     if (!tripId) {
       this.currentTripId = null;
       this.currentTrip = null;
@@ -122,6 +176,12 @@ class TravelOneApp {
       this.currentTripId = tripId;
       this.currentTrip = await getItemById('trips', tripId);
       localStorage.setItem('travelone_current_trip_id', tripId);
+
+      // Play professional icon transition animation
+      if (showAnimation && this.currentTrip) {
+        await this.playTripTransition(this.currentTrip);
+      }
+
       this.activeView = 'dashboard';
     }
     await this.render();
@@ -171,7 +231,7 @@ class TravelOneApp {
     // Route view rendering to the 4 Core Unified Pillars
     switch (this.activeView) {
       case 'home':
-        viewElement = await renderHomeView((tripId) => this.setTrip(tripId), this.currentUser);
+        viewElement = await renderHomeView((tripId) => this.setTrip(tripId, true), this.currentUser);
         break;
       case 'dashboard':
         viewElement = await renderDashboardView(this.currentTrip, (v) => this.setView(v));
@@ -210,7 +270,7 @@ class TravelOneApp {
         viewElement = await renderJournalView(this.currentTrip, refreshCurrentView, 'summary');
         break;
       default:
-        viewElement = await renderHomeView((tripId) => this.setTrip(tripId), this.currentUser);
+        viewElement = await renderHomeView((tripId) => this.setTrip(tripId, true), this.currentUser);
     }
 
     viewContainer.appendChild(viewElement);

@@ -362,12 +362,11 @@ export async function renderHomeView(onSelectTrip, currentUser) {
           alert('Error al importar archivo XML: ' + err.message);
         }
       });
-    }, 50);
-  };
+    };
 
-  renderContent();
-  return container;
-}
+    renderContent();
+    return container;
+  }
 
 function openNewTripModal(onSelectTrip, currentUser, onRefresh) {
   const bodyHTML = `

@@ -5,7 +5,7 @@
  * @module sw
  */
 
-const CACHE_NAME = 'travelone-v9';
+const CACHE_NAME = 'travelone-v10';
 
 /**
  * Essential static assets and application modules cached for full offline operation.
@@ -36,16 +36,9 @@ const ASSETS_TO_CACHE = [
   './js/views/home.js',
   './js/views/dashboard.js',
   './js/views/itinerary.js',
-  './js/views/reservations.js',
   './js/views/expenses.js',
-  './js/views/budget.js',
-  './js/views/places.js',
-  './js/views/shopping.js',
   './js/views/checklist.js',
-  './js/views/documents.js',
-  './js/views/contacts.js',
-  './js/views/journal.js',
-  './js/views/summary.js'
+  './js/views/journal.js'
 ];
 
 /**
