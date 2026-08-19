@@ -21,7 +21,7 @@ import { renderChecklistView } from './views/checklist.js';
 import { renderJournalView } from './views/journal.js';
 
 /**
- * Main application class controlling view state, user session, and transition lifecycles.
+ * Main application class controlling view state, user session, and startup lifecycles.
  */
 class TravelOneApp {
   /**
@@ -41,72 +41,38 @@ class TravelOneApp {
   }
 
   /**
-   * Initialize application services, database seeds, and service workers.
+   * Play an elegant, professional startup splash animation with glowing logo and sonar pulses upon launching the app.
    * 
-   * @returns {Promise<void>}
+   * @returns {Promise<void>} Resolves when the initial startup animation concludes
    */
-  async init() {
-    // 1. Seed demo dataset if database is empty
-    await seedDemoDataIfNeeded();
-
-    // 2. Hydrate active trip if user is authenticated
-    if (this.currentUser && this.currentTripId) {
-      this.currentTrip = await getItemById('trips', this.currentTripId);
-      if (!this.currentTrip) {
-        const trips = await getAllFromStore('trips');
-        const userTrips = trips.filter(t => !t.userId || t.userId === this.currentUser.id);
-        this.currentTrip = userTrips[0] || null;
-        this.currentTripId = this.currentTrip ? this.currentTrip.id : null;
-      }
-    }
-
-    // 3. Register Service Worker for offline PWA operation
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js').catch(err => {
-        console.log('Service Worker registration skipped/failed:', err);
-      });
-    }
-
-    // 4. Initial view render
-    await this.render();
-  }
-
-  /**
-   * Play an elegant, professional opening animation with glowing logo and sonar pulses before entering a trip.
-   * 
-   * @param {Object} trip - The trip object being entered
-   * @returns {Promise<void>} Resolves when the transition concludes
-   */
-  playTripTransition(trip) {
+  playAppStartupSplash() {
     return new Promise((resolve) => {
       const overlay = document.createElement('div');
-      overlay.className = 'trip-splash-overlay active';
+      overlay.className = 'app-startup-splash-overlay active';
       overlay.innerHTML = `
         <div class="splash-icon-wrapper">
           <div class="splash-sonar-ring"></div>
           <div class="splash-sonar-ring"></div>
           <div class="splash-sonar-ring"></div>
           <div class="splash-logo-box">
-            ${renderAppLogoSVG(72)}
+            ${renderAppLogoSVG(84)}
           </div>
         </div>
 
         <div class="splash-title-group">
-          <div class="splash-badge">
-            ${renderIcon('sparkles', { size: 13, color: 'var(--primary-cyan)' })}
-            <span>Accediendo al Viaje</span>
-          </div>
-          <h2 class="splash-trip-name">${trip.name}</h2>
-          <div class="splash-destination">
-            ${renderIcon('map-pin', { size: 15, color: 'var(--primary-cyan)' })}
-            <span>${trip.destination}</span>
+          <h1 style="font-size: 2.2rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.25rem; background: linear-gradient(135deg, #ffffff 30%, var(--primary-cyan) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            TravelOne
+          </h1>
+          <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: center; gap: 0.4rem;">
+            ${renderIcon('sparkles', { size: 14, color: 'var(--accent-emerald)' })}
+            <span>Organizador Personal de Viajes Offline</span>
           </div>
 
           <div class="splash-progress-track">
             <div class="splash-progress-bar"></div>
           </div>
           <div style="font-size: 0.78rem; color: var(--text-dim); margin-top: 0.75rem; font-weight: 500;">
-            Preparando itinerario, reservas y finanzas...
+            Iniciando base de datos local y herramientas...
           </div>
         </div>
       `;
@@ -119,8 +85,45 @@ class TravelOneApp {
           overlay.remove();
           resolve();
         }, 320);
-      }, 750);
+      }, 850);
     });
+  }
+
+  /**
+   * Initialize application services, database seeds, startup animation, and service workers.
+   * 
+   * @returns {Promise<void>}
+   */
+  async init() {
+    // 1. Play professional startup splash animation on launch
+    const splashPromise = this.playAppStartupSplash();
+
+    // 2. Seed demo dataset if database is empty
+    await seedDemoDataIfNeeded();
+
+    // 3. Hydrate active trip if user is authenticated
+    if (this.currentUser && this.currentTripId) {
+      this.currentTrip = await getItemById('trips', this.currentTripId);
+      if (!this.currentTrip) {
+        const trips = await getAllFromStore('trips');
+        const userTrips = trips.filter(t => !t.userId || t.userId === this.currentUser.id);
+        this.currentTrip = userTrips[0] || null;
+        this.currentTripId = this.currentTrip ? this.currentTrip.id : null;
+      }
+    }
+
+    // 4. Register Service Worker for offline PWA operation
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(err => {
+        console.log('Service Worker registration skipped/failed:', err);
+      });
+    }
+
+    // 5. Initial view render
+    await this.render();
+
+    // Wait for splash animation to smoothly conclude
+    await splashPromise;
   }
 
   /**
@@ -160,13 +163,12 @@ class TravelOneApp {
   }
 
   /**
-   * Select an active trip, play animated icon transition, and switch to dashboard view.
+   * Select an active trip and switch directly to dashboard view without middle interruption.
    * 
    * @param {string|null} tripId - Target trip ID or null to return home
-   * @param {boolean} [showAnimation=true] - Whether to show the icon transition animation
    * @returns {Promise<void>}
    */
-  async setTrip(tripId, showAnimation = true) {
+  async setTrip(tripId) {
     if (!tripId) {
       this.currentTripId = null;
       this.currentTrip = null;
@@ -176,12 +178,6 @@ class TravelOneApp {
       this.currentTripId = tripId;
       this.currentTrip = await getItemById('trips', tripId);
       localStorage.setItem('travelone_current_trip_id', tripId);
-
-      // Play professional icon transition animation
-      if (showAnimation && this.currentTrip) {
-        await this.playTripTransition(this.currentTrip);
-      }
-
       this.activeView = 'dashboard';
     }
     await this.render();
@@ -201,6 +197,7 @@ class TravelOneApp {
 
   /**
    * Render the complete UI based on current authentication state and active view.
+   * Keeps the Quick Tools FAB always visible and accessible across all views.
    * 
    * @returns {Promise<void>}
    */
@@ -213,9 +210,9 @@ class TravelOneApp {
       return;
     }
 
-    // Render navigation framework (desktop sidebar + mobile top/bottom bars)
+    // Render navigation framework and ALWAYS include Quick Tools FAB
     const navHTML = renderNavigation(this.activeView, this.currentTrip, this.currentUser);
-    const fabHTML = this.currentTrip ? renderQuickToolsFAB() : '';
+    const fabHTML = renderQuickToolsFAB();
 
     this.appLayout.innerHTML = `
       ${navHTML}
@@ -231,7 +228,7 @@ class TravelOneApp {
     // Route view rendering to the 4 Core Unified Pillars
     switch (this.activeView) {
       case 'home':
-        viewElement = await renderHomeView((tripId) => this.setTrip(tripId, true), this.currentUser);
+        viewElement = await renderHomeView((tripId) => this.setTrip(tripId), this.currentUser);
         break;
       case 'dashboard':
         viewElement = await renderDashboardView(this.currentTrip, (v) => this.setView(v));
@@ -270,7 +267,7 @@ class TravelOneApp {
         viewElement = await renderJournalView(this.currentTrip, refreshCurrentView, 'summary');
         break;
       default:
-        viewElement = await renderHomeView((tripId) => this.setTrip(tripId, true), this.currentUser);
+        viewElement = await renderHomeView((tripId) => this.setTrip(tripId), this.currentUser);
     }
 
     viewContainer.appendChild(viewElement);
@@ -288,7 +285,7 @@ class TravelOneApp {
     this.appLayout.querySelector('#btn-app-logout')?.addEventListener('click', () => this.logout());
     this.appLayout.querySelector('#btn-mobile-logout')?.addEventListener('click', () => this.logout());
 
-    // Attach Quick Tools FAB listener
+    // Attach Quick Tools FAB listener (always enabled with fallback if no trip is selected)
     const fabBtn = this.appLayout.querySelector('#fab-quick-tools');
     if (fabBtn) {
       fabBtn.addEventListener('click', (e) => {

@@ -311,8 +311,9 @@
 }
 
 /* ==========================================================================
-   Trip Loading & Splash Transition Animation
+   App Startup & Launch Splash Animation
    ========================================================================== */
+.app-startup-splash-overlay,
 .trip-splash-overlay {
   position: fixed;
   top: 0;
@@ -328,21 +329,23 @@
   padding: 2rem;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), filter 0.35s ease;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), filter 0.4s ease;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
 }
 
+.app-startup-splash-overlay.active,
 .trip-splash-overlay.active {
   opacity: 1;
   pointer-events: auto;
   transform: scale(1);
 }
 
+.app-startup-splash-overlay.leaving,
 .trip-splash-overlay.leaving {
   opacity: 0;
-  transform: scale(1.06);
-  filter: blur(8px);
+  transform: scale(1.08);
+  filter: blur(10px);
 }
 
 .splash-icon-wrapper {
