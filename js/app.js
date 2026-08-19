@@ -15,16 +15,9 @@ import { renderAuthView } from './views/auth.js';
 import { renderHomeView } from './views/home.js';
 import { renderDashboardView } from './views/dashboard.js';
 import { renderItineraryView } from './views/itinerary.js';
-import { renderReservationsView } from './views/reservations.js';
 import { renderExpensesView } from './views/expenses.js';
-import { renderBudgetView } from './views/budget.js';
-import { renderPlacesView } from './views/places.js';
-import { renderShoppingView } from './views/shopping.js';
 import { renderChecklistView } from './views/checklist.js';
-import { renderDocumentsView } from './views/documents.js';
-import { renderContactsView } from './views/contacts.js';
 import { renderJournalView } from './views/journal.js';
-import { renderSummaryView } from './views/summary.js';
 
 /**
  * Main application class controlling view state and user session.
@@ -175,7 +168,7 @@ class TravelOneApp {
 
     const refreshCurrentView = () => this.render();
 
-    // Route view rendering
+    // Route view rendering to the 4 Core Unified Pillars
     switch (this.activeView) {
       case 'home':
         viewElement = await renderHomeView((tripId) => this.setTrip(tripId), this.currentUser);
@@ -184,37 +177,37 @@ class TravelOneApp {
         viewElement = await renderDashboardView(this.currentTrip, (v) => this.setView(v));
         break;
       case 'itinerary':
-        viewElement = await renderItineraryView(this.currentTrip, refreshCurrentView);
-        break;
-      case 'reservations':
-        viewElement = await renderReservationsView(this.currentTrip, refreshCurrentView);
-        break;
-      case 'expenses':
-        viewElement = await renderExpensesView(this.currentTrip, refreshCurrentView);
-        break;
-      case 'budget':
-        viewElement = await renderBudgetView(this.currentTrip, refreshCurrentView);
+        viewElement = await renderItineraryView(this.currentTrip, refreshCurrentView, 'timeline');
         break;
       case 'places':
-        viewElement = await renderPlacesView(this.currentTrip, refreshCurrentView);
+        viewElement = await renderItineraryView(this.currentTrip, refreshCurrentView, 'places');
+        break;
+      case 'reservations':
+        viewElement = await renderItineraryView(this.currentTrip, refreshCurrentView, 'reservations');
+        break;
+      case 'expenses':
+        viewElement = await renderExpensesView(this.currentTrip, refreshCurrentView, 'expenses');
+        break;
+      case 'budget':
+        viewElement = await renderExpensesView(this.currentTrip, refreshCurrentView, 'budget');
         break;
       case 'shopping':
-        viewElement = await renderShoppingView(this.currentTrip, refreshCurrentView);
+        viewElement = await renderExpensesView(this.currentTrip, refreshCurrentView, 'shopping');
         break;
       case 'checklist':
-        viewElement = await renderChecklistView(this.currentTrip, refreshCurrentView);
+        viewElement = await renderChecklistView(this.currentTrip, refreshCurrentView, 'checklist');
         break;
       case 'documents':
-        viewElement = await renderDocumentsView(this.currentTrip, refreshCurrentView);
+        viewElement = await renderChecklistView(this.currentTrip, refreshCurrentView, 'documents');
         break;
       case 'contacts':
-        viewElement = await renderContactsView(this.currentTrip, refreshCurrentView);
+        viewElement = await renderChecklistView(this.currentTrip, refreshCurrentView, 'contacts');
         break;
       case 'journal':
-        viewElement = await renderJournalView(this.currentTrip, refreshCurrentView);
+        viewElement = await renderJournalView(this.currentTrip, refreshCurrentView, 'journal');
         break;
       case 'summary':
-        viewElement = await renderSummaryView(this.currentTrip, refreshCurrentView);
+        viewElement = await renderJournalView(this.currentTrip, refreshCurrentView, 'summary');
         break;
       default:
         viewElement = await renderHomeView((tripId) => this.setTrip(tripId), this.currentUser);

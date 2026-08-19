@@ -1,6 +1,6 @@
 /**
  * TravelOne Trip Dashboard View
- * Displays executive trip metrics, progress bars, upcoming activities, next reservations, and module quick launch cards.
+ * Executive command center displaying metrics, budget progress, upcoming events, and access to the 4 core pillars.
  * 
  * @module js/views/dashboard
  */
@@ -23,7 +23,10 @@ export async function renderDashboardView(trip, onNavigate) {
   const reservations = await getAllFromStore('reservations', trip.id);
   const expenses = await getAllFromStore('expenses', trip.id);
   const places = await getAllFromStore('places', trip.id);
+  const shopping = await getAllFromStore('shopping', trip.id);
   const checklists = await getAllFromStore('checklists', trip.id);
+  const documents = await getAllFromStore('documents', trip.id);
+  const journal = await getAllFromStore('journal', trip.id);
 
   // Calculations
   const daysLeft = calculateDaysLeft(trip.startDate);
@@ -42,8 +45,8 @@ export async function renderDashboardView(trip, onNavigate) {
   const nextReservation = reservations.length > 0 ? reservations[0] : null;
 
   // Counts
+  const completedTasksCount = checklists.filter(c => c.completed).length;
   const pendingPlacesCount = places.filter(p => !p.visited).length;
-  const pendingTasksCount = checklists.filter(c => !c.completed).length;
 
   const container = document.createElement('div');
   container.innerHTML = `
@@ -53,7 +56,7 @@ export async function renderDashboardView(trip, onNavigate) {
           <div style="display: flex; align-items: center;">
             ${renderAppLogoSVG(36)}
           </div>
-          <h1>${trip.name}</h1>
+          <h1 style="margin: 0; font-family: 'Outfit', sans-serif;">${trip.name}</h1>
         </div>
 
         <div class="page-subtitle" style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
@@ -65,119 +68,122 @@ export async function renderDashboardView(trip, onNavigate) {
       <div class="header-actions">
         <button class="btn btn-secondary" id="btn-quick-summary" style="display: inline-flex; align-items: center; gap: 0.4rem;">
           ${renderIcon('summary', { size: 15 })}
-          <span>Resumen Completo</span>
+          <span>Ver Resumen Ejecutivo</span>
         </button>
       </div>
     </div>
 
     <!-- Quick Metrics Row -->
-    <div class="grid-4" style="margin-bottom: 1.5rem;">
-      <div class="metric-card">
-        <div class="metric-icon">
+    <div class="grid grid-4" style="margin-bottom: 1.5rem;">
+      <div class="card stat-card">
+        <div class="stat-icon" style="background: rgba(0, 242, 254, 0.1); color: var(--primary-cyan);">
           ${renderIcon('hourglass', { size: 24, color: 'var(--primary-cyan)' })}
         </div>
-        <div class="metric-data">
-          <div class="label">Días Restantes</div>
-          <div class="value" style="color: var(--primary-cyan);">${daysLeft > 0 ? `${daysLeft} días` : (daysLeft === 0 ? '¡Hoy!' : 'Concluido')}</div>
+        <div>
+          <div class="stat-label">Días Restantes</div>
+          <div class="stat-value" style="color: var(--primary-cyan); font-family: 'Outfit', sans-serif;">
+            ${daysLeft > 0 ? `${daysLeft} días` : (daysLeft === 0 ? '¡Hoy!' : 'Concluido')}
+          </div>
         </div>
       </div>
 
-      <div class="metric-card">
-        <div class="metric-icon" style="background: rgba(246, 211, 101, 0.12); color: var(--accent-amber);">
+      <div class="card stat-card">
+        <div class="stat-icon" style="background: rgba(246, 211, 101, 0.12); color: var(--accent-amber);">
           ${renderIcon('coins', { size: 24, color: 'var(--accent-amber)' })}
         </div>
-        <div class="metric-data">
-          <div class="label">Disponible</div>
-          <div class="value" style="color: ${available < 0 ? 'var(--accent-rose)' : 'var(--accent-amber)'};">${formatMoney(available, trip.mainCurrency)}</div>
+        <div>
+          <div class="stat-label">Saldo Disponible</div>
+          <div class="stat-value" style="color: ${available < 0 ? 'var(--accent-rose)' : 'var(--accent-amber)'}; font-family: 'Outfit', sans-serif;">
+            ${formatMoney(available, trip.mainCurrency || 'CRC')}
+          </div>
         </div>
       </div>
 
-      <div class="metric-card">
-        <div class="metric-icon" style="background: rgba(0, 242, 96, 0.12); color: #00f260;">
-          ${renderIcon('calendar', { size: 24, color: '#00f260)' })}
+      <div class="card stat-card">
+        <div class="stat-icon" style="background: rgba(0, 242, 96, 0.12); color: var(--accent-emerald);">
+          ${renderIcon('calendar', { size: 24, color: 'var(--accent-emerald)' })}
         </div>
-        <div class="metric-data">
-          <div class="label">Actividades</div>
-          <div class="value">${itinerary.length} totales</div>
+        <div>
+          <div class="stat-label">Actividades</div>
+          <div class="stat-value" style="color: #ffffff; font-family: 'Outfit', sans-serif;">
+            ${itinerary.length} agenda
+          </div>
         </div>
       </div>
 
-      <div class="metric-card">
-        <div class="metric-icon" style="background: rgba(161, 140, 209, 0.12); color: var(--accent-purple);">
-          ${renderIcon('check-circle', { size: 24, color: 'var(--accent-purple)' })}
+      <div class="card stat-card">
+        <div class="stat-icon" style="background: rgba(161, 140, 209, 0.12); color: var(--accent-purple);">
+          ${renderIcon('checklist', { size: 24, color: 'var(--accent-purple)' })}
         </div>
-        <div class="metric-data">
-          <div class="label">Tareas Pendientes</div>
-          <div class="value">${pendingTasksCount} items</div>
+        <div>
+          <div class="stat-label">Preparativos</div>
+          <div class="stat-value" style="color: #ffffff; font-family: 'Outfit', sans-serif;">
+            ${completedTasksCount}/${checklists.length} listos
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Budget Overview Card -->
     <div class="card" style="margin-bottom: 1.5rem;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-        <h3 style="font-size: 1.1rem; display: flex; align-items: center; gap: 0.4rem;">
-          ${renderIcon('budget', { size: 18, color: 'var(--primary-cyan)' })}
-          <span>Presupuesto & Gastos</span>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+        <h3 style="font-size: 1.1rem; display: flex; align-items: center; gap: 0.4rem; color: #ffffff;">
+          ${renderIcon('wallet', { size: 18, color: 'var(--primary-cyan)' })}
+          <span>Control Financiero del Viaje</span>
         </h3>
-        <span style="font-size: 0.85rem; color: var(--text-muted);">${spentPercent}% consumido</span>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">${spentPercent}% del presupuesto consumido</span>
       </div>
 
-      <div class="progress-container" style="height: 12px; margin-bottom: 1rem;">
+      <div class="progress-container" style="height: 10px; margin-bottom: 1rem;">
         <div class="progress-bar ${spentPercent > 85 ? 'progress-rose' : (spentPercent > 65 ? 'progress-amber' : '')}" style="width: ${spentPercent}%;"></div>
       </div>
 
-      <div class="grid-3" style="text-align: center; background: var(--bg-surface); padding: 0.85rem; border-radius: var(--radius-md);">
+      <div class="grid grid-3" style="text-align: center; background: var(--bg-surface); padding: 0.85rem; border-radius: var(--radius-md);">
         <div>
           <div style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase;">Presupuesto Total</div>
-          <div style="font-weight: 700; color: #ffffff;">${formatMoney(budget, trip.mainCurrency)}</div>
+          <div style="font-weight: 700; color: #ffffff; font-family: 'Outfit', sans-serif;">${formatMoney(budget, trip.mainCurrency || 'CRC')}</div>
         </div>
         <div>
           <div style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase;">Total Gastado</div>
-          <div style="font-weight: 700; color: var(--accent-rose);">${formatMoney(totalSpent, trip.mainCurrency)}</div>
+          <div style="font-weight: 700; color: var(--accent-rose); font-family: 'Outfit', sans-serif;">${formatMoney(totalSpent, trip.mainCurrency || 'CRC')}</div>
         </div>
         <div>
           <div style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase;">Dinero Disponible</div>
-          <div style="font-weight: 700; color: var(--accent-amber);">${formatMoney(available, trip.mainCurrency)}</div>
+          <div style="font-weight: 700; color: var(--accent-emerald); font-family: 'Outfit', sans-serif;">${formatMoney(available, trip.mainCurrency || 'CRC')}</div>
         </div>
       </div>
     </div>
 
     <!-- Next Up Grid -->
-    <div class="grid-2" style="margin-bottom: 1.5rem;">
+    <div class="grid grid-2" style="margin-bottom: 1.5rem;">
       <!-- Next Activity Card -->
-      <div class="card card-interactive" id="card-next-activity">
+      <div class="card card-interactive" id="card-next-activity" style="cursor: pointer;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
           <span style="font-size: 0.8rem; font-weight: 700; color: var(--primary-cyan); text-transform: uppercase;">Próxima Actividad</span>
           ${renderIcon('calendar', { size: 16, color: 'var(--primary-cyan)' })}
         </div>
         ${nextActivity ? `
-          <h4 style="font-size: 1.15rem; margin-bottom: 0.25rem;">${nextActivity.title}</h4>
+          <h4 style="font-size: 1.15rem; margin-bottom: 0.25rem; font-family: 'Outfit', sans-serif; color: #ffffff;">${nextActivity.title}</h4>
           <div style="color: var(--text-muted); font-size: 0.85rem; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
-            <span class="icon-inline">${renderIcon('clock', { size: 13 })} ${nextActivity.time}</span>
-            <span class="icon-inline">${renderIcon('map-pin', { size: 13 })} ${nextActivity.location}</span>
+            <span class="icon-inline">${renderIcon('clock', { size: 13 })} ${nextActivity.time || 'Hora pendiente'}</span>
+            ${nextActivity.location ? `<span class="icon-inline">${renderIcon('map-pin', { size: 13 })} ${nextActivity.location}</span>` : ''}
           </div>
-          <div style="margin-top: 0.75rem; font-size: 0.8rem; color: var(--text-dim);">${nextActivity.notes || ''}</div>
         ` : `
           <div style="color: var(--text-muted); font-size: 0.9rem;">No hay actividades pendientes en el itinerario.</div>
         `}
       </div>
 
       <!-- Next Reservation Card -->
-      <div class="card card-interactive" id="card-next-reservation">
+      <div class="card card-interactive" id="card-next-reservation" style="cursor: pointer;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
           <span style="font-size: 0.8rem; font-weight: 700; color: var(--accent-amber); text-transform: uppercase;">Próxima Reserva</span>
           ${renderIcon('hotel', { size: 16, color: 'var(--accent-amber)' })}
         </div>
         ${nextReservation ? `
-          <h4 style="font-size: 1.15rem; margin-bottom: 0.25rem;">${nextReservation.name}</h4>
+          <h4 style="font-size: 1.15rem; margin-bottom: 0.25rem; font-family: 'Outfit', sans-serif; color: #ffffff;">${nextReservation.title}</h4>
           <div style="color: var(--text-muted); font-size: 0.85rem; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
             <span class="icon-inline">${renderIcon('tag', { size: 13 })} ${nextReservation.type}</span>
-            <span>Conf: #${nextReservation.confirmationNo || 'S/N'}</span>
-          </div>
-          <div style="margin-top: 0.75rem; font-size: 0.8rem; color: var(--text-dim); display: flex; align-items: center; gap: 0.35rem;">
-            ${renderIcon('map-pin', { size: 12 })}
-            <span>${nextReservation.address || ''}</span>
+            ${nextReservation.confirmationCode ? `<span>Conf: #${nextReservation.confirmationCode}</span>` : ''}
           </div>
         ` : `
           <div style="color: var(--text-muted); font-size: 0.9rem;">No hay reservas registradas aún.</div>
@@ -185,46 +191,46 @@ export async function renderDashboardView(trip, onNavigate) {
       </div>
     </div>
 
-    <!-- Quick Navigation Shortcuts -->
-    <h3 style="font-size: 1.1rem; margin-bottom: 1rem;">Módulos del Viaje</h3>
-    <div class="grid-4">
+    <!-- 4 Core Unified Pillars Quick Launch -->
+    <h3 style="font-size: 1.15rem; margin-bottom: 1rem; color: #ffffff;">Pilares del Viaje</h3>
+    <div class="grid grid-4">
       <div class="card card-interactive module-shortcut" data-view="itinerary" style="display: flex; align-items: center; gap: 1rem; cursor: pointer;">
-        <div class="icon-badge-box">
-          ${renderIcon('calendar', { size: 20, color: 'var(--primary-cyan)' })}
+        <div style="background: rgba(0, 242, 254, 0.1); padding: 0.75rem; border-radius: var(--radius-md); display: flex;">
+          ${renderIcon('calendar', { size: 24, color: 'var(--primary-cyan)' })}
         </div>
         <div>
-          <div style="font-weight: 700;">Itinerario</div>
-          <div style="font-size: 0.8rem; color: var(--text-muted);">${itinerary.length} actividades</div>
-        </div>
-      </div>
-
-      <div class="card card-interactive module-shortcut" data-view="reservations" style="display: flex; align-items: center; gap: 1rem; cursor: pointer;">
-        <div class="icon-badge-box icon-badge-amber">
-          ${renderIcon('hotel', { size: 20, color: 'var(--accent-amber)' })}
-        </div>
-        <div>
-          <div style="font-weight: 700;">Reservas</div>
-          <div style="font-size: 0.8rem; color: var(--text-muted);">${reservations.length} confirmadas</div>
-        </div>
-      </div>
-
-      <div class="card card-interactive module-shortcut" data-view="places" style="display: flex; align-items: center; gap: 1rem; cursor: pointer;">
-        <div class="icon-badge-box icon-badge-green">
-          ${renderIcon('map-pin', { size: 20, color: '#00f260' })}
-        </div>
-        <div>
-          <div style="font-weight: 700;">Lugares</div>
-          <div style="font-size: 0.8rem; color: var(--text-muted);">${pendingPlacesCount} por visitar</div>
+          <div style="font-weight: 700; font-size: 1rem; color: #ffffff;">Itinerario & Logística</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted);">${itinerary.length} act. • ${places.length} lugares</div>
         </div>
       </div>
 
       <div class="card card-interactive module-shortcut" data-view="expenses" style="display: flex; align-items: center; gap: 1rem; cursor: pointer;">
-        <div class="icon-badge-box icon-badge-rose">
-          ${renderIcon('credit-card', { size: 20, color: 'var(--accent-rose)' })}
+        <div style="background: rgba(246, 211, 101, 0.1); padding: 0.75rem; border-radius: var(--radius-md); display: flex;">
+          ${renderIcon('wallet', { size: 24, color: 'var(--accent-amber)' })}
         </div>
         <div>
-          <div style="font-weight: 700;">Gastos</div>
-          <div style="font-size: 0.8rem; color: var(--text-muted);">${expenses.length} registros</div>
+          <div style="font-weight: 700; font-size: 1rem; color: #ffffff;">Finanzas & Control</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted);">${expenses.length} gastos • ${shopping.length} compras</div>
+        </div>
+      </div>
+
+      <div class="card card-interactive module-shortcut" data-view="checklist" style="display: flex; align-items: center; gap: 1rem; cursor: pointer;">
+        <div style="background: rgba(0, 242, 96, 0.1); padding: 0.75rem; border-radius: var(--radius-md); display: flex;">
+          ${renderIcon('checklist', { size: 24, color: 'var(--accent-emerald)' })}
+        </div>
+        <div>
+          <div style="font-weight: 700; font-size: 1rem; color: #ffffff;">Preparativos & Equipaje</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted);">${checklists.length} tareas • ${documents.length} docs</div>
+        </div>
+      </div>
+
+      <div class="card card-interactive module-shortcut" data-view="journal" style="display: flex; align-items: center; gap: 1rem; cursor: pointer;">
+        <div style="background: rgba(255, 117, 140, 0.1); padding: 0.75rem; border-radius: var(--radius-md); display: flex;">
+          ${renderIcon('journal', { size: 24, color: 'var(--accent-rose)' })}
+        </div>
+        <div>
+          <div style="font-weight: 700; font-size: 1rem; color: #ffffff;">Bitácora & Resumen</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted);">${journal.length} entradas • Dossier</div>
         </div>
       </div>
     </div>
@@ -240,10 +246,9 @@ export async function renderDashboardView(trip, onNavigate) {
     });
 
     container.querySelector('#card-next-activity')?.addEventListener('click', () => onNavigate('itinerary'));
-    container.querySelector('#card-next-reservation')?.addEventListener('click', () => onNavigate('reservations'));
-    container.querySelector('#btn-quick-summary')?.addEventListener('click', () => onNavigate('summary'));
+    container.querySelector('#card-next-reservation')?.addEventListener('click', () => onNavigate('itinerary'));
+    container.querySelector('#btn-quick-summary')?.addEventListener('click', () => onNavigate('journal'));
   }, 50);
 
   return container;
 }
-
