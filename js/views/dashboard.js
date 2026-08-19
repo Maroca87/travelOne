@@ -4,7 +4,7 @@
 
 import { getAllFromStore } from '../db.js';
 import { formatDate, calculateDaysLeft, calculateDuration, formatMoney } from '../utils.js';
-import { renderIcon } from '../icons.js';
+import { renderIcon, renderAppLogoSVG } from '../icons.js';
 
 export async function renderDashboardView(trip, onNavigate) {
   if (!trip) return document.createElement('div');
@@ -40,11 +40,12 @@ export async function renderDashboardView(trip, onNavigate) {
     <div class="page-header">
       <div class="page-title-group">
         <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.25rem;">
-          <div class="icon-badge-box">
-            ${renderIcon('compass', { size: 24, color: 'var(--primary-cyan)' })}
+          <div style="display: flex; align-items: center;">
+            ${renderAppLogoSVG(36)}
           </div>
           <h1>${trip.name}</h1>
         </div>
+
         <div class="page-subtitle" style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
           <span class="icon-inline">${renderIcon('map-pin', { size: 14, color: 'var(--primary-cyan)' })} ${trip.destination}</span>
           <span>•</span>

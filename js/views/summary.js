@@ -4,7 +4,7 @@
 
 import { getAllFromStore, exportTripsXML } from '../db.js';
 import { formatDate, calculateDuration, formatMoney, showToast } from '../utils.js';
-import { renderIcon } from '../icons.js';
+import { renderIcon, renderAppLogoSVG } from '../icons.js';
 
 export async function renderSummaryView(trip, refreshView) {
   if (!trip) return document.createElement('div');
@@ -45,9 +45,10 @@ export async function renderSummaryView(trip, refreshView) {
     <!-- Main Overview Header Card -->
     <div class="card" style="margin-bottom: 1.5rem; background: linear-gradient(135deg, rgba(0, 242, 254, 0.1), rgba(79, 172, 254, 0.05)); border: 1px solid rgba(0, 242, 254, 0.25);">
       <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem;">
-        <div class="icon-badge-box" style="width: 48px; height: 48px;">
-          ${renderIcon('compass', { size: 28, color: 'var(--primary-cyan)' })}
+        <div style="display: flex; align-items: center;">
+          ${renderAppLogoSVG(48)}
         </div>
+
         <div>
           <h2 style="font-size: 1.6rem; color: #ffffff; margin-bottom: 0.2rem;">${trip.name}</h2>
           <div style="color: var(--primary-cyan); font-weight: 600; display: flex; align-items: center; gap: 0.35rem;">

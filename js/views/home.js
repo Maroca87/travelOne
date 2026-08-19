@@ -5,7 +5,7 @@
 import { getAllFromStore, saveItem, moveToTrash, restoreTrip, permanentDeleteTrip, emptyTrash, importTripsXML, exportTripsXML } from '../db.js';
 import { formatDate, calculateDaysLeft, calculateDuration, formatMoney, showToast } from '../utils.js';
 import { openModal } from '../components/modal.js';
-import { renderIcon } from '../icons.js';
+import { renderIcon, renderAppLogoSVG } from '../icons.js';
 
 export async function renderHomeView(onSelectTrip, currentUser) {
   const allTrips = await getAllFromStore('trips');
@@ -61,7 +61,7 @@ export async function renderHomeView(onSelectTrip, currentUser) {
     // Render Cards Function
     const renderTripCards = (list, isTrashView = false, isHistoryView = false) => {
       if (list.length === 0) {
-        const emptyIcon = isTrashView ? renderIcon('trash', { size: 48, color: 'var(--text-dim)' }) : (isHistoryView ? renderIcon('history', { size: 48, color: 'var(--text-dim)' }) : renderIcon('plane', { size: 48, color: 'var(--primary-cyan)' }));
+        const emptyIcon = isTrashView ? renderIcon('trash', { size: 48, color: 'var(--text-dim)' }) : (isHistoryView ? renderIcon('history', { size: 48, color: 'var(--text-dim)' }) : renderAppLogoSVG(56));
         return `
           <div class="card" style="text-align: center; padding: 3rem 1.5rem; grid-column: 1 / -1;">
             <div style="margin-bottom: 1rem; display: flex; justify-content: center;">${emptyIcon}</div>
@@ -92,11 +92,12 @@ export async function renderHomeView(onSelectTrip, currentUser) {
         return `
           <div class="card card-interactive trip-card" data-id="${trip.id}">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
-              <div class="icon-badge-box">
-                ${renderIcon('compass', { size: 22, color: 'var(--primary-cyan)' })}
+              <div style="display: flex; align-items: center;">
+                ${renderAppLogoSVG(38)}
               </div>
               <div>${getStatusBadge(trip.status)}</div>
             </div>
+
 
             <h3 style="font-size: 1.35rem; margin-bottom: 0.25rem;">${trip.name}</h3>
             <div style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.35rem;">
