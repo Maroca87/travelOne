@@ -1,6 +1,6 @@
 """
-TravelOne High-Definition Icon Generator
-Generates icons with:
+TravelOne Complete High-Definition Icon Generator
+Generates all PWA and Apple Touch icon sizes with:
 - Solid vibrant emerald green background (#0ea35d -> #09874c)
 - Centered crisp white circle container (#ffffff)
 - Centered sleek black airplane silhouette (#0b1326)
@@ -37,7 +37,7 @@ def generate_icon(size, filename, is_rgb=False):
     im = make_gradient(canvas_size, canvas_size)
     
     # 2. Centered White Circle with subtle ambient shadow
-    circle_radius = int(canvas_size * 0.34) # Radius 348 in 1024 -> ~174 in 512
+    circle_radius = int(canvas_size * 0.34) # Radius ~348 in 1024 -> ~174 in 512
     cx = canvas_size // 2
     cy = canvas_size // 2
     
@@ -80,13 +80,18 @@ def generate_icon(size, filename, is_rgb=False):
     print(f'Generated {filename} ({size}x{size}) Mode: {final_img.mode}')
 
 if __name__ == '__main__':
-    for name, sz, rgb in [
+    all_icons = [
         ('apple-touch-icon.png', 180, True),
         ('apple-touch-icon-180x180.png', 180, True),
+        ('apple-touch-icon-180x180-precomposed.png', 180, True),
         ('apple-touch-icon-precomposed.png', 180, True),
+        ('apple-touch-icon-167x167.png', 167, True),
+        ('apple-touch-icon-152x152.png', 152, True),
+        ('apple-touch-icon-120x120.png', 120, True),
         ('icon-192.png', 192, False),
         ('icon-512.png', 512, False),
         ('app-logo.png', 512, False),
         ('favicon.png', 64, False)
-    ]:
+    ]
+    for name, sz, rgb in all_icons:
         generate_icon(sz, name, rgb)

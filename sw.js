@@ -5,7 +5,7 @@
  * @module sw
  */
 
-const CACHE_NAME = 'travelone-v27';
+const CACHE_NAME = 'travelone-v28';
 
 /**
  * Essential static assets and application modules cached for full offline operation.
@@ -19,7 +19,11 @@ const ASSETS_TO_CACHE = [
   './app-logo.png',
   './apple-touch-icon.png',
   './apple-touch-icon-180x180.png',
+  './apple-touch-icon-180x180-precomposed.png',
   './apple-touch-icon-precomposed.png',
+  './apple-touch-icon-167x167.png',
+  './apple-touch-icon-152x152.png',
+  './apple-touch-icon-120x120.png',
   './icon-192.png',
   './icon-512.png',
   './favicon.png',
