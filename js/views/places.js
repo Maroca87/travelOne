@@ -5,6 +5,7 @@
 import { getAllFromStore, saveItem, deleteItem } from '../db.js';
 import { formatMoney, showToast } from '../utils.js';
 import { openModal } from '../components/modal.js';
+import { renderIcon } from '../icons.js';
 
 export async function renderPlacesView(trip, refreshView) {
   if (!trip) return document.createElement('div');
@@ -26,7 +27,9 @@ export async function renderPlacesView(trip, refreshView) {
     if (filtered.length === 0) {
       return `
         <div class="card" style="text-align: center; padding: 2.5rem 1.5rem; grid-column: 1 / -1;">
-          <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📍</div>
+          <div style="margin-bottom: 0.5rem; display: flex; justify-content: center;">
+            ${renderIcon('map-pin', { size: 40, color: 'var(--text-dim)' })}
+          </div>
           <div style="color: var(--text-muted);">No se encontraron lugares con estos filtros.</div>
         </div>
       `;
@@ -34,9 +37,9 @@ export async function renderPlacesView(trip, refreshView) {
 
     return filtered.map(p => {
       let priorityBadge = '';
-      if (p.priority === 'Alta') priorityBadge = '<span class="badge" style="background: rgba(255,117,140,0.15); color: var(--accent-rose);">🔥 Alta</span>';
-      else if (p.priority === 'Media') priorityBadge = '<span class="badge" style="background: rgba(246,211,101,0.15); color: var(--accent-amber);">⭐ Media</span>';
-      else priorityBadge = '<span class="badge badge-default">🌱 Baja</span>';
+      if (p.priority === 'Alta') priorityBadge = `<span class="badge icon-inline" style="background: rgba(255,117,140,0.15); color: var(--accent-rose);">${renderIcon('flame', { size: 12, color: 'var(--accent-rose)' })} Alta</span>`;
+      else if (p.priority === 'Media') priorityBadge = `<span class="badge icon-inline" style="background: rgba(246,211,101,0.15); color: var(--accent-amber);">${renderIcon('star', { size: 12, color: 'var(--accent-amber)' })} Media</span>`;
+      else priorityBadge = `<span class="badge badge-default icon-inline">${renderIcon('leaf', { size: 12, color: '#00f260' })} Baja</span>`;
 
       return `
         <div class="card" style="opacity: ${p.visited ? 0.75 : 1};">
@@ -46,27 +49,38 @@ export async function renderPlacesView(trip, refreshView) {
           </div>
 
           <h3 style="font-size: 1.2rem; margin-bottom: 0.2rem; ${p.visited ? 'text-decoration: line-through;' : ''}">${p.name}</h3>
-          <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.65rem;">
-            📍 ${p.address || 'Sin dirección especificada'}
+          <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.65rem; display: flex; align-items: center; gap: 0.35rem;">
+            ${renderIcon('map-pin', { size: 13, color: 'var(--primary-cyan)' })}
+            <span>${p.address || 'Sin dirección especificada'}</span>
           </div>
 
           ${p.approxPrice ? `
-            <div style="font-size: 0.85rem; color: var(--accent-amber); font-weight: 600; margin-bottom: 0.5rem;">
-              💵 Aprox: ${formatMoney(p.approxPrice, trip.mainCurrency)}
+            <div style="font-size: 0.85rem; color: var(--accent-amber); font-weight: 600; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.35rem;">
+              ${renderIcon('coins', { size: 13, color: 'var(--accent-amber)' })}
+              <span>Aprox: ${formatMoney(p.approxPrice, trip.mainCurrency)}</span>
             </div>
           ` : ''}
 
-          ${p.notes ? `<div style="font-size: 0.8rem; color: var(--text-dim); background: var(--bg-surface); padding: 0.5rem 0.75rem; border-radius: var(--radius-sm); margin-bottom: 0.75rem;">📝 ${p.notes}</div>` : ''}
+          ${p.notes ? `
+            <div style="font-size: 0.8rem; color: var(--text-dim); background: var(--bg-surface); padding: 0.5rem 0.75rem; border-radius: var(--radius-sm); margin-bottom: 0.75rem; display: flex; align-items: flex-start; gap: 0.35rem;">
+              ${renderIcon('notes', { size: 13, color: 'var(--text-muted)' })}
+              <span>${p.notes}</span>
+            </div>
+          ` : ''}
 
           <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 0.65rem; margin-top: 0.5rem;">
             <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; cursor: pointer; color: ${p.visited ? '#00f260' : 'var(--text-muted)'}; font-weight: 600;">
               <input type="checkbox" class="chk-toggle-visited" data-id="${p.id}" ${p.visited ? 'checked' : ''} style="accent-color: var(--primary-cyan); width: 18px; height: 18px;">
-              ${p.visited ? '✓ Visitado' : 'Pendiente de visitar'}
+              <span class="icon-inline">${p.visited ? `${renderIcon('check', { size: 14, color: '#00f260' })} Visitado` : 'Pendiente de visitar'}</span>
             </label>
 
             <div style="display: flex; gap: 0.35rem;">
-              <button class="btn btn-secondary btn-sm btn-edit-place" data-id="${p.id}">✏️</button>
-              <button class="btn btn-danger btn-sm btn-delete-place" data-id="${p.id}">🗑️</button>
+              <button class="btn btn-secondary btn-sm btn-edit-place" data-id="${p.id}" title="Editar">
+                ${renderIcon('edit', { size: 13 })}
+              </button>
+              <button class="btn btn-danger btn-sm btn-delete-place" data-id="${p.id}" title="Eliminar">
+                ${renderIcon('trash', { size: 13 })}
+              </button>
             </div>
           </div>
         </div>
@@ -82,7 +96,10 @@ export async function renderPlacesView(trip, refreshView) {
         <div class="page-subtitle">Restaurantes, cafeterías, miradores, museos y atracciones imperdibles</div>
       </div>
       <div class="header-actions">
-        <button class="btn btn-primary" id="btn-add-place">+ Agregar Lugar</button>
+        <button class="btn btn-primary" id="btn-add-place" style="display: inline-flex; align-items: center; gap: 0.4rem;">
+          ${renderIcon('plus', { size: 16, color: '#0b1326' })}
+          <span>Agregar Lugar</span>
+        </button>
       </div>
     </div>
 
@@ -220,7 +237,9 @@ function openPlaceModal(trip, itemToEdit, refreshView) {
     </div>
   `;
 
-  openModal(isEdit ? '✏️ Editar Lugar' : '➕ Agregar Lugar', bodyHTML, async () => {
+  const modalTitle = `<span class="icon-inline">${renderIcon(isEdit ? 'edit' : 'plus', { size: 20, color: 'var(--primary-cyan)' })} ${isEdit ? 'Editar Lugar' : 'Agregar Lugar'}</span>`;
+
+  openModal(modalTitle, bodyHTML, async () => {
     const name = document.getElementById('place-name').value.trim();
     const category = document.getElementById('place-category').value;
     const priority = document.getElementById('place-priority').value;
@@ -251,3 +270,4 @@ function openPlaceModal(trip, itemToEdit, refreshView) {
     return true;
   });
 }
+

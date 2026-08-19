@@ -5,6 +5,7 @@
 import { getAllFromStore, saveItem, deleteItem } from '../db.js';
 import { formatDate, formatMoney, getCategoryBadgeClass, showToast } from '../utils.js';
 import { openModal } from '../components/modal.js';
+import { renderIcon } from '../icons.js';
 
 export async function renderItineraryView(trip, refreshView) {
   if (!trip) return document.createElement('div');
@@ -22,10 +23,15 @@ export async function renderItineraryView(trip, refreshView) {
 
   const daysTimelineHTML = datesList.length === 0 ? `
     <div class="card" style="text-align: center; padding: 3rem 1.5rem;">
-      <div style="font-size: 3rem; margin-bottom: 1rem;">📅</div>
+      <div style="margin-bottom: 1rem; display: flex; justify-content: center;">
+        ${renderIcon('calendar', { size: 48, color: 'var(--primary-cyan)' })}
+      </div>
       <h3>No hay actividades planificadas</h3>
       <p style="color: var(--text-muted); margin: 0.5rem 0 1.5rem 0;">Añade tu primera actividad para construir el itinerario de tu viaje.</p>
-      <button class="btn btn-primary" id="btn-add-activity-empty">+ Agregar Actividad</button>
+      <button class="btn btn-primary" id="btn-add-activity-empty" style="display: inline-flex; align-items: center; gap: 0.4rem;">
+        ${renderIcon('plus', { size: 16, color: '#0b1326' })}
+        <span>Agregar Actividad</span>
+      </button>
     </div>
   ` : datesList.map(date => {
     const dayItems = groupedByDate[date];
@@ -33,16 +39,19 @@ export async function renderItineraryView(trip, refreshView) {
     return `
       <div style="margin-bottom: 2rem;">
         <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
-          <h3 style="font-size: 1.2rem; color: var(--primary-cyan);">📆 ${formatDate(date)}</h3>
+          <h3 style="font-size: 1.2rem; color: var(--primary-cyan); display: flex; align-items: center; gap: 0.4rem;">
+            ${renderIcon('calendar', { size: 18, color: 'var(--primary-cyan)' })}
+            <span>${formatDate(date)}</span>
+          </h3>
           <span class="badge badge-default">${dayItems.length} actividades</span>
         </div>
 
         <div class="timeline">
           ${dayItems.map(item => {
             let statusBadge = '';
-            if (item.status === 'Completado') statusBadge = '<span class="status-badge status-completed">✓ Completado</span>';
-            else if (item.status === 'En progreso') statusBadge = '<span class="status-badge status-in-progress">⚡ En progreso</span>';
-            else statusBadge = '<span class="status-badge status-pending">⏳ Pendiente</span>';
+            if (item.status === 'Completado') statusBadge = `<span class="status-badge status-completed icon-inline">${renderIcon('check', { size: 12 })} Completado</span>`;
+            else if (item.status === 'En progreso') statusBadge = `<span class="status-badge status-in-progress icon-inline">${renderIcon('zap', { size: 12 })} En progreso</span>`;
+            else statusBadge = `<span class="status-badge status-pending icon-inline">${renderIcon('hourglass', { size: 12 })} Pendiente</span>`;
 
             return `
               <div class="timeline-item">
@@ -50,7 +59,9 @@ export async function renderItineraryView(trip, refreshView) {
                 <div class="timeline-card">
                   <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.4rem;">
                     <div style="display: flex; align-items: center; gap: 0.6rem;">
-                      <span class="timeline-time">⏰ ${item.time || '08:00'}</span>
+                      <span class="timeline-time" style="display: inline-flex; align-items: center; gap: 0.3rem;">
+                        ${renderIcon('clock', { size: 13 })} ${item.time || '08:00'}
+                      </span>
                       <h4 style="font-size: 1.05rem; display: inline;">${item.title}</h4>
                     </div>
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
@@ -59,16 +70,28 @@ export async function renderItineraryView(trip, refreshView) {
                     </div>
                   </div>
 
-                  <div style="display: flex; justify-content: space-between; align-items: center; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.5rem;">
-                    <div>📍 <strong>${item.location || 'Lugar no especificado'}</strong> ${item.address ? `(${item.address})` : ''}</div>
+                  <div style="display: flex; justify-content: space-between; align-items: center; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+                    <div style="display: flex; align-items: center; gap: 0.35rem;">
+                      ${renderIcon('map-pin', { size: 14, color: 'var(--primary-cyan)' })}
+                      <span><strong>${item.location || 'Lugar no especificado'}</strong> ${item.address ? `(${item.address})` : ''}</span>
+                    </div>
                     ${item.cost ? `<div style="font-weight: 700; color: var(--accent-amber);">${formatMoney(item.cost, trip.mainCurrency)}</div>` : ''}
                   </div>
 
-                  ${item.notes ? `<div style="font-size: 0.8rem; color: var(--text-dim); background: var(--bg-surface); padding: 0.5rem 0.75rem; border-radius: var(--radius-sm); margin-top: 0.5rem;">📝 ${item.notes}</div>` : ''}
+                  ${item.notes ? `
+                    <div style="font-size: 0.8rem; color: var(--text-dim); background: var(--bg-surface); padding: 0.5rem 0.75rem; border-radius: var(--radius-sm); margin-top: 0.5rem; display: flex; align-items: flex-start; gap: 0.35rem;">
+                      ${renderIcon('notes', { size: 14, color: 'var(--text-muted)' })}
+                      <span>${item.notes}</span>
+                    </div>
+                  ` : ''}
 
                   <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 0.75rem;">
-                    <button class="btn btn-secondary btn-sm btn-edit-activity" data-id="${item.id}">✏️ Editar</button>
-                    <button class="btn btn-danger btn-sm btn-delete-activity" data-id="${item.id}">🗑️</button>
+                    <button class="btn btn-secondary btn-sm btn-edit-activity" data-id="${item.id}" style="display: inline-flex; align-items: center; gap: 0.3rem;">
+                      ${renderIcon('edit', { size: 13 })} Editar
+                    </button>
+                    <button class="btn btn-danger btn-sm btn-delete-activity" data-id="${item.id}" title="Eliminar">
+                      ${renderIcon('trash', { size: 13 })}
+                    </button>
                   </div>
                 </div>
               </div>
@@ -87,7 +110,10 @@ export async function renderItineraryView(trip, refreshView) {
         <div class="page-subtitle">Timeline día a día de tus actividades en ${trip.destination}</div>
       </div>
       <div class="header-actions">
-        <button class="btn btn-primary" id="btn-add-activity">+ Agregar Actividad</button>
+        <button class="btn btn-primary" id="btn-add-activity" style="display: inline-flex; align-items: center; gap: 0.4rem;">
+          ${renderIcon('plus', { size: 16, color: '#0b1326' })}
+          <span>Agregar Actividad</span>
+        </button>
       </div>
     </div>
 
@@ -192,7 +218,9 @@ function openActivityModal(trip, itemToEdit, refreshView) {
     </div>
   `;
 
-  openModal(isEdit ? '✏️ Editar Actividad' : '➕ Nueva Actividad', bodyHTML, async () => {
+  const modalTitle = `<span class="icon-inline">${renderIcon(isEdit ? 'edit' : 'plus', { size: 20, color: 'var(--primary-cyan)' })} ${isEdit ? 'Editar Actividad' : 'Nueva Actividad'}</span>`;
+
+  openModal(modalTitle, bodyHTML, async () => {
     const title = document.getElementById('act-title').value.trim();
     const date = document.getElementById('act-date').value;
     const time = document.getElementById('act-time').value;
@@ -228,3 +256,4 @@ function openActivityModal(trip, itemToEdit, refreshView) {
     return true;
   });
 }
+

@@ -5,6 +5,7 @@
 import { getAllFromStore, saveItem } from '../db.js';
 import { formatMoney, showToast } from '../utils.js';
 import { openModal } from '../components/modal.js';
+import { renderIcon } from '../icons.js';
 
 export async function renderBudgetView(trip, refreshView) {
   if (!trip) return document.createElement('div');
@@ -35,6 +36,17 @@ export async function renderBudgetView(trip, refreshView) {
     else actualSpent[cat] += (parseFloat(e.amount) || 0);
   });
 
+  const getCategoryIconName = (cat) => {
+    switch (cat) {
+      case 'Hotel': return 'hotel';
+      case 'Comida': return 'utensils';
+      case 'Transporte': return 'bus';
+      case 'Compras': return 'shopping';
+      case 'Entretenimiento': return 'sparkles';
+      default: return 'tag';
+    }
+  };
+
   const categoriesHTML = Object.keys(categoryBudgets).map(cat => {
     const allocated = categoryBudgets[cat] || 0;
     const spent = actualSpent[cat] || 0;
@@ -48,7 +60,12 @@ export async function renderBudgetView(trip, refreshView) {
     return `
       <div class="card" style="margin-bottom: 1rem;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-          <h4 style="font-size: 1.1rem;">${cat}</h4>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <div class="icon-badge-box" style="width: 32px; height: 32px;">
+              ${renderIcon(getCategoryIconName(cat), { size: 16, color: 'var(--primary-cyan)' })}
+            </div>
+            <h4 style="font-size: 1.1rem; margin: 0;">${cat}</h4>
+          </div>
           <span style="font-size: 0.85rem; font-weight: 700; color: ${available < 0 ? 'var(--accent-rose)' : 'var(--primary-cyan)'};">
             ${pct}% de límite
           </span>
@@ -58,7 +75,7 @@ export async function renderBudgetView(trip, refreshView) {
           <div class="progress-bar ${barColorClass}" style="width: ${pct}%;"></div>
         </div>
 
-        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-muted); background: var(--bg-surface); padding: 0.6rem 0.85rem; border-radius: var(--radius-md);">
+        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-muted); background: var(--bg-surface); padding: 0.6rem 0.85rem; border-radius: var(--radius-md); flex-wrap: wrap; gap: 0.5rem;">
           <div>Presupuesto: <strong style="color: #ffffff;">${formatMoney(allocated, trip.mainCurrency)}</strong></div>
           <div>Gastado: <strong style="color: var(--accent-rose);">${formatMoney(spent, trip.mainCurrency)}</strong></div>
           <div>Disponible: <strong style="color: var(--accent-amber);">${formatMoney(available, trip.mainCurrency)}</strong></div>
@@ -75,7 +92,10 @@ export async function renderBudgetView(trip, refreshView) {
         <div class="page-subtitle">Monitoreo visual de tus metas de ahorro e inversión en el viaje</div>
       </div>
       <div class="header-actions">
-        <button class="btn btn-secondary" id="btn-edit-category-budgets">⚙️ Ajustar Presupuestos</button>
+        <button class="btn btn-secondary" id="btn-edit-category-budgets" style="display: inline-flex; align-items: center; gap: 0.4rem;">
+          ${renderIcon('settings', { size: 15 })}
+          <span>Ajustar Presupuestos</span>
+        </button>
       </div>
     </div>
 
@@ -123,7 +143,9 @@ function openCategoryBudgetsModal(trip, currentBudgets, refreshView) {
     </div>
   `;
 
-  openModal('🎯 Ajustar Presupuestos por Categoría', bodyHTML, async () => {
+  const modalTitle = `<span class="icon-inline">${renderIcon('settings', { size: 18, color: 'var(--primary-cyan)' })} Ajustar Presupuestos por Categoría</span>`;
+
+  openModal(modalTitle, bodyHTML, async () => {
     const updatedBudgets = {
       'Hotel': parseFloat(document.getElementById('cat-b-hotel').value) || 0,
       'Comida': parseFloat(document.getElementById('cat-b-comida').value) || 0,
@@ -144,3 +166,4 @@ function openCategoryBudgetsModal(trip, currentBudgets, refreshView) {
     return true;
   });
 }
+

@@ -2,14 +2,16 @@
  * TravelOne Service Worker - Cache-First Offline Engine - Costa Rica Edition 🇨🇷
  */
 
-const CACHE_NAME = 'travelone-cr-v2';
+const CACHE_NAME = 'travelone-cr-v3';
 
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
+  './app-logo.svg',
   './css/main.css',
   './css/components.css',
+  './js/icons.js',
   './js/app.js',
   './js/db.js',
   './js/seed.js',

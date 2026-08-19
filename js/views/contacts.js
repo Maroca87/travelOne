@@ -5,6 +5,7 @@
 import { getAllFromStore, saveItem, deleteItem } from '../db.js';
 import { showToast } from '../utils.js';
 import { openModal } from '../components/modal.js';
+import { renderIcon } from '../icons.js';
 
 export async function renderContactsView(trip, refreshView) {
   if (!trip) return document.createElement('div');
@@ -13,38 +14,59 @@ export async function renderContactsView(trip, refreshView) {
 
   const listHTML = contacts.length === 0 ? `
     <div class="card" style="text-align: center; padding: 3rem 1.5rem;">
-      <div style="font-size: 3rem; margin-bottom: 1rem;">📇</div>
+      <div style="margin-bottom: 1rem; display: flex; justify-content: center;">
+        ${renderIcon('contacts', { size: 48, color: 'var(--primary-cyan)' })}
+      </div>
       <h3>Directorio de contactos vacío</h3>
       <p style="color: var(--text-muted); margin: 0.5rem 0 1.5rem 0;">Guarda teléfonos de tu hotel, guías de tour, emergencias o acompañantes.</p>
-      <button class="btn btn-primary" id="btn-add-contact-empty">+ Agregar Contacto</button>
+      <button class="btn btn-primary" id="btn-add-contact-empty" style="display: inline-flex; align-items: center; gap: 0.4rem;">
+        ${renderIcon('plus', { size: 16, color: '#0b1326' })}
+        <span>Agregar Contacto</span>
+      </button>
     </div>
   ` : `
     <div class="grid-2">
       ${contacts.map(c => `
         <div class="card">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
-            <h3 style="font-size: 1.15rem;">${c.name}</h3>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <div class="icon-badge-box" style="width: 32px; height: 32px;">
+                ${renderIcon('user', { size: 16, color: 'var(--primary-cyan)' })}
+              </div>
+              <h3 style="font-size: 1.15rem; margin: 0;">${c.name}</h3>
+            </div>
             <span class="badge badge-tourism">${c.type || 'Contacto'}</span>
           </div>
 
           <div style="background: var(--bg-surface); padding: 0.75rem; border-radius: var(--radius-md); font-size: 0.85rem; margin-bottom: 0.75rem;">
             ${c.phone ? `
-              <div style="margin-bottom: 0.35rem;">
-                📞 <strong>Tel:</strong> <a href="tel:${c.phone}" style="color: var(--primary-cyan); text-decoration: none;">${c.phone}</a>
+              <div style="margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.35rem;">
+                ${renderIcon('phone', { size: 13, color: 'var(--primary-cyan)' })}
+                <span><strong>Tel:</strong> <a href="tel:${c.phone}" style="color: var(--primary-cyan); text-decoration: none;">${c.phone}</a></span>
               </div>
             ` : ''}
             ${c.email ? `
-              <div>
-                ✉️ <strong>Email:</strong> <a href="mailto:${c.email}" style="color: var(--primary-cyan); text-decoration: none;">${c.email}</a>
+              <div style="display: flex; align-items: center; gap: 0.35rem;">
+                ${renderIcon('mail', { size: 13, color: 'var(--primary-cyan)' })}
+                <span><strong>Email:</strong> <a href="mailto:${c.email}" style="color: var(--primary-cyan); text-decoration: none;">${c.email}</a></span>
               </div>
             ` : ''}
           </div>
 
-          ${c.notes ? `<div style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 0.75rem;">📝 ${c.notes}</div>` : ''}
+          ${c.notes ? `
+            <div style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 0.75rem; display: flex; align-items: flex-start; gap: 0.35rem;">
+              ${renderIcon('notes', { size: 13, color: 'var(--text-muted)' })}
+              <span>${c.notes}</span>
+            </div>
+          ` : ''}
 
           <div style="display: flex; justify-content: flex-end; gap: 0.5rem; border-top: 1px solid var(--border-color); padding-top: 0.5rem;">
-            <button class="btn btn-secondary btn-sm btn-edit-contact" data-id="${c.id}">✏️ Editar</button>
-            <button class="btn btn-danger btn-sm btn-delete-contact" data-id="${c.id}">🗑️</button>
+            <button class="btn btn-secondary btn-sm btn-edit-contact" data-id="${c.id}" style="display: inline-flex; align-items: center; gap: 0.3rem;">
+              ${renderIcon('edit', { size: 13 })} Editar
+            </button>
+            <button class="btn btn-danger btn-sm btn-delete-contact" data-id="${c.id}" title="Eliminar">
+              ${renderIcon('trash', { size: 13 })}
+            </button>
           </div>
         </div>
       `).join('')}
@@ -59,7 +81,10 @@ export async function renderContactsView(trip, refreshView) {
         <div class="page-subtitle">Directorio telefónico y correos de hoteles, tours y emergencias</div>
       </div>
       <div class="header-actions">
-        <button class="btn btn-primary" id="btn-add-contact">+ Agregar Contacto</button>
+        <button class="btn btn-primary" id="btn-add-contact" style="display: inline-flex; align-items: center; gap: 0.4rem;">
+          ${renderIcon('plus', { size: 16, color: '#0b1326' })}
+          <span>Agregar Contacto</span>
+        </button>
       </div>
     </div>
 
@@ -133,7 +158,9 @@ function openContactModal(trip, itemToEdit, refreshView) {
     </div>
   `;
 
-  openModal(isEdit ? '✏️ Editar Contacto' : '➕ Agregar Contacto', bodyHTML, async () => {
+  const modalTitle = `<span class="icon-inline">${renderIcon(isEdit ? 'edit' : 'plus', { size: 20, color: 'var(--primary-cyan)' })} ${isEdit ? 'Editar Contacto' : 'Agregar Contacto'}</span>`;
+
+  openModal(modalTitle, bodyHTML, async () => {
     const name = document.getElementById('cnt-name').value.trim();
     const type = document.getElementById('cnt-type').value;
     const phone = document.getElementById('cnt-phone').value.trim();
@@ -161,3 +188,4 @@ function openContactModal(trip, itemToEdit, refreshView) {
     return true;
   });
 }
+

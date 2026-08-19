@@ -5,6 +5,7 @@
 import { getAllFromStore, saveItem, deleteItem } from '../db.js';
 import { formatDate, fileToDataURL, showToast } from '../utils.js';
 import { openModal } from '../components/modal.js';
+import { renderIcon } from '../icons.js';
 
 export async function renderJournalView(trip, refreshView) {
   if (!trip) return document.createElement('div');
@@ -14,21 +15,34 @@ export async function renderJournalView(trip, refreshView) {
 
   const listHTML = journalEntries.length === 0 ? `
     <div class="card" style="text-align: center; padding: 3rem 1.5rem;">
-      <div style="font-size: 3rem; margin-bottom: 1rem;">📖</div>
+      <div style="margin-bottom: 1rem; display: flex; justify-content: center;">
+        ${renderIcon('journal', { size: 48, color: 'var(--primary-cyan)' })}
+      </div>
       <h3>Tu diario personal está vacío</h3>
       <p style="color: var(--text-muted); margin: 0.5rem 0 1.5rem 0;">Escribe recuerdos, anécdotas e impresiones de tu viaje para conservar la memoria de tus momentos favoritos.</p>
-      <button class="btn btn-primary" id="btn-add-journal-empty">+ Escribir Entrada</button>
+      <button class="btn btn-primary" id="btn-add-journal-empty" style="display: inline-flex; align-items: center; gap: 0.4rem;">
+        ${renderIcon('plus', { size: 16, color: '#0b1326' })}
+        <span>Escribir Entrada</span>
+      </button>
     </div>
   ` : `
     <div style="display: flex; flex-direction: column; gap: 1.25rem;">
       ${journalEntries.map(entry => `
         <div class="card">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
-            <div>
-              <span style="font-size: 0.85rem; color: var(--primary-cyan); font-weight: 600;">📆 ${formatDate(entry.date)}</span>
-              ${entry.location ? `<span style="font-size: 0.85rem; color: var(--text-muted); margin-left: 0.5rem;">📍 ${entry.location}</span>` : ''}
+            <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+              <span class="icon-inline" style="font-size: 0.85rem; color: var(--primary-cyan); font-weight: 600;">
+                ${renderIcon('calendar', { size: 13, color: 'var(--primary-cyan)' })} ${formatDate(entry.date)}
+              </span>
+              ${entry.location ? `
+                <span class="icon-inline" style="font-size: 0.85rem; color: var(--text-muted);">
+                  ${renderIcon('map-pin', { size: 13, color: 'var(--primary-cyan)' })} ${entry.location}
+                </span>
+              ` : ''}
             </div>
-            <button class="btn btn-danger btn-sm btn-delete-journal" data-id="${entry.id}">🗑️</button>
+            <button class="btn btn-danger btn-sm btn-delete-journal" data-id="${entry.id}" title="Eliminar">
+              ${renderIcon('trash', { size: 13 })}
+            </button>
           </div>
 
           <h3 style="font-size: 1.3rem; margin-bottom: 0.75rem; color: #ffffff;">${entry.title}</h3>
@@ -55,7 +69,10 @@ export async function renderJournalView(trip, refreshView) {
         <div class="page-subtitle">Tus memorias, impresiones y momentos inolvidables en ${trip.destination}</div>
       </div>
       <div class="header-actions">
-        <button class="btn btn-primary" id="btn-add-journal">+ Escribir Entrada</button>
+        <button class="btn btn-primary" id="btn-add-journal" style="display: inline-flex; align-items: center; gap: 0.4rem;">
+          ${renderIcon('plus', { size: 16, color: '#0b1326' })}
+          <span>Escribir Entrada</span>
+        </button>
       </div>
     </div>
 
@@ -113,7 +130,9 @@ function openJournalModal(trip, refreshView) {
     </div>
   `;
 
-  openModal('📖 Escribir en el Diario', bodyHTML, async () => {
+  const modalTitle = `<span class="icon-inline">${renderIcon('journal', { size: 18, color: 'var(--primary-cyan)' })} Escribir en el Diario</span>`;
+
+  openModal(modalTitle, bodyHTML, async () => {
     const title = document.getElementById('jnl-title').value.trim();
     const date = document.getElementById('jnl-date').value;
     const location = document.getElementById('jnl-location').value.trim();
@@ -144,3 +163,4 @@ function openJournalModal(trip, refreshView) {
     return true;
   });
 }
+

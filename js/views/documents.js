@@ -5,45 +5,63 @@
 import { getAllFromStore, saveItem, deleteItem } from '../db.js';
 import { fileToDataURL, showToast } from '../utils.js';
 import { openModal } from '../components/modal.js';
+import { renderIcon } from '../icons.js';
 
 export async function renderDocumentsView(trip, refreshView) {
   if (!trip) return document.createElement('div');
 
   const docs = await getAllFromStore('documents', trip.id);
 
+  const getDocIconName = (type) => {
+    switch (type) {
+      case 'Boletos': return 'tag';
+      case 'Identificaciones': return 'user';
+      case 'Seguros': return 'shield';
+      case 'Comprobantes': return 'receipt';
+      default: return 'documents';
+    }
+  };
+
   const listHTML = docs.length === 0 ? `
     <div class="card" style="text-align: center; padding: 3rem 1.5rem;">
-      <div style="font-size: 3rem; margin-bottom: 1rem;">📄</div>
+      <div style="margin-bottom: 1rem; display: flex; justify-content: center;">
+        ${renderIcon('documents', { size: 48, color: 'var(--primary-cyan)' })}
+      </div>
       <h3>Sin documentos guardados</h3>
       <p style="color: var(--text-muted); margin: 0.5rem 0 1.5rem 0;">Guarda boletos, confirmaciones, seguros o identificaciones localmente en tu dispositivo.</p>
-      <button class="btn btn-primary" id="btn-add-doc-empty">+ Agregar Documento</button>
+      <button class="btn btn-primary" id="btn-add-doc-empty" style="display: inline-flex; align-items: center; gap: 0.4rem;">
+        ${renderIcon('plus', { size: 16, color: '#0b1326' })}
+        <span>Agregar Documento</span>
+      </button>
     </div>
   ` : `
     <div class="grid-2">
       ${docs.map(doc => {
-        let typeIcon = '📄';
-        if (doc.type === 'Boletos') typeIcon = '🎫';
-        else if (doc.type === 'Identificaciones') typeIcon = '🪪';
-        else if (doc.type === 'Seguros') typeIcon = '🛡️';
-        else if (doc.type === 'Comprobantes') typeIcon = '🧾';
-
         return `
           <div class="card">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
               <span class="badge badge-tourism">${doc.type || 'Documento'}</span>
-              <span style="font-size: 1.25rem;">${typeIcon}</span>
+              <div class="icon-badge-box" style="width: 32px; height: 32px;">
+                ${renderIcon(getDocIconName(doc.type), { size: 16, color: 'var(--primary-cyan)' })}
+              </div>
             </div>
 
             <h3 style="font-size: 1.15rem; margin-bottom: 0.35rem;">${doc.name}</h3>
-            ${doc.notes ? `<div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">📝 ${doc.notes}</div>` : ''}
+            ${doc.notes ? `
+              <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem; display: flex; align-items: flex-start; gap: 0.35rem;">
+                ${renderIcon('notes', { size: 13, color: 'var(--text-muted)' })}
+                <span>${doc.notes}</span>
+              </div>
+            ` : ''}
 
             ${doc.fileData ? `
               <div style="margin-bottom: 0.75rem; text-align: center; background: var(--bg-surface); padding: 0.75rem; border-radius: var(--radius-md);">
                 ${doc.fileData.startsWith('data:image') ? `
                   <img src="${doc.fileData}" class="file-preview-img" style="max-height: 180px; width: 100%; object-fit: contain;">
                 ` : `
-                  <a href="${doc.fileData}" download="${doc.fileName || 'Documento.pdf'}" class="btn btn-primary btn-sm">
-                    📥 Descargar ${doc.fileName || 'Archivo PDF'}
+                  <a href="${doc.fileData}" download="${doc.fileName || 'Documento.pdf'}" class="btn btn-primary btn-sm" style="display: inline-flex; align-items: center; gap: 0.35rem;">
+                    ${renderIcon('download', { size: 14, color: '#0b1326' })}
+                    <span>Descargar ${doc.fileName || 'Archivo PDF'}</span>
                   </a>
                 `}
               </div>
@@ -52,7 +70,9 @@ export async function renderDocumentsView(trip, refreshView) {
             `}
 
             <div style="display: flex; justify-content: flex-end; gap: 0.5rem; border-top: 1px solid var(--border-color); padding-top: 0.5rem;">
-              <button class="btn btn-danger btn-sm btn-delete-doc" data-id="${doc.id}">🗑️ Eliminar</button>
+              <button class="btn btn-danger btn-sm btn-delete-doc" data-id="${doc.id}" style="display: inline-flex; align-items: center; gap: 0.35rem;">
+                ${renderIcon('trash', { size: 13 })} Eliminar
+              </button>
             </div>
           </div>
         `;
@@ -68,13 +88,18 @@ export async function renderDocumentsView(trip, refreshView) {
         <div class="page-subtitle">Boletos, confirmaciones, identidades y seguros organizados localmente</div>
       </div>
       <div class="header-actions">
-        <button class="btn btn-primary" id="btn-add-doc">+ Guardar Documento</button>
+        <button class="btn btn-primary" id="btn-add-doc" style="display: inline-flex; align-items: center; gap: 0.4rem;">
+          ${renderIcon('plus', { size: 16, color: '#0b1326' })}
+          <span>Guardar Documento</span>
+        </button>
       </div>
     </div>
 
     <!-- Security Disclaimer Alert -->
     <div style="background: rgba(0, 242, 254, 0.08); border: 1px solid rgba(0, 242, 254, 0.25); border-radius: var(--radius-md); padding: 0.85rem 1.25rem; display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;">
-      <span style="font-size: 1.35rem;">🔒</span>
+      <div class="icon-badge-box" style="width: 36px; height: 36px;">
+        ${renderIcon('lock', { size: 18, color: 'var(--primary-cyan)' })}
+      </div>
       <div style="font-size: 0.85rem; color: var(--text-muted);">
         <strong>Almacenamiento Local Organizado:</strong> Todos tus documentos se guardan exclusivamente dentro de la memoria de tu navegador (IndexedDB). No se envían a ningún servidor externo.
       </div>
@@ -136,7 +161,9 @@ function openDocumentModal(trip, refreshView) {
     </div>
   `;
 
-  openModal('➕ Guardar Documento Local', bodyHTML, async () => {
+  const modalTitle = `<span class="icon-inline">${renderIcon('plus', { size: 18, color: 'var(--primary-cyan)' })} Guardar Documento Local</span>`;
+
+  openModal(modalTitle, bodyHTML, async () => {
     const type = document.getElementById('doc-type').value;
     const name = document.getElementById('doc-name').value.trim();
     const notes = document.getElementById('doc-notes').value.trim();
@@ -170,3 +197,4 @@ function openDocumentModal(trip, refreshView) {
     return true;
   });
 }
+

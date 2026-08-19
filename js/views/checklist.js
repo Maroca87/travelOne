@@ -5,6 +5,7 @@
 import { getAllFromStore, saveItem, deleteItem } from '../db.js';
 import { showToast } from '../utils.js';
 import { openModal } from '../components/modal.js';
+import { renderIcon } from '../icons.js';
 
 export async function renderChecklistView(trip, refreshView) {
   if (!trip) return document.createElement('div');
@@ -17,23 +18,29 @@ export async function renderChecklistView(trip, refreshView) {
 
   const groups = ['Antes del viaje', 'Equipaje', 'Durante el viaje', 'Regreso'];
 
+  const getGroupIconName = (groupName) => {
+    switch (groupName) {
+      case 'Antes del viaje': return 'plane';
+      case 'Equipaje': return 'shopping';
+      case 'Durante el viaje': return 'compass';
+      case 'Regreso': return 'home';
+      default: return 'checklist';
+    }
+  };
+
   const groupsHTML = groups.map(groupName => {
     const groupItems = checklists.filter(c => c.group === groupName);
     const groupDone = groupItems.filter(c => c.completed).length;
     const groupPct = groupItems.length > 0 ? Math.round((groupDone / groupItems.length) * 100) : 0;
 
-    let groupIcon = '📋';
-    if (groupName === 'Antes del viaje') groupIcon = '✈️';
-    else if (groupName === 'Equipaje') groupIcon = '🧳';
-    else if (groupName === 'Durante el viaje') groupIcon = '🗺️';
-    else if (groupName === 'Regreso') groupIcon = '🏠';
-
     return `
       <div class="card" style="margin-bottom: 1.5rem;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-          <div style="display: flex; align-items: center; gap: 0.5rem;">
-            <span style="font-size: 1.35rem;">${groupIcon}</span>
-            <h3 style="font-size: 1.15rem;">${groupName}</h3>
+          <div style="display: flex; align-items: center; gap: 0.6rem;">
+            <div class="icon-badge-box" style="width: 32px; height: 32px;">
+              ${renderIcon(getGroupIconName(groupName), { size: 16, color: 'var(--primary-cyan)' })}
+            </div>
+            <h3 style="font-size: 1.15rem; margin: 0;">${groupName}</h3>
           </div>
           <span style="font-size: 0.85rem; color: var(--text-muted);">${groupDone} de ${groupItems.length} (${groupPct}%)</span>
         </div>
@@ -47,13 +54,17 @@ export async function renderChecklistView(trip, refreshView) {
             <div class="checklist-row ${item.completed ? 'completed' : ''}">
               <input type="checkbox" class="chk-item-toggle" data-id="${item.id}" ${item.completed ? 'checked' : ''}>
               <label style="flex: 1; font-size: 0.9rem; cursor: pointer;">${item.item}</label>
-              <button class="btn btn-danger btn-sm btn-delete-checklist" data-id="${item.id}" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;">✕</button>
+              <button class="btn btn-danger btn-sm btn-delete-checklist" data-id="${item.id}" title="Eliminar" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;">
+                ${renderIcon('trash', { size: 12 })}
+              </button>
             </div>
           `).join('')}
         </div>
 
         <div style="margin-top: 0.75rem;">
-          <button class="btn btn-secondary btn-sm btn-add-checklist-item" data-group="${groupName}">+ Añadir a ${groupName}</button>
+          <button class="btn btn-secondary btn-sm btn-add-checklist-item" data-group="${groupName}" style="display: inline-flex; align-items: center; gap: 0.35rem;">
+            ${renderIcon('plus', { size: 13 })} Añadir a ${groupName}
+          </button>
         </div>
       </div>
     `;
@@ -71,7 +82,10 @@ export async function renderChecklistView(trip, refreshView) {
     <!-- Overall Progress -->
     <div class="card" style="margin-bottom: 1.5rem; text-align: center;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-        <h3 style="font-size: 1.1rem;">Progreso General del Equipaje & Tareas</h3>
+        <h3 style="font-size: 1.1rem; display: flex; align-items: center; gap: 0.4rem;">
+          ${renderIcon('checklist', { size: 18, color: 'var(--primary-cyan)' })}
+          <span>Progreso General del Equipaje & Tareas</span>
+        </h3>
         <span style="font-family: 'Outfit', sans-serif; font-size: 1.4rem; font-weight: 700; color: var(--primary-cyan);">${overallPercent}%</span>
       </div>
       <div class="progress-container" style="height: 12px;">
@@ -128,7 +142,9 @@ function openAddChecklistItemModal(trip, groupName, refreshView) {
     </div>
   `;
 
-  openModal(`➕ Añadir a ${groupName}`, bodyHTML, async () => {
+  const modalTitle = `<span class="icon-inline">${renderIcon('plus', { size: 18, color: 'var(--primary-cyan)' })} Añadir a ${groupName}</span>`;
+
+  openModal(modalTitle, bodyHTML, async () => {
     const itemText = document.getElementById('chk-input-name').value.trim();
     if (!itemText) {
       alert('Ingresa la descripción del elemento.');
@@ -148,3 +164,4 @@ function openAddChecklistItemModal(trip, groupName, refreshView) {
     return true;
   });
 }
+

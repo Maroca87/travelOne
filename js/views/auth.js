@@ -5,6 +5,7 @@
 import { registerUser, loginUser, resetPassword } from '../db.js';
 import { showToast } from '../utils.js';
 import { openModal } from '../components/modal.js';
+import { renderIcon, renderAppLogoSVG } from '../icons.js';
 
 export function renderAuthView(onAuthSuccess) {
   let isRegisterTab = false;
@@ -24,7 +25,9 @@ export function renderAuthView(onAuthSuccess) {
     container.innerHTML = `
       <div class="card" style="width: 100%; max-width: 440px; border-color: rgba(0, 242, 254, 0.3); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);">
         <div style="text-align: center; margin-bottom: 1.5rem;">
-          <img src="./app-logo.png" alt="TravelOne Logo" style="width: 90px; height: 90px; border-radius: 22px; margin-bottom: 0.75rem; box-shadow: 0 10px 25px rgba(0, 242, 254, 0.35); border: 2px solid rgba(255, 255, 255, 0.2);">
+          <div style="display: inline-block; margin-bottom: 0.75rem;">
+            ${renderAppLogoSVG(88)}
+          </div>
           
           <h1 style="font-size: 1.9rem; background: linear-gradient(135deg, var(--primary-cyan), #00b09b); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
             TravelOne
@@ -63,15 +66,15 @@ export function renderAuthView(onAuthSuccess) {
             <input type="password" id="auth-password" class="form-control" required>
           </div>
 
-          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem; padding: 0.75rem;">
-            ${isRegisterTab ? '✨ Crear Cuenta' : '🚀 Iniciar Sesión'}
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem; padding: 0.75rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+            ${isRegisterTab ? `${renderIcon('sparkles', { size: 18, color: '#0b1326' })} Crear Cuenta` : `${renderIcon('rocket', { size: 18, color: '#0b1326' })} Iniciar Sesión`}
           </button>
         </form>
 
         ${!isRegisterTab ? `
           <div style="text-align: center; margin-top: 1rem;">
-            <button class="btn btn-secondary btn-sm" id="btn-forgot-password" style="font-size: 0.8rem; background: transparent; border: none; color: var(--primary-cyan);">
-              🔑 ¿Olvidaste tu contraseña?
+            <button class="btn btn-secondary btn-sm" id="btn-forgot-password" style="font-size: 0.8rem; background: transparent; border: none; color: var(--primary-cyan); display: inline-flex; align-items: center; gap: 0.35rem;">
+              ${renderIcon('key', { size: 14, color: 'var(--primary-cyan)' })} ¿Olvidaste tu contraseña?
             </button>
           </div>
         ` : ''}
@@ -132,7 +135,9 @@ function openPasswordRecoveryModal() {
     </div>
   `;
 
-  openModal('🔑 Recuperar / Restablecer Contraseña', bodyHTML, async () => {
+  const modalTitle = `<span class="icon-inline">${renderIcon('key', { size: 20, color: 'var(--primary-cyan)' })} Recuperar / Restablecer Contraseña</span>`;
+
+  openModal(modalTitle, bodyHTML, async () => {
     const username = document.getElementById('rec-username').value.trim();
     const newPassword = document.getElementById('rec-new-password').value.trim();
 
@@ -151,3 +156,4 @@ function openPasswordRecoveryModal() {
     }
   });
 }
+

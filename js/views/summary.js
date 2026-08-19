@@ -4,6 +4,7 @@
 
 import { getAllFromStore, exportTripsXML } from '../db.js';
 import { formatDate, calculateDuration, formatMoney, showToast } from '../utils.js';
+import { renderIcon } from '../icons.js';
 
 export async function renderSummaryView(trip, refreshView) {
   if (!trip) return document.createElement('div');
@@ -30,18 +31,29 @@ export async function renderSummaryView(trip, refreshView) {
         <div class="page-subtitle">Vista consolidada e imprimible de todas las secciones de tu viaje</div>
       </div>
       <div class="header-actions">
-        <button class="btn btn-secondary" id="btn-export-xml">💾 Respaldo XML</button>
-        <button class="btn btn-primary" id="btn-print-summary">🖨️ Imprimir / Guardar PDF</button>
+        <button class="btn btn-secondary" id="btn-export-xml" style="display: inline-flex; align-items: center; gap: 0.4rem;">
+          ${renderIcon('save', { size: 15 })}
+          <span>Respaldo XML</span>
+        </button>
+        <button class="btn btn-primary" id="btn-print-summary" style="display: inline-flex; align-items: center; gap: 0.4rem;">
+          ${renderIcon('summary', { size: 15, color: '#0b1326' })}
+          <span>Imprimir / Guardar PDF</span>
+        </button>
       </div>
     </div>
 
     <!-- Main Overview Header Card -->
     <div class="card" style="margin-bottom: 1.5rem; background: linear-gradient(135deg, rgba(0, 242, 254, 0.1), rgba(79, 172, 254, 0.05)); border: 1px solid rgba(0, 242, 254, 0.25);">
       <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem;">
-        <span style="font-size: 2.5rem;">${trip.coverEmoji || '✈️'}</span>
+        <div class="icon-badge-box" style="width: 48px; height: 48px;">
+          ${renderIcon('compass', { size: 28, color: 'var(--primary-cyan)' })}
+        </div>
         <div>
-          <h2 style="font-size: 1.6rem; color: #ffffff;">${trip.name}</h2>
-          <div style="color: var(--primary-cyan); font-weight: 600;">📍 ${trip.destination}</div>
+          <h2 style="font-size: 1.6rem; color: #ffffff; margin-bottom: 0.2rem;">${trip.name}</h2>
+          <div style="color: var(--primary-cyan); font-weight: 600; display: flex; align-items: center; gap: 0.35rem;">
+            ${renderIcon('map-pin', { size: 14, color: 'var(--primary-cyan)' })}
+            <span>${trip.destination}</span>
+          </div>
         </div>
       </div>
 
@@ -64,7 +76,9 @@ export async function renderSummaryView(trip, refreshView) {
     <!-- Metrics Breakdown Grid -->
     <div class="grid-4" style="margin-bottom: 1.5rem;">
       <div class="metric-card">
-        <div class="metric-icon">📅</div>
+        <div class="metric-icon">
+          ${renderIcon('calendar', { size: 24, color: 'var(--primary-cyan)' })}
+        </div>
         <div class="metric-data">
           <div class="label">Itinerario</div>
           <div class="value">${itinerary.length} actividades</div>
@@ -72,7 +86,9 @@ export async function renderSummaryView(trip, refreshView) {
       </div>
 
       <div class="metric-card">
-        <div class="metric-icon" style="background: rgba(246, 211, 101, 0.12); color: var(--accent-amber);">🏨</div>
+        <div class="metric-icon" style="background: rgba(246, 211, 101, 0.12); color: var(--accent-amber);">
+          ${renderIcon('hotel', { size: 24, color: 'var(--accent-amber)' })}
+        </div>
         <div class="metric-data">
           <div class="label">Reservas</div>
           <div class="value">${reservations.length} confirmadas</div>
@@ -80,7 +96,9 @@ export async function renderSummaryView(trip, refreshView) {
       </div>
 
       <div class="metric-card">
-        <div class="metric-icon" style="background: rgba(0, 242, 96, 0.12); color: #00f260;">📍</div>
+        <div class="metric-icon" style="background: rgba(0, 242, 96, 0.12); color: #00f260;">
+          ${renderIcon('map-pin', { size: 24, color: '#00f260' })}
+        </div>
         <div class="metric-data">
           <div class="label">Lugares Visitados</div>
           <div class="value">${visitedPlacesCount} de ${places.length}</div>
@@ -88,7 +106,9 @@ export async function renderSummaryView(trip, refreshView) {
       </div>
 
       <div class="metric-card">
-        <div class="metric-icon" style="background: rgba(161, 140, 209, 0.12); color: var(--accent-purple);">✅</div>
+        <div class="metric-icon" style="background: rgba(161, 140, 209, 0.12); color: var(--accent-purple);">
+          ${renderIcon('check-circle', { size: 24, color: 'var(--accent-purple)' })}
+        </div>
         <div class="metric-data">
           <div class="label">Checklist</div>
           <div class="value">${completedChecklistCount} de ${checklists.length}</div>
@@ -100,10 +120,16 @@ export async function renderSummaryView(trip, refreshView) {
     <div class="grid-2" style="margin-bottom: 1.5rem;">
       <!-- Itinerary Preview Card -->
       <div class="card">
-        <h3 style="font-size: 1.1rem; margin-bottom: 0.75rem; color: var(--primary-cyan);">📅 Resumen de Actividades Clave</h3>
+        <h3 style="font-size: 1.1rem; margin-bottom: 0.75rem; color: var(--primary-cyan); display: flex; align-items: center; gap: 0.4rem;">
+          ${renderIcon('calendar', { size: 18, color: 'var(--primary-cyan)' })}
+          <span>Resumen de Actividades Clave</span>
+        </h3>
         ${itinerary.slice(0, 5).map(a => `
-          <div style="display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px dashed var(--border-color); font-size: 0.85rem;">
-            <div>⏰ ${a.time} - <strong>${a.title}</strong> (${a.location || ''})</div>
+          <div style="display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px dashed var(--border-color); font-size: 0.85rem; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 0.35rem;">
+              <span class="icon-inline">${renderIcon('clock', { size: 12 })} ${a.time}</span>
+              <span>- <strong>${a.title}</strong> (${a.location || ''})</span>
+            </div>
             <div style="color: var(--text-muted);">${formatDate(a.date)}</div>
           </div>
         `).join('')}
@@ -112,7 +138,10 @@ export async function renderSummaryView(trip, refreshView) {
 
       <!-- Reservations Preview Card -->
       <div class="card">
-        <h3 style="font-size: 1.1rem; margin-bottom: 0.75rem; color: var(--accent-amber);">🏨 Confirmaciones de Reserva</h3>
+        <h3 style="font-size: 1.1rem; margin-bottom: 0.75rem; color: var(--accent-amber); display: flex; align-items: center; gap: 0.4rem;">
+          ${renderIcon('hotel', { size: 18, color: 'var(--accent-amber)' })}
+          <span>Confirmaciones de Reserva</span>
+        </h3>
         ${reservations.slice(0, 5).map(r => `
           <div style="display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px dashed var(--border-color); font-size: 0.85rem;">
             <div><strong>${r.name}</strong> (${r.type})</div>
@@ -147,3 +176,4 @@ export async function renderSummaryView(trip, refreshView) {
 
   return container;
 }
+

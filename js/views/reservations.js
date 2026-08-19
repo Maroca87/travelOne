@@ -5,6 +5,7 @@
 import { getAllFromStore, saveItem, deleteItem } from '../db.js';
 import { formatDate, formatMoney, fileToDataURL, showToast } from '../utils.js';
 import { openModal } from '../components/modal.js';
+import { renderIcon } from '../icons.js';
 
 export async function renderReservationsView(trip, refreshView) {
   if (!trip) return document.createElement('div');
@@ -14,26 +15,33 @@ export async function renderReservationsView(trip, refreshView) {
 
   const listHTML = reservations.length === 0 ? `
     <div class="card" style="text-align: center; padding: 3rem 1.5rem;">
-      <div style="font-size: 3rem; margin-bottom: 1rem;">🏨</div>
+      <div style="margin-bottom: 1rem; display: flex; justify-content: center;">
+        ${renderIcon('hotel', { size: 48, color: 'var(--accent-amber)' })}
+      </div>
       <h3>No hay reservas guardadas</h3>
       <p style="color: var(--text-muted); margin: 0.5rem 0 1.5rem 0;">Guarda las confirmaciones de tu hotel, vuelos, transporte o tours.</p>
-      <button class="btn btn-primary" id="btn-add-res-empty">+ Registrar Reserva</button>
+      <button class="btn btn-primary" id="btn-add-res-empty" style="display: inline-flex; align-items: center; gap: 0.4rem;">
+        ${renderIcon('plus', { size: 16, color: '#0b1326' })}
+        <span>Registrar Reserva</span>
+      </button>
     </div>
   ` : `
     <div class="grid-2">
       ${reservations.map(res => {
-        let typeIcon = '🏨';
-        if (res.type === 'Vuelo') typeIcon = '✈️';
-        else if (res.type === 'Autobús') typeIcon = '🚌';
-        else if (res.type === 'Restaurante') typeIcon = '🍽️';
-        else if (res.type === 'Tour') typeIcon = '⛵';
-        else if (res.type === 'Alquiler de vehículo') typeIcon = '🚗';
+        let typeIconName = 'hotel';
+        if (res.type === 'Vuelo') typeIconName = 'plane';
+        else if (res.type === 'Autobús') typeIconName = 'bus';
+        else if (res.type === 'Restaurante') typeIconName = 'utensils';
+        else if (res.type === 'Tour') typeIconName = 'ship';
+        else if (res.type === 'Alquiler de vehículo') typeIconName = 'car';
 
         return `
           <div class="card">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
               <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <span style="font-size: 1.5rem;">${typeIcon}</span>
+                <div class="icon-badge-box icon-badge-amber">
+                  ${renderIcon(typeIconName, { size: 18, color: 'var(--accent-amber)' })}
+                </div>
                 <span class="badge badge-tourism">${res.type}</span>
               </div>
               <div style="font-family: 'Outfit', sans-serif; font-weight: 700; color: var(--accent-amber); font-size: 1.1rem;">
@@ -42,31 +50,56 @@ export async function renderReservationsView(trip, refreshView) {
             </div>
 
             <h3 style="font-size: 1.2rem; margin-bottom: 0.25rem;">${res.name}</h3>
-            <div style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.75rem;">
-              📆 ${formatDate(res.date)} ${res.time ? `⏰ ${res.time}` : ''}
+            <div style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
+              <span class="icon-inline">${renderIcon('calendar', { size: 13, color: 'var(--primary-cyan)' })} ${formatDate(res.date)}</span>
+              ${res.time ? `<span class="icon-inline">${renderIcon('clock', { size: 13 })} ${res.time}</span>` : ''}
             </div>
 
             <div style="background: var(--bg-surface); padding: 0.75rem; border-radius: var(--radius-md); font-size: 0.85rem; margin-bottom: 0.75rem;">
-              <div>🔑 <strong>Conf:</strong> ${res.confirmationNo || 'Sin número registrado'}</div>
-              ${res.address ? `<div style="margin-top: 0.2rem;">📍 ${res.address}</div>` : ''}
-              ${res.contact ? `<div style="margin-top: 0.2rem;">📞 ${res.contact}</div>` : ''}
+              <div style="display: flex; align-items: center; gap: 0.35rem;">
+                ${renderIcon('key', { size: 13, color: 'var(--accent-amber)' })}
+                <span><strong>Conf:</strong> ${res.confirmationNo || 'Sin número registrado'}</span>
+              </div>
+              ${res.address ? `
+                <div style="margin-top: 0.3rem; display: flex; align-items: center; gap: 0.35rem;">
+                  ${renderIcon('map-pin', { size: 13, color: 'var(--primary-cyan)' })}
+                  <span>${res.address}</span>
+                </div>
+              ` : ''}
+              ${res.contact ? `
+                <div style="margin-top: 0.3rem; display: flex; align-items: center; gap: 0.35rem;">
+                  ${renderIcon('phone', { size: 13, color: 'var(--primary-cyan)' })}
+                  <span>${res.contact}</span>
+                </div>
+              ` : ''}
             </div>
 
-            ${res.notes ? `<div style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 0.75rem;">📝 ${res.notes}</div>` : ''}
+            ${res.notes ? `
+              <div style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 0.75rem; display: flex; align-items: flex-start; gap: 0.35rem;">
+                ${renderIcon('notes', { size: 13, color: 'var(--text-muted)' })}
+                <span>${res.notes}</span>
+              </div>
+            ` : ''}
 
             ${res.attachment ? `
               <div style="margin-bottom: 0.75rem;">
                 ${res.attachment.startsWith('data:image') ? `
                   <img src="${res.attachment}" class="file-preview-img" style="width: 100%; max-height: 160px; object-fit: cover;">
                 ` : `
-                  <a href="${res.attachment}" download="Reserva_${res.name}.pdf" class="btn btn-secondary btn-sm">📄 Descargar Adjunto</a>
+                  <a href="${res.attachment}" download="Reserva_${res.name}.pdf" class="btn btn-secondary btn-sm" style="display: inline-flex; align-items: center; gap: 0.35rem;">
+                    ${renderIcon('download', { size: 14 })} Descargar Adjunto
+                  </a>
                 `}
               </div>
             ` : ''}
 
             <div style="display: flex; justify-content: flex-end; gap: 0.5rem; border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
-              <button class="btn btn-secondary btn-sm btn-edit-res" data-id="${res.id}">✏️ Editar</button>
-              <button class="btn btn-danger btn-sm btn-delete-res" data-id="${res.id}">🗑️</button>
+              <button class="btn btn-secondary btn-sm btn-edit-res" data-id="${res.id}" style="display: inline-flex; align-items: center; gap: 0.3rem;">
+                ${renderIcon('edit', { size: 13 })} Editar
+              </button>
+              <button class="btn btn-danger btn-sm btn-delete-res" data-id="${res.id}" title="Eliminar">
+                ${renderIcon('trash', { size: 13 })}
+              </button>
             </div>
           </div>
         `;
@@ -82,7 +115,10 @@ export async function renderReservationsView(trip, refreshView) {
         <div class="page-subtitle">Hoteles, vuelos, autobuses, tours y alquileres confirmados</div>
       </div>
       <div class="header-actions">
-        <button class="btn btn-primary" id="btn-add-res">+ Nueva Reserva</button>
+        <button class="btn btn-primary" id="btn-add-res" style="display: inline-flex; align-items: center; gap: 0.4rem;">
+          ${renderIcon('plus', { size: 16, color: '#0b1326' })}
+          <span>Nueva Reserva</span>
+        </button>
       </div>
     </div>
 
@@ -177,7 +213,7 @@ function openReservationModal(trip, itemToEdit, refreshView) {
       <label>Adjuntar Comprobante o Imagen (Local)</label>
       <input type="file" id="res-file" class="form-control" accept="image/*,.pdf">
       <div id="res-file-info" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.3rem;">
-        ${attachmentData ? '✅ Archivo adjunto guardado en dispositivo' : ''}
+        ${attachmentData ? 'Archivo adjunto guardado en dispositivo' : ''}
       </div>
     </div>
 
@@ -187,7 +223,9 @@ function openReservationModal(trip, itemToEdit, refreshView) {
     </div>
   `;
 
-  openModal(isEdit ? '✏️ Editar Reserva' : '➕ Nueva Reserva', bodyHTML, async () => {
+  const modalTitle = `<span class="icon-inline">${renderIcon(isEdit ? 'edit' : 'plus', { size: 20, color: 'var(--primary-cyan)' })} ${isEdit ? 'Editar Reserva' : 'Nueva Reserva'}</span>`;
+
+  openModal(modalTitle, bodyHTML, async () => {
     const type = document.getElementById('res-type').value;
     const name = document.getElementById('res-name').value.trim();
     const date = document.getElementById('res-date').value;
@@ -229,3 +267,4 @@ function openReservationModal(trip, itemToEdit, refreshView) {
     return true;
   });
 }
+

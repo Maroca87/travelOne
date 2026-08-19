@@ -5,6 +5,7 @@
 import { getAllFromStore, saveItem, moveToTrash, restoreTrip, permanentDeleteTrip, emptyTrash, importTripsXML, exportTripsXML } from '../db.js';
 import { formatDate, calculateDaysLeft, calculateDuration, formatMoney, showToast } from '../utils.js';
 import { openModal } from '../components/modal.js';
+import { renderIcon } from '../icons.js';
 
 export async function renderHomeView(onSelectTrip, currentUser) {
   const allTrips = await getAllFromStore('trips');
@@ -49,10 +50,10 @@ export async function renderHomeView(onSelectTrip, currentUser) {
 
     const getStatusBadge = (status) => {
       switch (status) {
-        case 'en_curso': return `<span class="status-badge status-in-progress">⚡ En curso</span>`;
-        case 'planificando': return `<span class="status-badge status-pending">📋 Planificando</span>`;
-        case 'finalizado': return `<span class="status-badge status-completed">✅ Finalizado</span>`;
-        case 'papelera': return `<span class="status-badge status-pending" style="background: rgba(255,117,140,0.15); color: var(--accent-rose);">🗑️ En Papelera</span>`;
+        case 'en_curso': return `<span class="status-badge status-in-progress icon-inline">${renderIcon('zap', { size: 12 })} En curso</span>`;
+        case 'planificando': return `<span class="status-badge status-pending icon-inline">${renderIcon('checklist', { size: 12 })} Planificando</span>`;
+        case 'finalizado': return `<span class="status-badge status-completed icon-inline">${renderIcon('check-circle', { size: 12 })} Finalizado</span>`;
+        case 'papelera': return `<span class="status-badge status-pending icon-inline" style="background: rgba(255,117,140,0.15); color: var(--accent-rose);">${renderIcon('trash', { size: 12 })} En Papelera</span>`;
         default: return '';
       }
     };
@@ -60,14 +61,15 @@ export async function renderHomeView(onSelectTrip, currentUser) {
     // Render Cards Function
     const renderTripCards = (list, isTrashView = false, isHistoryView = false) => {
       if (list.length === 0) {
+        const emptyIcon = isTrashView ? renderIcon('trash', { size: 48, color: 'var(--text-dim)' }) : (isHistoryView ? renderIcon('history', { size: 48, color: 'var(--text-dim)' }) : renderIcon('plane', { size: 48, color: 'var(--primary-cyan)' }));
         return `
           <div class="card" style="text-align: center; padding: 3rem 1.5rem; grid-column: 1 / -1;">
-            <div style="font-size: 3rem; margin-bottom: 1rem;">${isTrashView ? '🗑️' : (isHistoryView ? '📜' : '✈️')}</div>
+            <div style="margin-bottom: 1rem; display: flex; justify-content: center;">${emptyIcon}</div>
             <h3>${isTrashView ? 'La papelera está vacía' : (isHistoryView ? 'No hay viajes en el historial' : 'No tienes viajes activos')}</h3>
             <p style="color: var(--text-muted); margin: 0.5rem 0 1.5rem 0;">
               ${isTrashView ? 'Los viajes que elimines aparecerán aquí conservando toda su información.' : (isHistoryView ? 'Los viajes que finalices se guardarán aquí de forma permanente.' : 'Crea tu próximo viaje para organizar itinerario, gastos y más.')}
             </p>
-            ${!isTrashView && !isHistoryView ? `<button class="btn btn-primary" id="btn-create-first-trip">+ Crear nuevo viaje</button>` : ''}
+            ${!isTrashView && !isHistoryView ? `<button class="btn btn-primary" id="btn-create-first-trip">${renderIcon('plus', { size: 16, color: '#0b1326' })} Crear nuevo viaje</button>` : ''}
           </div>
         `;
       }
@@ -78,32 +80,39 @@ export async function renderHomeView(onSelectTrip, currentUser) {
         
         let countdownText = '';
         if (trip.status === 'en_curso') {
-          countdownText = `<span style="color: var(--accent-amber); font-weight: 700;">¡En curso!</span>`;
+          countdownText = `<span class="icon-inline" style="color: var(--accent-amber); font-weight: 700;">${renderIcon('zap', { size: 14, color: 'var(--accent-amber)' })} ¡En curso!</span>`;
         } else if (daysLeft > 0) {
-          countdownText = `<span style="color: var(--primary-cyan); font-weight: 700;">⏳ Faltan ${daysLeft} días</span>`;
+          countdownText = `<span class="icon-inline" style="color: var(--primary-cyan); font-weight: 700;">${renderIcon('hourglass', { size: 14, color: 'var(--primary-cyan)' })} Faltan ${daysLeft} días</span>`;
         } else if (daysLeft === 0) {
-          countdownText = `<span style="color: var(--accent-amber); font-weight: 700;">🎉 ¡Empieza hoy!</span>`;
+          countdownText = `<span class="icon-inline" style="color: var(--accent-amber); font-weight: 700;">${renderIcon('sparkles', { size: 14, color: 'var(--accent-amber)' })} ¡Empieza hoy!</span>`;
         } else {
-          countdownText = `<span style="color: var(--text-dim);">Viaje concluido</span>`;
+          countdownText = `<span class="icon-inline" style="color: var(--text-dim);">${renderIcon('check-circle', { size: 14, color: 'var(--text-dim)' })} Concluido</span>`;
         }
 
         return `
           <div class="card card-interactive trip-card" data-id="${trip.id}">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
-              <span style="font-size: 2rem;">${trip.coverEmoji || '✈️'}</span>
+              <div class="icon-badge-box">
+                ${renderIcon('compass', { size: 22, color: 'var(--primary-cyan)' })}
+              </div>
               <div>${getStatusBadge(trip.status)}</div>
             </div>
 
             <h3 style="font-size: 1.35rem; margin-bottom: 0.25rem;">${trip.name}</h3>
-            <div style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.75rem;">📍 ${trip.destination}</div>
+            <div style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.35rem;">
+              ${renderIcon('map-pin', { size: 14, color: 'var(--primary-cyan)' })}
+              <span>${trip.destination}</span>
+            </div>
 
-            <div style="display: flex; gap: 1rem; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem; background: var(--bg-surface); padding: 0.65rem; border-radius: var(--radius-md);">
-              <div>📅 ${formatDate(trip.startDate)} — ${formatDate(trip.endDate)} (${duration} días)</div>
+            <div style="display: flex; gap: 0.5rem; align-items: center; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem; background: var(--bg-surface); padding: 0.65rem; border-radius: var(--radius-md);">
+              ${renderIcon('calendar', { size: 14, color: 'var(--primary-cyan)' })}
+              <div>${formatDate(trip.startDate)} — ${formatDate(trip.endDate)} (${duration} días)</div>
             </div>
 
             ${isTrashView ? `
-              <div style="font-size: 0.8rem; color: var(--accent-rose); margin-bottom: 0.75rem; background: rgba(255, 117, 140, 0.1); padding: 0.4rem 0.65rem; border-radius: var(--radius-sm);">
-                🗑️ Enviado a papelera el: <strong>${formatDate(trip.deletedAt ? trip.deletedAt.split('T')[0] : '')}</strong>
+              <div style="font-size: 0.8rem; color: var(--accent-rose); margin-bottom: 0.75rem; background: rgba(255, 117, 140, 0.1); padding: 0.4rem 0.65rem; border-radius: var(--radius-sm); display: flex; align-items: center; gap: 0.35rem;">
+                ${renderIcon('trash', { size: 13, color: 'var(--accent-rose)' })}
+                <span>Enviado a papelera el: <strong>${formatDate(trip.deletedAt ? trip.deletedAt.split('T')[0] : '')}</strong></span>
               </div>
             ` : `
               <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
@@ -117,12 +126,18 @@ export async function renderHomeView(onSelectTrip, currentUser) {
 
             <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
               ${isTrashView ? `
-                <button class="btn btn-secondary btn-sm btn-restore-trip" data-id="${trip.id}" style="flex: 1;">↩️ Restaurar</button>
-                <button class="btn btn-danger btn-sm btn-perm-delete-trip" data-id="${trip.id}" title="Eliminar definitivamente">🗑️ Eliminar</button>
+                <button class="btn btn-secondary btn-sm btn-restore-trip" data-id="${trip.id}" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.35rem;">
+                  ${renderIcon('restore', { size: 14 })} Restaurar
+                </button>
+                <button class="btn btn-danger btn-sm btn-perm-delete-trip" data-id="${trip.id}" title="Eliminar definitivamente" style="display: flex; align-items: center; justify-content: center; gap: 0.35rem;">
+                  ${renderIcon('trash', { size: 14 })}
+                </button>
               ` : `
                 <button class="btn btn-primary btn-sm btn-open-trip" data-id="${trip.id}" style="flex: 1;">Abrir Viaje</button>
-                ${isHistoryView ? `<button class="btn btn-secondary btn-sm btn-restore-trip" data-id="${trip.id}" title="Restaurar a activo">↩️ Activar</button>` : ''}
-                <button class="btn btn-danger btn-sm btn-move-trash-trip" data-id="${trip.id}" title="Enviar a papelera">🗑️</button>
+                ${isHistoryView ? `<button class="btn btn-secondary btn-sm btn-restore-trip" data-id="${trip.id}" title="Restaurar a activo" style="display: flex; align-items: center; gap: 0.3rem;">${renderIcon('restore', { size: 14 })} Activar</button>` : ''}
+                <button class="btn btn-danger btn-sm btn-move-trash-trip" data-id="${trip.id}" title="Enviar a papelera">
+                  ${renderIcon('trash', { size: 14 })}
+                </button>
               `}
             </div>
           </div>
@@ -137,32 +152,42 @@ export async function renderHomeView(onSelectTrip, currentUser) {
           <div class="page-subtitle">Organiza tus viajes activos, consulta tu historial y administra la papelera</div>
         </div>
         <div class="header-actions">
-          <label class="btn btn-secondary" style="cursor: pointer;">
-            📥 Importar XML
+          <label class="btn btn-secondary" style="cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;">
+            ${renderIcon('download', { size: 15 })}
+            <span>Importar XML</span>
             <input type="file" id="input-import-xml" accept=".xml" style="display: none;">
           </label>
-          <button class="btn btn-secondary" id="btn-export-all-xml">💾 Respaldar XML</button>
-          <button class="btn btn-primary" id="btn-add-trip">+ Nuevo Viaje</button>
+          <button class="btn btn-secondary" id="btn-export-all-xml" style="display: inline-flex; align-items: center; gap: 0.4rem;">
+            ${renderIcon('save', { size: 15 })}
+            <span>Respaldar XML</span>
+          </button>
+          <button class="btn btn-primary" id="btn-add-trip" style="display: inline-flex; align-items: center; gap: 0.4rem;">
+            ${renderIcon('plus', { size: 15, color: '#0b1326' })}
+            <span>Nuevo Viaje</span>
+          </button>
         </div>
       </div>
 
       <!-- Main Navigation Tabs -->
       <div style="display: flex; gap: 0.5rem; border-bottom: 1px solid var(--border-color); margin-bottom: 1.5rem; flex-wrap: wrap;">
-        <button class="btn btn-sm ${activeTab === 'active' ? 'btn-primary' : 'btn-secondary'}" id="tab-active" style="border-radius: var(--radius-md) var(--radius-md) 0 0;">
-          ✈️ Mis Viajes (${activeTrips.length})
+        <button class="btn btn-sm ${activeTab === 'active' ? 'btn-primary' : 'btn-secondary'}" id="tab-active" style="border-radius: var(--radius-md) var(--radius-md) 0 0; display: inline-flex; align-items: center; gap: 0.4rem;">
+          ${renderIcon('plane', { size: 14 })}
+          <span>Mis Viajes (${activeTrips.length})</span>
         </button>
-        <button class="btn btn-sm ${activeTab === 'history' ? 'btn-primary' : 'btn-secondary'}" id="tab-history" style="border-radius: var(--radius-md) var(--radius-md) 0 0;">
-          📜 Historial (${historyTrips.length})
+        <button class="btn btn-sm ${activeTab === 'history' ? 'btn-primary' : 'btn-secondary'}" id="tab-history" style="border-radius: var(--radius-md) var(--radius-md) 0 0; display: inline-flex; align-items: center; gap: 0.4rem;">
+          ${renderIcon('history', { size: 14 })}
+          <span>Historial (${historyTrips.length})</span>
         </button>
-        <button class="btn btn-sm ${activeTab === 'trash' ? 'btn-primary' : 'btn-secondary'}" id="tab-trash" style="border-radius: var(--radius-md) var(--radius-md) 0 0;">
-          🗑️ Papelera (${trashTrips.length})
+        <button class="btn btn-sm ${activeTab === 'trash' ? 'btn-primary' : 'btn-secondary'}" id="tab-trash" style="border-radius: var(--radius-md) var(--radius-md) 0 0; display: inline-flex; align-items: center; gap: 0.4rem;">
+          ${renderIcon('trash', { size: 14 })}
+          <span>Papelera (${trashTrips.length})</span>
         </button>
       </div>
 
       <!-- History Filter Controls -->
       ${activeTab === 'history' ? `
         <div style="display: flex; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap; background: var(--bg-card); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
-          <input type="text" id="hist-search" class="form-control" style="flex: 2; min-width: 200px;" placeholder="🔍 Buscar por nombre o destino..." value="${searchQuery}">
+          <input type="text" id="hist-search" class="form-control" style="flex: 2; min-width: 200px;" placeholder="Buscar por nombre o destino..." value="${searchQuery}">
           
           <select id="hist-year" class="form-select" style="flex: 1; min-width: 130px;">
             <option value="todos">Todos los años</option>
@@ -184,10 +209,13 @@ export async function renderHomeView(onSelectTrip, currentUser) {
       <!-- Trash Controls Header -->
       ${activeTab === 'trash' && trashTrips.length > 0 ? `
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; background: rgba(255, 117, 140, 0.1); padding: 0.85rem 1.25rem; border-radius: var(--radius-md); border: 1px solid rgba(255, 117, 140, 0.25);">
-          <div style="font-size: 0.9rem; color: var(--accent-rose); font-weight: 600;">
-            ℹ️ Los viajes en papelera conservan toda su información. No se eliminan automáticamente.
+          <div style="font-size: 0.9rem; color: var(--accent-rose); font-weight: 600; display: flex; align-items: center; gap: 0.4rem;">
+            ${renderIcon('info', { size: 16, color: 'var(--accent-rose)' })}
+            <span>Los viajes en papelera conservan toda su información. No se eliminan automáticamente.</span>
           </div>
-          <button class="btn btn-danger btn-sm" id="btn-empty-trash">🗑️ Vaciar Papelera</button>
+          <button class="btn btn-danger btn-sm" id="btn-empty-trash" style="display: inline-flex; align-items: center; gap: 0.35rem;">
+            ${renderIcon('trash', { size: 14 })} Vaciar Papelera
+          </button>
         </div>
       ` : ''}
 
@@ -370,11 +398,6 @@ function openNewTripModal(onSelectTrip, currentUser, onRefresh) {
 
     <div class="form-row">
       <div class="form-group">
-        <label>Emoji del Viaje</label>
-        <input type="text" id="trip-emoji" class="form-control" value="✈️" maxLength="4">
-      </div>
-
-      <div class="form-group">
         <label>Estado Inicial</label>
         <select id="trip-status" class="form-select">
           <option value="planificando" selected>Planificando</option>
@@ -385,14 +408,15 @@ function openNewTripModal(onSelectTrip, currentUser, onRefresh) {
     </div>
   `;
 
-  openModal('✨ Crear Nuevo Viaje', bodyHTML, async () => {
+  const modalTitle = `<span class="icon-inline">${renderIcon('sparkles', { size: 20, color: 'var(--primary-cyan)' })} Crear Nuevo Viaje</span>`;
+
+  openModal(modalTitle, bodyHTML, async () => {
     const name = document.getElementById('trip-name').value.trim();
     const destination = document.getElementById('trip-destination').value.trim();
     const startDate = document.getElementById('trip-start-date').value;
     const endDate = document.getElementById('trip-end-date').value;
     const budget = parseFloat(document.getElementById('trip-budget').value) || 0;
     const mainCurrency = document.getElementById('trip-currency').value;
-    const coverEmoji = document.getElementById('trip-emoji').value.trim() || '✈️';
     const status = document.getElementById('trip-status').value;
 
     if (!name || !destination || !startDate || !endDate) {
@@ -411,7 +435,6 @@ function openNewTripModal(onSelectTrip, currentUser, onRefresh) {
       mainCurrency,
       secondaryCurrencies: ['USD'],
       exchangeRates: { USD: 500 },
-      coverEmoji,
       status,
       createdAt: new Date().toISOString()
     };
@@ -422,3 +445,4 @@ function openNewTripModal(onSelectTrip, currentUser, onRefresh) {
     return true;
   });
 }
+

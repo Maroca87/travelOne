@@ -5,6 +5,7 @@
 import { getAllFromStore, saveItem, deleteItem } from '../db.js';
 import { formatDate, formatMoney, getCategoryBadgeClass, showToast } from '../utils.js';
 import { openModal } from '../components/modal.js';
+import { renderIcon } from '../icons.js';
 
 export async function renderExpensesView(trip, refreshView) {
   if (!trip) return document.createElement('div');
@@ -53,8 +54,9 @@ export async function renderExpensesView(trip, refreshView) {
       <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.5rem;">Pagado Por</div>
       <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
         ${Object.entries(byPerson).map(([person, amount]) => `
-          <div style="background: var(--bg-surface); padding: 0.4rem 0.75rem; border-radius: var(--radius-full); font-size: 0.8rem;">
-            👤 ${person}: <strong style="color: var(--primary-cyan);">${formatMoney(amount, trip.mainCurrency)}</strong>
+          <div style="background: var(--bg-surface); padding: 0.4rem 0.75rem; border-radius: var(--radius-full); font-size: 0.8rem; display: inline-flex; align-items: center; gap: 0.35rem;">
+            ${renderIcon('user', { size: 13, color: 'var(--primary-cyan)' })}
+            <span>${person}: <strong style="color: var(--primary-cyan);">${formatMoney(amount, trip.mainCurrency)}</strong></span>
           </div>
         `).join('')}
       </div>
@@ -63,21 +65,32 @@ export async function renderExpensesView(trip, refreshView) {
 
   const listHTML = expenses.length === 0 ? `
     <div class="card" style="text-align: center; padding: 3rem 1.5rem;">
-      <div style="font-size: 3rem; margin-bottom: 1rem;">💳</div>
+      <div style="margin-bottom: 1rem; display: flex; justify-content: center;">
+        ${renderIcon('credit-card', { size: 48, color: 'var(--accent-rose)' })}
+      </div>
       <h3>No hay gastos registrados</h3>
       <p style="color: var(--text-muted); margin: 0.5rem 0 1.5rem 0;">Añade tus gastos de transporte, hotel, comida o compras para llevar el control.</p>
-      <button class="btn btn-primary" id="btn-add-exp-empty">+ Registrar Gasto</button>
+      <button class="btn btn-primary" id="btn-add-exp-empty" style="display: inline-flex; align-items: center; gap: 0.4rem;">
+        ${renderIcon('plus', { size: 16, color: '#0b1326' })}
+        <span>Registrar Gasto</span>
+      </button>
     </div>
   ` : `
     <div class="card">
-      <h3 style="font-size: 1.1rem; margin-bottom: 1rem;">Historial de Gastos</h3>
+      <h3 style="font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.4rem;">
+        ${renderIcon('receipt', { size: 18, color: 'var(--primary-cyan)' })}
+        <span>Historial de Gastos</span>
+      </h3>
       <div style="display: flex; flex-direction: column; gap: 0.65rem;">
         ${expenses.map(e => `
           <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-surface); padding: 0.85rem 1rem; border-radius: var(--radius-md); gap: 0.5rem; flex-wrap: wrap;">
             <div style="flex: 1; min-width: 180px;">
               <div style="font-weight: 600; color: #ffffff;">${e.description}</div>
-              <div style="font-size: 0.8rem; color: var(--text-muted);">
-                📅 ${formatDate(e.date)} • 👤 ${e.paidBy || 'Yo'} ${e.notes ? `• 📝 ${e.notes}` : ''}
+              <div style="font-size: 0.8rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; margin-top: 0.2rem;">
+                <span class="icon-inline">${renderIcon('calendar', { size: 12 })} ${formatDate(e.date)}</span>
+                <span>•</span>
+                <span class="icon-inline">${renderIcon('user', { size: 12 })} ${e.paidBy || 'Yo'}</span>
+                ${e.notes ? `<span>•</span> <span class="icon-inline">${renderIcon('notes', { size: 12 })} ${e.notes}</span>` : ''}
               </div>
             </div>
 
@@ -86,8 +99,12 @@ export async function renderExpensesView(trip, refreshView) {
               <span style="font-family: 'Outfit', sans-serif; font-weight: 700; color: var(--accent-amber); font-size: 1.1rem;">
                 ${formatMoney(e.amount, e.currency || trip.mainCurrency)}
               </span>
-              <button class="btn btn-secondary btn-sm btn-edit-exp" data-id="${e.id}">✏️</button>
-              <button class="btn btn-danger btn-sm btn-delete-exp" data-id="${e.id}">🗑️</button>
+              <button class="btn btn-secondary btn-sm btn-edit-exp" data-id="${e.id}" title="Editar">
+                ${renderIcon('edit', { size: 13 })}
+              </button>
+              <button class="btn btn-danger btn-sm btn-delete-exp" data-id="${e.id}" title="Eliminar">
+                ${renderIcon('trash', { size: 13 })}
+              </button>
             </div>
           </div>
         `).join('')}
@@ -103,7 +120,10 @@ export async function renderExpensesView(trip, refreshView) {
         <div class="page-subtitle">Control de presupuesto y lista detallada de gastos</div>
       </div>
       <div class="header-actions">
-        <button class="btn btn-primary" id="btn-add-exp">+ Registrar Gasto</button>
+        <button class="btn btn-primary" id="btn-add-exp" style="display: inline-flex; align-items: center; gap: 0.4rem;">
+          ${renderIcon('plus', { size: 16, color: '#0b1326' })}
+          <span>Registrar Gasto</span>
+        </button>
       </div>
     </div>
 
@@ -130,7 +150,10 @@ export async function renderExpensesView(trip, refreshView) {
 
     <!-- Category & Payer Breakdown Card -->
     <div class="card" style="margin-bottom: 1.5rem;">
-      <h3 style="font-size: 1.1rem; margin-bottom: 1rem;">Distribución por Categoría</h3>
+      <h3 style="font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.4rem;">
+        ${renderIcon('budget', { size: 18, color: 'var(--accent-amber)' })}
+        <span>Distribución por Categoría</span>
+      </h3>
       ${categoryBreakdownHTML}
       ${personBreakdownHTML}
     </div>
@@ -184,7 +207,7 @@ function openExpenseModal(trip, itemToEdit, refreshView) {
       <div class="form-group">
         <label>Moneda</label>
         <select id="exp-currency" class="form-select">
-          <option value="${trip.mainCurrency || 'GTQ'}" selected>${trip.mainCurrency || 'GTQ'}</option>
+          <option value="${trip.mainCurrency || 'CRC'}" selected>${trip.mainCurrency || 'CRC'}</option>
           <option value="USD">USD ($)</option>
         </select>
       </div>
@@ -222,7 +245,9 @@ function openExpenseModal(trip, itemToEdit, refreshView) {
     </div>
   `;
 
-  openModal(isEdit ? '✏️ Editar Gasto' : '➕ Registrar Gasto', bodyHTML, async () => {
+  const modalTitle = `<span class="icon-inline">${renderIcon(isEdit ? 'edit' : 'plus', { size: 20, color: 'var(--primary-cyan)' })} ${isEdit ? 'Editar Gasto' : 'Registrar Gasto'}</span>`;
+
+  openModal(modalTitle, bodyHTML, async () => {
     const description = document.getElementById('exp-desc').value.trim();
     const amount = parseFloat(document.getElementById('exp-amount').value) || 0;
     const currency = document.getElementById('exp-currency').value;
@@ -254,3 +279,4 @@ function openExpenseModal(trip, itemToEdit, refreshView) {
     return true;
   });
 }
+

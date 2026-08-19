@@ -484,3 +484,59 @@ h1, h2, h3, h4, h5, h6 {
     text-align: center;
   }
 }
+
+/* Vector SVG Icon Global Utilities */
+.svg-icon {
+  display: inline-block;
+  vertical-align: -0.15em;
+  flex-shrink: 0;
+  stroke: currentColor;
+}
+
+.icon-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  vertical-align: middle;
+}
+
+.icon-badge-box {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-md);
+  background: rgba(0, 242, 254, 0.12);
+  color: var(--primary-cyan);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.icon-badge-amber {
+  background: rgba(246, 211, 101, 0.15);
+  color: var(--accent-amber);
+}
+
+.icon-badge-rose {
+  background: rgba(255, 117, 140, 0.15);
+  color: var(--accent-rose);
+}
+
+.icon-badge-green {
+  background: rgba(0, 242, 96, 0.15);
+  color: #00f260;
+}
+
+.icon-badge-purple {
+  background: rgba(161, 140, 209, 0.15);
+  color: var(--accent-purple);
+}
+
+.travelone-brand-svg {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.travelone-brand-svg:hover {
+  transform: scale(1.04);
+}
+

@@ -5,6 +5,7 @@
 import { getAllFromStore, saveItem, deleteItem } from '../db.js';
 import { formatMoney, showToast } from '../utils.js';
 import { openModal } from '../components/modal.js';
+import { renderIcon } from '../icons.js';
 
 export async function renderShoppingView(trip, refreshView) {
   if (!trip) return document.createElement('div');
@@ -16,10 +17,15 @@ export async function renderShoppingView(trip, refreshView) {
 
   const listHTML = shoppingItems.length === 0 ? `
     <div class="card" style="text-align: center; padding: 3rem 1.5rem;">
-      <div style="font-size: 3rem; margin-bottom: 1rem;">🛍️</div>
+      <div style="margin-bottom: 1rem; display: flex; justify-content: center;">
+        ${renderIcon('shopping', { size: 48, color: 'var(--primary-cyan)' })}
+      </div>
       <h3>Lista de compras vacía</h3>
       <p style="color: var(--text-muted); margin: 0.5rem 0 1.5rem 0;">Añade recuerdos, souvenirs, café o regalos que deseas comprar durante tu viaje.</p>
-      <button class="btn btn-primary" id="btn-add-shop-empty">+ Agregar Artículo</button>
+      <button class="btn btn-primary" id="btn-add-shop-empty" style="display: inline-flex; align-items: center; gap: 0.4rem;">
+        ${renderIcon('plus', { size: 16, color: '#0b1326' })}
+        <span>Agregar Artículo</span>
+      </button>
     </div>
   ` : `
     <div style="display: flex; flex-direction: column; gap: 0.75rem;">
@@ -35,8 +41,12 @@ export async function renderShoppingView(trip, refreshView) {
                 <input type="checkbox" class="chk-toggle-bought" data-id="${item.id}" ${item.bought ? 'checked' : ''} style="accent-color: var(--primary-cyan); width: 20px; height: 20px; cursor: pointer;">
                 <div>
                   <h4 style="font-size: 1.1rem; ${item.bought ? 'text-decoration: line-through; color: var(--text-muted);' : ''}">${item.product}</h4>
-                  <div style="font-size: 0.8rem; color: var(--text-muted);">
-                    📍 ${item.place || 'Lugar pendiente'} • 📦 Cantidad: ${qty} • <span class="badge badge-shopping">${item.category || 'Souvenirs'}</span>
+                  <div style="font-size: 0.8rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; margin-top: 0.2rem;">
+                    <span class="icon-inline">${renderIcon('map-pin', { size: 12, color: 'var(--primary-cyan)' })} ${item.place || 'Lugar pendiente'}</span>
+                    <span>•</span>
+                    <span class="icon-inline">${renderIcon('tag', { size: 12 })} Cant: ${qty}</span>
+                    <span>•</span>
+                    <span class="badge badge-shopping">${item.category || 'Souvenirs'}</span>
                   </div>
                 </div>
               </div>
@@ -51,11 +61,20 @@ export async function renderShoppingView(trip, refreshView) {
               </div>
             </div>
 
-            ${item.notes ? `<div style="font-size: 0.8rem; color: var(--text-dim); background: var(--bg-surface); padding: 0.4rem 0.65rem; border-radius: var(--radius-sm); margin-top: 0.5rem;">📝 ${item.notes}</div>` : ''}
+            ${item.notes ? `
+              <div style="font-size: 0.8rem; color: var(--text-dim); background: var(--bg-surface); padding: 0.4rem 0.65rem; border-radius: var(--radius-sm); margin-top: 0.5rem; display: flex; align-items: flex-start; gap: 0.35rem;">
+                ${renderIcon('notes', { size: 13, color: 'var(--text-muted)' })}
+                <span>${item.notes}</span>
+              </div>
+            ` : ''}
 
             <div style="display: flex; justify-content: flex-end; gap: 0.5rem; border-top: 1px solid var(--border-color); padding-top: 0.5rem; margin-top: 0.5rem;">
-              <button class="btn btn-secondary btn-sm btn-edit-shop" data-id="${item.id}">✏️ Editar</button>
-              <button class="btn btn-danger btn-sm btn-delete-shop" data-id="${item.id}">🗑️</button>
+              <button class="btn btn-secondary btn-sm btn-edit-shop" data-id="${item.id}" title="Editar">
+                ${renderIcon('edit', { size: 13 })}
+              </button>
+              <button class="btn btn-danger btn-sm btn-delete-shop" data-id="${item.id}" title="Eliminar">
+                ${renderIcon('trash', { size: 13 })}
+              </button>
             </div>
           </div>
         `;
@@ -71,7 +90,10 @@ export async function renderShoppingView(trip, refreshView) {
         <div class="page-subtitle">Presupuesto estimado vs gasto real en regalos y compras</div>
       </div>
       <div class="header-actions">
-        <button class="btn btn-primary" id="btn-add-shop">+ Agregar Artículo</button>
+        <button class="btn btn-primary" id="btn-add-shop" style="display: inline-flex; align-items: center; gap: 0.4rem;">
+          ${renderIcon('plus', { size: 16, color: '#0b1326' })}
+          <span>Agregar Artículo</span>
+        </button>
       </div>
     </div>
 
@@ -187,7 +209,9 @@ function openShoppingModal(trip, itemToEdit, refreshView) {
     </div>
   `;
 
-  openModal(isEdit ? '✏️ Editar Artículo' : '➕ Agregar a Lista de Compras', bodyHTML, async () => {
+  const modalTitle = `<span class="icon-inline">${renderIcon(isEdit ? 'edit' : 'plus', { size: 20, color: 'var(--primary-cyan)' })} ${isEdit ? 'Editar Artículo' : 'Agregar a Lista de Compras'}</span>`;
+
+  openModal(modalTitle, bodyHTML, async () => {
     const product = document.getElementById('shop-product').value.trim();
     const category = document.getElementById('shop-category').value;
     const quantity = parseInt(document.getElementById('shop-qty').value) || 1;
@@ -220,3 +244,4 @@ function openShoppingModal(trip, itemToEdit, refreshView) {
     return true;
   });
 }
+

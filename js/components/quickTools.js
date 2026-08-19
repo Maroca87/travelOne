@@ -1,14 +1,15 @@
 /**
- * Quick Tools Widget (Currency Converter & Tip Calculator) - Costa Rica Edition 🇨🇷
+ * Quick Tools Widget (Currency Converter & Tip Calculator)
  */
 
 import { openModal } from './modal.js';
 import { formatMoney } from '../utils.js';
+import { renderIcon } from '../icons.js';
 
 export function renderQuickToolsFAB() {
   return `
     <button class="quick-tools-fab" id="fab-quick-tools" title="Herramientas rápidas">
-      🧮
+      ${renderIcon('calculator', { size: 24, color: '#0b1326' })}
     </button>
   `;
 }
@@ -41,7 +42,8 @@ export function openCurrencyConverterModal(trip) {
     </div>
   `;
 
-  openModal('💱 Conversor Rápido Colones (₡) / Dólares ($)', bodyHTML, null, null);
+  const modalTitle = `<span class="icon-inline">${renderIcon('exchange', { size: 20, color: 'var(--primary-cyan)' })} Conversor Rápido de Moneda</span>`;
+  openModal(modalTitle, bodyHTML, null, null);
 
   setTimeout(() => {
     const rateEl = document.getElementById('tool-exchange-rate');
@@ -101,7 +103,8 @@ export function openTipCalculatorModal() {
     </div>
   `;
 
-  openModal('🍽️ Calculadora de Propinas', bodyHTML, null, null);
+  const modalTitle = `<span class="icon-inline">${renderIcon('utensils', { size: 20, color: 'var(--accent-amber)' })} Calculadora de Propinas</span>`;
+  openModal(modalTitle, bodyHTML, null, null);
 
   setTimeout(() => {
     const amountEl = document.getElementById('tip-amount');
@@ -130,3 +133,4 @@ export function openTipCalculatorModal() {
     peopleEl?.addEventListener('input', updateTip);
   }, 50);
 }
+
