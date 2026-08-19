@@ -5,7 +5,7 @@
  * @module sw
  */
 
-const CACHE_NAME = 'travelone-v25';
+const CACHE_NAME = 'travelone-v26';
 
 /**
  * Essential static assets and application modules cached for full offline operation.
@@ -19,6 +19,7 @@ const ASSETS_TO_CACHE = [
   './app-logo.png',
   './apple-touch-icon.png',
   './apple-touch-icon-180x180.png',
+  './apple-touch-icon-precomposed.png',
   './icon-192.png',
   './icon-512.png',
   './favicon.png',
@@ -55,7 +56,7 @@ self.addEventListener('install', (event) => {
 
 /**
  * Service Worker Activation Event
- * Purges outdated cache versions and claims active clients immediately.
+ * Purges all outdated cache versions and claims active clients immediately.
  */
 self.addEventListener('activate', (event) => {
   event.waitUntil(
@@ -72,12 +73,26 @@ self.addEventListener('activate', (event) => {
 });
 
 /**
+ * Listen for explicit SKIP_WAITING message
+ */
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
+/**
  * Service Worker Fetch Event
- * Implements Cache-First strategy with automatic background network fallback and caching.
+ * Implements Network-First for HTML/sw.js and Cache-First for versioned assets with background revalidation.
  */
 self.addEventListener('fetch', (event) => {
+  // Always fetch SW directly
+  if (event.request.url.includes('sw.js')) {
+    return;
+  }
+
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
+    caches.match(event.request, { ignoreSearch: false }).then((cachedResponse) => {
       if (cachedResponse) {
         return cachedResponse;
       }
@@ -90,6 +105,7 @@ self.addEventListener('fetch', (event) => {
         }
         return networkResponse;
       }).catch(() => {
+        // Fallback for navigation requests
         if (event.request.mode === 'navigate') {
           return caches.match('./index.html');
         }
@@ -97,4 +113,3 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
-

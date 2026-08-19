@@ -150,9 +150,9 @@ export function renderIcon(name, options = {}) {
 
 /**
  * Render the Official TravelOne Master Logo SVG
- * Features edge-to-edge solid emerald green background (#0ea35d), centered white circle container,
- * and a sober, minimalist, elegant black travel jet silhouette.
- * Fully compatible with iOS Dark Mode (opaque solid fill, no transparent margins).
+ * Features edge-to-edge solid emerald green background (#0ea35d), subtle ambient glow ring,
+ * and a crisp pure white centered jet silhouette.
+ * Fully compatible with iOS & Android Dark Mode (opaque solid fill, no transparent margins).
  * 
  * @param {number} [size=42] - Pixel dimensions (width and height)
  * @param {string} [className=''] - Optional additional CSS class names
@@ -166,12 +166,21 @@ export function renderAppLogoSVG(size = 42, className = '') {
          width="${size}" 
          height="${size}" 
          style="display: inline-block; vertical-align: middle; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 14px rgba(14, 163, 93, 0.35);">
-      <!-- Solid Green Edge-to-Edge Background -->
-      <rect width="512" height="512" fill="#0ea35d" />
-      <!-- Center White Circle -->
-      <circle cx="256" cy="256" r="195" fill="#ffffff" />
-      <!-- Minimalist & Elegant Jet Silhouette -->
-      <polygon points="357.47,154.53 349.21,171.04 331.05,194.15 307.11,219.74 295.56,232.95 326.1,331.18 318.67,338.61 262.54,265.97 232.0,293.21 241.9,332.83 236.13,338.61 213.84,308.07 196.5,320.45 190.73,321.27 191.55,315.5 203.93,298.16 173.39,275.87 179.17,270.1 218.79,280.0 246.03,249.46 173.39,193.33 180.82,185.9 279.05,216.44 292.26,204.89 317.85,180.95 340.96,162.79" fill="#0b1326" />
+      <defs>
+        <linearGradient id="travelone-brand-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#0ea35d" />
+          <stop offset="100%" stop-color="#09874c" />
+        </linearGradient>
+        <filter id="travelone-brand-shadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#002814" flood-opacity="0.4" />
+        </filter>
+      </defs>
+      <!-- Solid Emerald Green Edge-to-Edge Background -->
+      <rect width="512" height="512" fill="url(#travelone-brand-grad)" />
+      <!-- Subtle Ambient Glow Ring -->
+      <circle cx="256" cy="256" r="195" fill="none" stroke="rgba(255, 255, 255, 0.28)" stroke-width="6" />
+      <!-- Crisp Pure White Centered Jet Silhouette -->
+      <polygon points="389.12,122.88 377.17,146.76 350.91,180.18 316.28,217.2 299.58,236.3 343.75,378.37 333.0,389.12 251.82,284.06 207.65,323.46 221.97,380.76 213.62,389.12 181.38,344.95 156.3,362.85 147.96,364.04 149.15,355.7 167.05,330.62 122.88,298.38 131.24,290.03 188.54,304.35 227.94,260.18 122.88,179.0 133.63,168.25 275.7,212.42 294.8,195.72 331.82,161.09 365.24,134.83" fill="#ffffff" filter="url(#travelone-brand-shadow)" />
     </svg>
   `.trim();
 }

@@ -1,11 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
-  <!-- Solid Emerald Green Edge-to-Edge Background (iOS Dark Mode Safe) -->
-  <rect width="512" height="512" fill="#0ea35d" />
+  <defs>
+    <linearGradient id="travelone-green-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0ea35d" />
+      <stop offset="100%" stop-color="#09874c" />
+    </linearGradient>
+    <filter id="travelone-jet-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#002814" flood-opacity="0.45" />
+    </filter>
+  </defs>
 
-  <!-- Crisp White Central Circle -->
-  <circle cx="256" cy="256" r="195" fill="#ffffff" />
+  <!-- Solid Emerald Green Edge-to-Edge Background (100% Opaque, iOS Dark Mode Immune) -->
+  <rect width="512" height="512" fill="url(#travelone-green-grad)" />
 
-  <!-- Sober, Minimalist & Elegant Travel Jet Silhouette in Solid Black -->
-  <polygon points="357.47,154.53 349.21,171.04 331.05,194.15 307.11,219.74 295.56,232.95 326.1,331.18 318.67,338.61 262.54,265.97 232.0,293.21 241.9,332.83 236.13,338.61 213.84,308.07 196.5,320.45 190.73,321.27 191.55,315.5 203.93,298.16 173.39,275.87 179.17,270.1 218.79,280.0 246.03,249.46 173.39,193.33 180.82,185.9 279.05,216.44 292.26,204.89 317.85,180.95 340.96,162.79" fill="#0b1326" />
+  <!-- Subtle Ambient Glow Ring -->
+  <circle cx="256" cy="256" r="195" fill="none" stroke="rgba(255, 255, 255, 0.28)" stroke-width="6" />
+
+  <!-- Crisp Pure White Centered Jet Silhouette -->
+  <polygon points="389.12,122.88 377.17,146.76 350.91,180.18 316.28,217.2 299.58,236.3 343.75,378.37 333.0,389.12 251.82,284.06 207.65,323.46 221.97,380.76 213.62,389.12 181.38,344.95 156.3,362.85 147.96,364.04 149.15,355.7 167.05,330.62 122.88,298.38 131.24,290.03 188.54,304.35 227.94,260.18 122.88,179.0 133.63,168.25 275.7,212.42 294.8,195.72 331.82,161.09 365.24,134.83" fill="#ffffff" filter="url(#travelone-jet-shadow)" />
 </svg>
-

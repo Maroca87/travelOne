@@ -3,35 +3,41 @@
   "short_name": "TravelOne",
   "description": "Tu organizador personal de viajes local y offline",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#0ea35d",
   "theme_color": "#0ea35d",
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "./apple-touch-icon.png?v=25",
+      "src": "./apple-touch-icon.png?v=26",
       "sizes": "180x180",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "./icon-192.png?v=25",
+      "src": "./icon-192.png?v=26",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "./icon-512.png?v=25",
+      "src": "./icon-512.png?v=26",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "./app-logo.svg?v=25",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "src": "./icon-192.png?v=26",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "./icon-512.png?v=26",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
-
