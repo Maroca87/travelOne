@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head><title>PNG Icon Generator</title></head>
+<body>
+<canvas id="canvas"></canvas>
+<script>
+async function generateAll() {
+  const svgText = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+    <rect width="512" height="512" fill="#0ea35d" />
+    <circle cx="256" cy="256" r="195" fill="#ffffff" />
+    <polygon points="357.47,154.53 349.21,171.04 331.05,194.15 307.11,219.74 295.56,232.95 326.1,331.18 318.67,338.61 262.54,265.97 232.0,293.21 241.9,332.83 236.13,338.61 213.84,308.07 196.5,320.45 190.73,321.27 191.55,315.5 203.93,298.16 173.39,275.87 179.17,270.1 218.79,280.0 246.03,249.46 173.39,193.33 180.82,185.9 279.05,216.44 292.26,204.89 317.85,180.95 340.96,162.79" fill="#0b1326" />
+  </svg>`;
+
+  const blob = new Blob([svgText], { type: 'image/svg+xml' });
+  const url = URL.createObjectURL(blob);
+  const img = new Image();
+  img.src = url;
+  await new Promise(r => img.onload = r);
+
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+
+  function getPNG(size) {
+    canvas.width = size;
+    canvas.height = size;
+    ctx.fillStyle = '#0ea35d';
+    ctx.fillRect(0, 0, size, size);
+    ctx.drawImage(img, 0, 0, size, size);
+    return canvas.toDataURL('image/png');
+  }
+
+  window.generatedIcons = {
+    icon512: getPNG(512),
+    icon192: getPNG(192),
+    icon180: getPNG(180),
+    icon64: getPNG(64)
+  };
+  document.body.setAttribute('data-ready', 'true');
+  console.log('ICONS_GENERATED_SUCCESSFULLY');
+}
+generateAll();
+</script>
+</body>
+</html>
