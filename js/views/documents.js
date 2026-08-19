@@ -1,5 +1,8 @@
 /**
- * Documents View (Local Trip Files & Travel Passports/Vouchers)
+ * TravelOne Document Vault View
+ * Manages travel vouchers, boarding passes, travel insurance PDFs, passports, and offline file downloads with secure local storage.
+ * 
+ * @module js/views/documents
  */
 
 import { getAllFromStore, saveItem, deleteItem } from '../db.js';
@@ -7,6 +10,13 @@ import { fileToDataURL, showToast } from '../utils.js';
 import { openModal } from '../components/modal.js';
 import { renderIcon } from '../icons.js';
 
+/**
+ * Render the document storage and offline file vault view.
+ * 
+ * @param {Object} trip - The active trip model
+ * @param {Function} refreshView - Callback to refresh view after updates
+ * @returns {Promise<HTMLElement>} The documents view DOM container
+ */
 export async function renderDocumentsView(trip, refreshView) {
   if (!trip) return document.createElement('div');
 

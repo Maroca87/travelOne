@@ -1,5 +1,8 @@
 /**
- * Travel Journal View (Personal Memories & Diary)
+ * TravelOne Travel Journal & Memories View
+ * Provides a personal travel diary for storing experiences, anecdotes, locations, and memory photos.
+ * 
+ * @module js/views/journal
  */
 
 import { getAllFromStore, saveItem, deleteItem } from '../db.js';
@@ -7,6 +10,13 @@ import { formatDate, fileToDataURL, showToast } from '../utils.js';
 import { openModal } from '../components/modal.js';
 import { renderIcon } from '../icons.js';
 
+/**
+ * Render the personal travel diary and journal entries view.
+ * 
+ * @param {Object} trip - The active trip model
+ * @param {Function} refreshView - Callback to refresh view after updates
+ * @returns {Promise<HTMLElement>} The journal view DOM container
+ */
 export async function renderJournalView(trip, refreshView) {
   if (!trip) return document.createElement('div');
 

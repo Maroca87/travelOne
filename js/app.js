@@ -1,5 +1,9 @@
 /**
- * TravelOne PWA Application Controller
+ * TravelOne PWA Main Application Controller
+ * Manages client-side routing, user authentication lifecycle, active trip context,
+ * offline service worker registration, and dynamic view rendering.
+ * 
+ * @module js/app
  */
 
 import { seedDemoDataIfNeeded } from './seed.js';
@@ -22,20 +26,36 @@ import { renderContactsView } from './views/contacts.js';
 import { renderJournalView } from './views/journal.js';
 import { renderSummaryView } from './views/summary.js';
 
+/**
+ * Main application class controlling view state and user session.
+ */
 class TravelOneApp {
+  /**
+   * Instantiate application state from persistent local storage.
+   */
   constructor() {
+    /** @type {string} Current active view identifier */
     this.activeView = 'home';
+    /** @type {Object|null} Logged in user profile or null */
     this.currentUser = JSON.parse(localStorage.getItem('travelone_current_user')) || null;
+    /** @type {string|null} ID of the currently selected trip */
     this.currentTripId = localStorage.getItem('travelone_current_trip_id') || null;
+    /** @type {Object|null} Active trip model instance */
     this.currentTrip = null;
+    /** @type {HTMLElement} Root layout DOM element */
     this.appLayout = document.getElementById('app-layout');
   }
 
+  /**
+   * Initialize application services, database seeds, and service workers.
+   * 
+   * @returns {Promise<void>}
+   */
   async init() {
-    // 1. Seed initial data if first time
+    // 1. Seed demo dataset if database is empty
     await seedDemoDataIfNeeded();
 
-    // 2. Load active trip if user is authenticated
+    // 2. Hydrate active trip if user is authenticated
     if (this.currentUser && this.currentTripId) {
       this.currentTrip = await getItemById('trips', this.currentTripId);
       if (!this.currentTrip) {
@@ -46,22 +66,28 @@ class TravelOneApp {
       }
     }
 
-    // 3. Register Service Worker for offline PWA functionality
+    // 3. Register Service Worker for offline PWA operation
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('./sw.js').catch(err => {
         console.log('Service Worker registration skipped/failed:', err);
       });
     }
 
-    // 4. Render main application view
+    // 4. Initial view render
     await this.render();
   }
 
+  /**
+   * Set logged-in user profile and transition to home view.
+   * 
+   * @param {Object} user - User profile object
+   * @returns {Promise<void>}
+   */
   async setAuthUser(user) {
     this.currentUser = user;
     localStorage.setItem('travelone_current_user', JSON.stringify(user));
     
-    // Find user's last trip or first active trip
+    // Auto-select user's first active trip if available
     const trips = await getAllFromStore('trips');
     const userTrips = trips.filter(t => (!t.userId || t.userId === user.id) && t.status !== 'papelera');
     this.currentTrip = userTrips[0] || null;
@@ -73,6 +99,11 @@ class TravelOneApp {
     await this.render();
   }
 
+  /**
+   * Clear session state and return to authentication screen.
+   * 
+   * @returns {Promise<void>}
+   */
   async logout() {
     this.currentUser = null;
     this.currentTrip = null;
@@ -82,6 +113,12 @@ class TravelOneApp {
     await this.render();
   }
 
+  /**
+   * Select an active trip and switch to dashboard view.
+   * 
+   * @param {string|null} tripId - Target trip ID or null to return home
+   * @returns {Promise<void>}
+   */
   async setTrip(tripId) {
     if (!tripId) {
       this.currentTripId = null;
@@ -97,14 +134,25 @@ class TravelOneApp {
     await this.render();
   }
 
+  /**
+   * Switch the current active view.
+   * 
+   * @param {string} viewName - Target view name identifier
+   * @returns {Promise<void>}
+   */
   async setView(viewName) {
     this.activeView = viewName;
     await this.render();
     window.scrollTo(0, 0);
   }
 
+  /**
+   * Render the complete UI based on current authentication state and active view.
+   * 
+   * @returns {Promise<void>}
+   */
   async render() {
-    // If not authenticated, force AuthView
+    // If not authenticated, render AuthView exclusively
     if (!this.currentUser) {
       this.appLayout.innerHTML = '';
       const authElem = renderAuthView((user) => this.setAuthUser(user));
@@ -112,7 +160,7 @@ class TravelOneApp {
       return;
     }
 
-    // Render navigation (sidebar + bottom nav + mobile top bar)
+    // Render navigation framework (desktop sidebar + mobile top/bottom bars)
     const navHTML = renderNavigation(this.activeView, this.currentTrip, this.currentUser);
     const fabHTML = this.currentTrip ? renderQuickToolsFAB() : '';
 
@@ -127,6 +175,7 @@ class TravelOneApp {
 
     const refreshCurrentView = () => this.render();
 
+    // Route view rendering
     switch (this.activeView) {
       case 'home':
         viewElement = await renderHomeView((tripId) => this.setTrip(tripId), this.currentUser);
@@ -173,7 +222,7 @@ class TravelOneApp {
 
     viewContainer.appendChild(viewElement);
 
-    // Attach navigation click listeners
+    // Attach navigation link event listeners
     document.querySelectorAll('[data-view]').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
@@ -182,7 +231,7 @@ class TravelOneApp {
       });
     });
 
-    // Logout listeners (desktop & mobile)
+    // Attach logout event listeners
     document.getElementById('btn-app-logout')?.addEventListener('click', () => this.logout());
     document.getElementById('btn-mobile-logout')?.addEventListener('click', () => this.logout());
 
@@ -196,8 +245,9 @@ class TravelOneApp {
   }
 }
 
-// Initialize on DOM load
+// Bootstrap application on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
   const app = new TravelOneApp();
   app.init();
 });
+

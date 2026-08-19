@@ -1,5 +1,8 @@
 /**
- * Itinerary View (Timeline Format)
+ * TravelOne Itinerary Timeline View
+ * Manages chronological daily schedules, activity categories, costs, locations, and completion statuses.
+ * 
+ * @module js/views/itinerary
  */
 
 import { getAllFromStore, saveItem, deleteItem } from '../db.js';
@@ -7,6 +10,13 @@ import { formatDate, formatMoney, getCategoryBadgeClass, showToast } from '../ut
 import { openModal } from '../components/modal.js';
 import { renderIcon } from '../icons.js';
 
+/**
+ * Render the daily timeline view of activities for a trip.
+ * 
+ * @param {Object} trip - The active trip model
+ * @param {Function} refreshView - Callback to re-render the view
+ * @returns {Promise<HTMLElement>} The rendered itinerary container
+ */
 export async function renderItineraryView(trip, refreshView) {
   if (!trip) return document.createElement('div');
 

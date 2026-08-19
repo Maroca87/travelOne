@@ -1,12 +1,25 @@
 /**
  * TravelOne Local Database Engine (IndexedDB Native)
+ * Provides persistent offline storage, relational indexing, user auth stores,
+ * trash management, and XML import/export backup capabilities.
+ * 
+ * @module js/db
  */
 
 const DB_NAME = 'TravelOneDB';
 const DB_VERSION = 2;
 
+/**
+ * Cached active IndexedDB connection instance.
+ * @type {IDBDatabase|null}
+ */
 let dbInstance = null;
 
+/**
+ * Open and initialize the IndexedDB database instance with all object stores and indexes.
+ * 
+ * @returns {Promise<IDBDatabase>} Resolved with active IDBDatabase instance
+ */
 export function openDB() {
   return new Promise((resolve, reject) => {
     if (dbInstance) return resolve(dbInstance);
@@ -34,8 +47,18 @@ export function openDB() {
         }
       }
 
-      // Child stores
-      const childStores = ['itinerary', 'reservations', 'expenses', 'places', 'shopping', 'checklists', 'documents', 'contacts', 'journal'];
+      // Child stores with relational tripId foreign index
+      const childStores = [
+        'itinerary',
+        'reservations',
+        'expenses',
+        'places',
+        'shopping',
+        'checklists',
+        'documents',
+        'contacts',
+        'journal'
+      ];
       for (const storeName of childStores) {
         if (!db.objectStoreNames.contains(storeName)) {
           const store = db.createObjectStore(storeName, { keyPath: 'id', autoIncrement: true });
@@ -50,13 +73,25 @@ export function openDB() {
     };
 
     request.onerror = (event) => {
-      console.error('IndexedDB Error:', event.target.error);
+      console.error('IndexedDB Initialization Error:', event.target.error);
       reject(event.target.error);
     };
   });
 }
 
-// User Management Methods
+// ==========================================
+// User Management & Authentication Methods
+// ==========================================
+
+/**
+ * Register a new user in the local database.
+ * 
+ * @param {string} username - Unique handle
+ * @param {string} name - Full display name
+ * @param {string} password - Password or PIN
+ * @returns {Promise<Object>} The registered user profile
+ * @throws {Error} If username already exists
+ */
 export async function registerUser(username, name, password) {
   const existingUsers = await getAllFromStore('users');
   const normalizedUsername = username.trim().toLowerCase();
@@ -77,6 +112,14 @@ export async function registerUser(username, name, password) {
   return newUser;
 }
 
+/**
+ * Authenticate a user with username and password.
+ * 
+ * @param {string} username - User handle
+ * @param {string} password - Password/PIN
+ * @returns {Promise<Object>} Authenticated user profile
+ * @throws {Error} If credentials do not match
+ */
 export async function loginUser(username, password) {
   const users = await getAllFromStore('users');
   const normalizedUsername = username.trim().toLowerCase();
@@ -87,6 +130,14 @@ export async function loginUser(username, password) {
   return user;
 }
 
+/**
+ * Reset a user's password.
+ * 
+ * @param {string} username - Registered user handle
+ * @param {string} newPassword - New password or PIN
+ * @returns {Promise<Object>} Updated user profile
+ * @throws {Error} If user does not exist
+ */
 export async function resetPassword(username, newPassword) {
   const users = await getAllFromStore('users');
   const normalizedUsername = username.trim().toLowerCase();
@@ -99,7 +150,17 @@ export async function resetPassword(username, newPassword) {
   return user;
 }
 
-// Generic Store Access Methods
+// ==========================================
+// Generic Store CRUD Operations
+// ==========================================
+
+/**
+ * Retrieve all records from a specified store, optionally filtered by tripId index.
+ * 
+ * @param {string} storeName - Target object store name
+ * @param {string|number|null} [tripId=null] - Optional trip foreign key filter
+ * @returns {Promise<Array<Object>>} Array of records
+ */
 export async function getAllFromStore(storeName, tripId = null) {
   const db = await openDB();
   return new Promise((resolve, reject) => {
@@ -119,6 +180,13 @@ export async function getAllFromStore(storeName, tripId = null) {
   });
 }
 
+/**
+ * Retrieve a single record by its primary key ID.
+ * 
+ * @param {string} storeName - Target object store
+ * @param {string|number} id - Primary key value
+ * @returns {Promise<Object|undefined>} The found record or undefined
+ */
 export async function getItemById(storeName, id) {
   const db = await openDB();
   return new Promise((resolve, reject) => {
@@ -131,6 +199,13 @@ export async function getItemById(storeName, id) {
   });
 }
 
+/**
+ * Save or update a record in the specified store.
+ * 
+ * @param {string} storeName - Target object store
+ * @param {Object} item - Record object to insert or update
+ * @returns {Promise<string|number>} Primary key of the saved item
+ */
 export async function saveItem(storeName, item) {
   const db = await openDB();
   return new Promise((resolve, reject) => {
@@ -143,6 +218,13 @@ export async function saveItem(storeName, item) {
   });
 }
 
+/**
+ * Delete a single record by primary key ID.
+ * 
+ * @param {string} storeName - Target object store
+ * @param {string|number} id - Primary key ID to remove
+ * @returns {Promise<boolean>} Resolves true when deleted
+ */
 export async function deleteItem(storeName, id) {
   const db = await openDB();
   return new Promise((resolve, reject) => {
@@ -155,7 +237,17 @@ export async function deleteItem(storeName, id) {
   });
 }
 
-// Trash & Restoration Operations
+// ==========================================
+// Trash & Trip Lifecycle Operations
+// ==========================================
+
+/**
+ * Soft-delete a trip by setting its status to 'papelera'.
+ * Preserves previous status for clean restoration.
+ * 
+ * @param {string} tripId - ID of the trip
+ * @returns {Promise<Object>} Updated trip object
+ */
 export async function moveToTrash(tripId) {
   const trip = await getItemById('trips', tripId);
   if (!trip) throw new Error('Viaje no encontrado');
@@ -168,6 +260,12 @@ export async function moveToTrash(tripId) {
   return trip;
 }
 
+/**
+ * Restore a soft-deleted trip from trash to its previous active status.
+ * 
+ * @param {string} tripId - ID of the trip to restore
+ * @returns {Promise<Object>} Restored trip object
+ */
 export async function restoreTrip(tripId) {
   const trip = await getItemById('trips', tripId);
   if (!trip) throw new Error('Viaje no encontrado');
@@ -179,9 +277,24 @@ export async function restoreTrip(tripId) {
   return trip;
 }
 
+/**
+ * Permanently delete a trip and all its associated child records cascadingly.
+ * 
+ * @param {string} tripId - ID of the trip
+ * @returns {Promise<boolean>} Resolves true when permanently deleted
+ */
 export async function permanentDeleteTrip(tripId) {
-  const db = await openDB();
-  const childStores = ['itinerary', 'reservations', 'expenses', 'places', 'shopping', 'checklists', 'documents', 'contacts', 'journal'];
+  const childStores = [
+    'itinerary',
+    'reservations',
+    'expenses',
+    'places',
+    'shopping',
+    'checklists',
+    'documents',
+    'contacts',
+    'journal'
+  ];
   
   for (const storeName of childStores) {
     const items = await getAllFromStore(storeName, tripId);
@@ -193,7 +306,13 @@ export async function permanentDeleteTrip(tripId) {
   return true;
 }
 
-export async function emptyTrash(userId) {
+/**
+ * Permanently delete all trips marked as 'papelera' for a given user.
+ * 
+ * @param {string|null} [userId=null] - User ID scope
+ * @returns {Promise<boolean>} Resolves true when trash is purged
+ */
+export async function emptyTrash(userId = null) {
   const trips = await getAllFromStore('trips');
   const trashTrips = trips.filter(t => t.status === 'papelera' && (!userId || !t.userId || t.userId === userId));
 
@@ -203,7 +322,33 @@ export async function emptyTrash(userId) {
   return true;
 }
 
-// XML Backup Export Engine
+// ==========================================
+// XML Backup Export & Import Engine
+// ==========================================
+
+/**
+ * Escape XML special characters to maintain valid document syntax.
+ * 
+ * @param {*} str - Raw input value
+ * @returns {string} XML-safe sanitized string
+ */
+function escapeXML(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
+/**
+ * Generate a complete XML string backup of one or all trips including all child collections.
+ * 
+ * @param {string|null} [tripId=null] - Specific trip ID to backup (or null for all)
+ * @param {string|null} [userId=null] - User filter scope
+ * @returns {Promise<string>} Well-formed XML document string
+ */
 export async function exportTripsXML(tripId = null, userId = null) {
   let trips = [];
   if (tripId) {
@@ -231,7 +376,7 @@ export async function exportTripsXML(tripId = null, userId = null) {
     xml += `      <deletedAt>${escapeXML(trip.deletedAt || '')}</deletedAt>\n`;
     xml += `      <budget>${trip.budget || 0}</budget>\n`;
     xml += `      <mainCurrency>${escapeXML(trip.mainCurrency || 'CRC')}</mainCurrency>\n`;
-    xml += `      <coverEmoji>${escapeXML(trip.coverEmoji || '✈️')}</coverEmoji>\n`;
+    xml += `      <coverIcon>${escapeXML(trip.coverIcon || trip.coverEmoji || 'plane')}</coverIcon>\n`;
 
     // Export child collections
     const collections = {
@@ -267,7 +412,14 @@ export async function exportTripsXML(tripId = null, userId = null) {
   return xml;
 }
 
-// XML Import Engine
+/**
+ * Parse and restore trips and collections from a valid TravelOne XML backup file.
+ * 
+ * @param {string} xmlString - Raw XML backup text
+ * @param {string|null} [currentUserId=null] - Active user ID to assign imported trips
+ * @returns {Promise<{importedCount: number, lastTripId: string|null}>} Summary of imported records
+ * @throws {Error} If XML syntax or structure is malformed
+ */
 export async function importTripsXML(xmlString, currentUserId = null) {
   const parser = new DOMParser();
   const xmlDoc = parser.parseFromString(xmlString, 'text/xml');
@@ -306,7 +458,7 @@ export async function importTripsXML(xmlString, currentUserId = null) {
       deletedAt: getTagVal(tripNode, 'deletedAt') || null,
       budget: parseFloat(getTagVal(tripNode, 'budget')) || 0,
       mainCurrency: getTagVal(tripNode, 'mainCurrency') || 'CRC',
-      coverEmoji: getTagVal(tripNode, 'coverEmoji') || '✈️'
+      coverIcon: getTagVal(tripNode, 'coverIcon') || getTagVal(tripNode, 'coverEmoji') || 'plane'
     };
 
     await saveItem('trips', tripObj);
@@ -335,12 +487,3 @@ export async function importTripsXML(xmlString, currentUserId = null) {
   return { importedCount, lastTripId };
 }
 
-function escapeXML(str) {
-  if (str === null || str === undefined) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
-}

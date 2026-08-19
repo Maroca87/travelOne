@@ -1,5 +1,8 @@
 /**
- * Contacts View (Trip Emergency Directory)
+ * TravelOne Contacts & Emergency Directory View
+ * Manages travel emergency hotlines, embassies, tour guides, hotel numbers, and instant calling/email links.
+ * 
+ * @module js/views/contacts
  */
 
 import { getAllFromStore, saveItem, deleteItem } from '../db.js';
@@ -7,6 +10,13 @@ import { showToast } from '../utils.js';
 import { openModal } from '../components/modal.js';
 import { renderIcon } from '../icons.js';
 
+/**
+ * Render the emergency contacts directory view for a trip.
+ * 
+ * @param {Object} trip - The active trip model
+ * @param {Function} refreshView - Callback to refresh view after updates
+ * @returns {Promise<HTMLElement>} The contacts view DOM container
+ */
 export async function renderContactsView(trip, refreshView) {
   if (!trip) return document.createElement('div');
 

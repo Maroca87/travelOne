@@ -1,5 +1,8 @@
 /**
- * Budget View (Category Allocation & Spending Limits)
+ * TravelOne Budget & Financial Planning View
+ * Manages category spending limits, budget allocations, variance tracking, and threshold alerts.
+ * 
+ * @module js/views/budget
  */
 
 import { getAllFromStore, saveItem } from '../db.js';
@@ -7,6 +10,13 @@ import { formatMoney, showToast } from '../utils.js';
 import { openModal } from '../components/modal.js';
 import { renderIcon } from '../icons.js';
 
+/**
+ * Render the budget allocation and spending limit monitor view.
+ * 
+ * @param {Object} trip - The active trip model
+ * @param {Function} refreshView - Callback to refresh view after updates
+ * @returns {Promise<HTMLElement>} The budget view DOM container
+ */
 export async function renderBudgetView(trip, refreshView) {
   if (!trip) return document.createElement('div');
 

@@ -1,11 +1,21 @@
 /**
- * Trip Dashboard View
+ * TravelOne Trip Dashboard View
+ * Displays executive trip metrics, progress bars, upcoming activities, next reservations, and module quick launch cards.
+ * 
+ * @module js/views/dashboard
  */
 
 import { getAllFromStore } from '../db.js';
 import { formatDate, calculateDaysLeft, calculateDuration, formatMoney } from '../utils.js';
 import { renderIcon, renderAppLogoSVG } from '../icons.js';
 
+/**
+ * Render the comprehensive dashboard view for a selected trip.
+ * 
+ * @param {Object} trip - The active trip object
+ * @param {Function} onNavigate - Navigation callback to transition between views
+ * @returns {Promise<HTMLElement>} The dashboard view DOM container
+ */
 export async function renderDashboardView(trip, onNavigate) {
   if (!trip) return document.createElement('div');
 

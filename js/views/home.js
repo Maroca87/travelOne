@@ -1,5 +1,8 @@
 /**
- * Home View ("Mis Viajes", "Historial" & "Papelera")
+ * TravelOne Home & Trip Hub View
+ * Manages active trips, historical completed travels, trash recycling, and XML backup import/export.
+ * 
+ * @module js/views/home
  */
 
 import { getAllFromStore, saveItem, moveToTrash, restoreTrip, permanentDeleteTrip, emptyTrash, importTripsXML, exportTripsXML } from '../db.js';
@@ -7,6 +10,13 @@ import { formatDate, calculateDaysLeft, calculateDuration, formatMoney, showToas
 import { openModal } from '../components/modal.js';
 import { renderIcon, renderAppLogoSVG } from '../icons.js';
 
+/**
+ * Render the main Home view showcasing user trips, filters, and management actions.
+ * 
+ * @param {Function} onSelectTrip - Callback when user selects a trip (receives tripId)
+ * @param {Object|null} currentUser - Active authenticated user profile
+ * @returns {Promise<HTMLElement>} The resolved home view container
+ */
 export async function renderHomeView(onSelectTrip, currentUser) {
   const allTrips = await getAllFromStore('trips');
   // Scoped to current logged in user if userId exists

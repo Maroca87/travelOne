@@ -1,5 +1,8 @@
 /**
- * Places View (Spots to Visit & Must-See Bucket List)
+ * TravelOne Bucket List & Places to Visit View
+ * Manages destination points of interest, tourist attractions, priority levels, estimated admissions, and visited check-offs.
+ * 
+ * @module js/views/places
  */
 
 import { getAllFromStore, saveItem, deleteItem } from '../db.js';
@@ -7,6 +10,13 @@ import { formatMoney, showToast } from '../utils.js';
 import { openModal } from '../components/modal.js';
 import { renderIcon } from '../icons.js';
 
+/**
+ * Render the places and attractions bucket list view.
+ * 
+ * @param {Object} trip - The active trip model
+ * @param {Function} refreshView - Callback to refresh view after updates
+ * @returns {Promise<HTMLElement>} The places view DOM container
+ */
 export async function renderPlacesView(trip, refreshView) {
   if (!trip) return document.createElement('div');
 

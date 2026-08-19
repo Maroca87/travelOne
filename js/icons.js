@@ -1,8 +1,16 @@
 /**
  * TravelOne Modern Vector Icon Library (SVG Engine)
  * Replaces all emojis with crisp, responsive, customizable SVG vector icons.
+ * Provides brand logo generators and theme-aware SVG markup.
+ * 
+ * @module js/icons
  */
 
+/**
+ * Registry of SVG path definitions for the application's icons.
+ * Each entry contains pure SVG elements without wrapper tags.
+ * @type {Object.<string, string>}
+ */
 const ICONS = {
   // Navigation & Core Modules
   'home': `<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>`,
@@ -104,9 +112,15 @@ const ICONS = {
 
 /**
  * Render a Vector SVG Icon
- * @param {string} name - Name of the icon
- * @param {object} options - Options { size, color, className, strokeWidth, style }
- * @returns {string} - SVG markup
+ * 
+ * @param {string} name - The registered name of the icon (case-insensitive)
+ * @param {Object} [options={}] - Configuration options for icon styling
+ * @param {number} [options.size=18] - Width and height in pixels
+ * @param {string} [options.color='currentColor'] - Stroke color or CSS variable
+ * @param {number} [options.strokeWidth=2] - Stroke width in pixels
+ * @param {string} [options.className=''] - Additional CSS classes
+ * @param {string} [options.style=''] - Inline CSS style declarations
+ * @returns {string} Fully rendered HTML/SVG markup string
  */
 export function renderIcon(name, options = {}) {
   const iconName = (name || '').toLowerCase();
@@ -135,11 +149,14 @@ export function renderIcon(name, options = {}) {
 }
 
 /**
- * Render the Official TravelOne Logo SVG
- * (Solid green background, centered white circle, globe + plane orbit + briefcase)
- * @param {number} size - Pixel size (default 42)
- * @param {string} className - Optional CSS class
- * @returns {string} - SVG markup
+ * Render the Official TravelOne Master Logo SVG
+ * Features edge-to-edge solid emerald green background (#0ea35d), centered white circle container,
+ * and modern black travel silhouette (soaring jet, globe coordinates, flight orbit, and luggage).
+ * Fully compatible with iOS Dark Mode (opaque solid fill, no transparent margins).
+ * 
+ * @param {number} [size=42] - Pixel dimensions (width and height)
+ * @param {string} [className=''] - Optional additional CSS class names
+ * @returns {string} SVG markup string for the brand logo
  */
 export function renderAppLogoSVG(size = 42, className = '') {
   return `
@@ -151,41 +168,49 @@ export function renderAppLogoSVG(size = 42, className = '') {
          style="display: inline-block; vertical-align: middle; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 14px rgba(14, 163, 93, 0.35);">
       <defs>
         <clipPath id="logoClip_${size}">
-          <circle cx="256" cy="256" r="195" />
+          <circle cx="256" cy="256" r="205" />
         </clipPath>
       </defs>
       <!-- Solid Green Edge-to-Edge Background -->
       <rect width="512" height="512" fill="#0ea35d" />
       <!-- Center White Circle -->
-      <circle cx="256" cy="256" r="195" fill="#ffffff" />
-      <!-- Vector Travel Elements -->
+      <circle cx="256" cy="256" r="205" fill="#ffffff" />
+      <!-- Vector Travel Silhouette Group -->
       <g clip-path="url(#logoClip_${size})">
-        <!-- Dashed Flight Orbit -->
-        <path d="M 235 90 A 155 155 0 1 1 125 330" fill="none" stroke="#111827" stroke-width="12" stroke-dasharray="14 12" stroke-linecap="round" />
-        <path d="M 330 115 A 155 155 0 0 1 395 240" fill="none" stroke="#111827" stroke-width="12" stroke-dasharray="14 12" stroke-linecap="round" />
-        <!-- Globe -->
-        <circle cx="230" cy="265" r="110" fill="#111827" />
-        <!-- Continents & Meridian -->
-        <path d="M 230 155 C 190 200, 190 330, 230 375" fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="round" />
-        <path d="M 205 175 C 220 185, 235 205, 215 225 C 205 235, 195 255, 210 275 C 220 290, 230 320, 220 340" fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="round" />
-        <path d="M 270 190 C 285 200, 290 220, 305 235 C 315 245, 305 265, 320 280" fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="round" />
-        <path d="M 280 230 C 265 240, 275 260, 295 265" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" />
-        <!-- Plane -->
-        <g transform="translate(180, 145) rotate(35) scale(1.15)">
-          <path d="M 0 -38 C 4 -32, 6 -15, 6 15 L 6 35 L 2 38 L -2 38 L -6 35 L -6 15 C -6 -15, -4 -32, 0 -38 Z" fill="#111827" />
-          <path d="M 0 -5 L 34 14 L 33 22 L 5 13 L -5 13 L -33 22 L -34 14 Z" fill="#111827" />
-          <path d="M 0 28 L 16 38 L 14 43 L 0 38 L -14 43 L -16 38 Z" fill="#111827" />
-          <path d="M 0 -12 L 0 30" stroke="#ffffff" stroke-width="2" stroke-linecap="round" />
+        <!-- Dashed Orbital Flight Path -->
+        <path d="M 120 310 C 90 220, 160 110, 290 95 C 380 85, 425 150, 420 220 C 415 290, 340 395, 230 405 C 150 412, 105 350, 115 285" 
+              fill="none" stroke="#111827" stroke-width="9" stroke-dasharray="14 12" stroke-linecap="round" />
+        <!-- Stylized Globe -->
+        <circle cx="236" cy="268" r="102" fill="#111827" />
+        <!-- Globe Grid Coordinates -->
+        <path d="M 236 166 C 196 205, 196 331, 236 370" fill="none" stroke="#ffffff" stroke-width="5.5" stroke-linecap="round" />
+        <path d="M 236 166 C 276 205, 276 331, 236 370" fill="none" stroke="#ffffff" stroke-width="5.5" stroke-linecap="round" />
+        <path d="M 134 268 C 170 286, 302 286, 338 268" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" />
+        <path d="M 158 215 C 190 230, 282 230, 314 215" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" />
+        <path d="M 158 321 C 190 306, 282 306, 314 321" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" />
+        <!-- Soaring Jet Airplane -->
+        <g transform="translate(290, 138) rotate(42)">
+          <path d="M 0 -52 C 5 -42, 7 -20, 7 24 L 7 48 L 2 52 L -2 52 L -7 48 L -7 24 C -7 -20, -5 -42, 0 -52 Z" fill="#111827" />
+          <path d="M 0 -8 L 52 18 L 50 28 L 7 15 L -7 15 L -50 28 L -52 18 Z" fill="#111827" />
+          <rect x="18" y="10" width="6" height="15" rx="3" fill="#111827" stroke="#ffffff" stroke-width="1.5" />
+          <rect x="-24" y="10" width="6" height="15" rx="3" fill="#111827" stroke="#ffffff" stroke-width="1.5" />
+          <path d="M 0 38 L 24 50 L 22 56 L 0 50 L -22 56 L -24 50 Z" fill="#111827" />
+          <line x1="0" y1="-28" x2="0" y2="40" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
         </g>
-        <!-- Briefcase -->
-        <g transform="translate(295, 290)">
-          <rect x="-6" y="-6" width="140" height="110" rx="16" fill="rgba(0,0,0,0.15)" />
-          <path d="M 45 0 L 45 -14 C 45 -22, 85 -22, 85 -14 L 85 0" fill="none" stroke="#111827" stroke-width="9" stroke-linecap="round" />
-          <rect x="0" y="0" width="128" height="98" rx="14" fill="#111827" />
-          <path d="M 0 14 C 0 6, 6 0, 14 0 L 114 0 C 122 0, 128 6, 128 14 L 128 42 C 128 48, 122 52, 114 52 L 14 52 C 6 52, 0 48, 0 42 Z" fill="#1f2937" />
-          <path d="M 2 44 L 126 44" stroke="#ffffff" stroke-width="4" stroke-linecap="round" />
-          <rect x="48" y="34" width="32" height="24" rx="6" fill="#111827" stroke="#ffffff" stroke-width="4" />
-          <rect x="58" y="42" width="12" height="8" rx="2" fill="#ffffff" />
+        <!-- Modern Executive Luggage -->
+        <g transform="translate(305, 298)">
+          <path d="M 38 0 L 38 -14 C 38 -20, 74 -20, 74 -14 L 74 0" fill="none" stroke="#111827" stroke-width="7.5" stroke-linecap="round" />
+          <rect x="0" y="0" width="112" height="88" rx="14" fill="#111827" />
+          <path d="M 0 12 C 0 5, 5 0, 12 0 L 100 0 C 107 0, 112 5, 112 12 L 112 36 C 112 42, 107 46, 100 46 L 12 46 C 5 46, 0 42, 0 36 Z" fill="#1f2937" />
+          <line x1="4" y1="40" x2="108" y2="40" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" />
+          <rect x="42" y="30" width="28" height="20" rx="5" fill="#111827" stroke="#ffffff" stroke-width="3" />
+          <rect x="51" y="36" width="10" height="8" rx="2" fill="#ffffff" />
+          <circle cx="20" cy="90" r="5" fill="#111827" />
+          <circle cx="92" cy="90" r="5" fill="#111827" />
+        </g>
+        <!-- Compass Sparkle -->
+        <g transform="translate(136, 140) scale(0.9)">
+          <path d="M 0 -18 Q 0 0, 18 0 Q 0 0, 0 18 Q 0 0, -18 0 Q 0 0, 0 -18 Z" fill="#111827" />
         </g>
       </g>
     </svg>
@@ -197,3 +222,4 @@ export default {
   renderAppLogoSVG,
   icons: ICONS
 };
+

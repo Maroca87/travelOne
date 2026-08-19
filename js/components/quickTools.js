@@ -1,11 +1,19 @@
 /**
- * Quick Tools Widget (Currency Converter & Tip Calculator)
+ * TravelOne Quick Travel Tools Component
+ * Provides floating action button (FAB) triggering live offline currency conversion and tip calculations.
+ * 
+ * @module js/components/quickTools
  */
 
 import { openModal } from './modal.js';
 import { formatMoney } from '../utils.js';
 import { renderIcon } from '../icons.js';
 
+/**
+ * Render the Floating Action Button (FAB) HTML for quick tools.
+ * 
+ * @returns {string} HTML markup string for the FAB button
+ */
 export function renderQuickToolsFAB() {
   return `
     <button class="quick-tools-fab" id="fab-quick-tools" title="Herramientas rápidas">
@@ -14,6 +22,11 @@ export function renderQuickToolsFAB() {
   `;
 }
 
+/**
+ * Open the interactive modal for multi-currency conversion and tip calculation.
+ * 
+ * @param {Object|null} trip - Current active trip context with currency and rate settings
+ */
 export function openCurrencyConverterModal(trip) {
   const rate = (trip && trip.exchangeRates && trip.exchangeRates.USD) ? trip.exchangeRates.USD : 500;
   const mainCur = (trip && trip.mainCurrency) ? trip.mainCurrency : 'CRC';

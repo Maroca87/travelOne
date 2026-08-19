@@ -1,9 +1,18 @@
 /**
- * TravelOne Initial Seed Data ("Costa Rica 2026" Pura Vida Edition 🇨🇷)
+ * TravelOne Initial Seed Data Generator
+ * Seeds a default user profile and a demo trip with realistic activities,
+ * reservations, expenses, bucket list places, checklists, and memories.
+ * 
+ * @module js/seed
  */
 
 import { getAllFromStore, saveItem } from './db.js';
 
+/**
+ * Seed initial demonstration data if the local database is currently empty.
+ * 
+ * @returns {Promise<void>}
+ */
 export async function seedDemoDataIfNeeded() {
   const existingUsers = await getAllFromStore('users');
   let demoUserId = 'usr-demo';
@@ -40,7 +49,7 @@ export async function seedDemoDataIfNeeded() {
     mainCurrency: 'CRC',
     secondaryCurrencies: ['USD'],
     exchangeRates: { USD: 500 }, // 1 USD = 500 CRC
-    coverEmoji: '🇨🇷',
+    coverIcon: 'plane',
     createdAt: new Date().toISOString()
   };
 

@@ -1,5 +1,8 @@
 /**
- * Expenses View (Expenses Manager & Category Breakdowns)
+ * TravelOne Expense Tracker View
+ * Manages travel expenditures, category distribution progress bars, multi-payer breakdowns, and expense creation.
+ * 
+ * @module js/views/expenses
  */
 
 import { getAllFromStore, saveItem, deleteItem } from '../db.js';
@@ -7,6 +10,13 @@ import { formatDate, formatMoney, getCategoryBadgeClass, showToast } from '../ut
 import { openModal } from '../components/modal.js';
 import { renderIcon } from '../icons.js';
 
+/**
+ * Render the expense manager view with summary analytics and transaction logs.
+ * 
+ * @param {Object} trip - The active trip model
+ * @param {Function} refreshView - Callback to refresh view after updates
+ * @returns {Promise<HTMLElement>} The expenses view DOM element
+ */
 export async function renderExpensesView(trip, refreshView) {
   if (!trip) return document.createElement('div');
 

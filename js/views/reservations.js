@@ -1,5 +1,8 @@
 /**
- * Reservations View (Hotels, Flights, Tours, Rentals)
+ * TravelOne Bookings & Reservations View
+ * Manages confirmed bookings for hotels, flights, buses, car rentals, tours, and restaurants with voucher attachments.
+ * 
+ * @module js/views/reservations
  */
 
 import { getAllFromStore, saveItem, deleteItem } from '../db.js';
@@ -7,6 +10,13 @@ import { formatDate, formatMoney, fileToDataURL, showToast } from '../utils.js';
 import { openModal } from '../components/modal.js';
 import { renderIcon } from '../icons.js';
 
+/**
+ * Render the reservations and bookings list view.
+ * 
+ * @param {Object} trip - The active trip model
+ * @param {Function} refreshView - Callback to re-render the view
+ * @returns {Promise<HTMLElement>} The reservations view DOM container
+ */
 export async function renderReservationsView(trip, refreshView) {
   if (!trip) return document.createElement('div');
 

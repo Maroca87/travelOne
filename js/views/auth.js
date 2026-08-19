@@ -1,5 +1,8 @@
 /**
- * Auth View (Local Login & User Registration)
+ * TravelOne Local Authentication View
+ * Provides user registration, login verification, and PIN/password recovery modals.
+ * 
+ * @module js/views/auth
  */
 
 import { registerUser, loginUser, resetPassword } from '../db.js';
@@ -7,6 +10,12 @@ import { showToast } from '../utils.js';
 import { openModal } from '../components/modal.js';
 import { renderIcon, renderAppLogoSVG } from '../icons.js';
 
+/**
+ * Render the authentication screen with login and registration tabs.
+ * 
+ * @param {Function} onAuthSuccess - Callback invoked with authenticated user profile
+ * @returns {HTMLElement} The root authentication container element
+ */
 export function renderAuthView(onAuthSuccess) {
   let isRegisterTab = false;
 

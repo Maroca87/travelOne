@@ -1,7 +1,18 @@
 /**
- * Modal System Helper
+ * TravelOne Modal Dialog Engine
+ * Manages modal overlays, custom HTML bodies, backdrop dismissals, and asynchronous confirmations.
+ * 
+ * @module js/components/modal
  */
 
+/**
+ * Open an interactive modal dialog overlay.
+ * 
+ * @param {string} title - Modal header title string or HTML
+ * @param {string} bodyHTML - Inner form or content HTML string
+ * @param {Function|null} [onConfirm=null] - Async callback when primary action is triggered. Return false to prevent closing.
+ * @param {string} [confirmText='Guardar'] - Text label for the primary action button
+ */
 export function openModal(title, bodyHTML, onConfirm = null, confirmText = 'Guardar') {
   let modalContainer = document.getElementById('travelone-modal-container');
   if (!modalContainer) {

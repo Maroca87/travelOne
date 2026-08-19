@@ -1,5 +1,8 @@
 /**
- * Shopping List View (Souvenirs & Travel Items)
+ * TravelOne Shopping & Souvenirs View
+ * Tracks desired purchases, quantities, estimated vs actual costs, store locations, and purchase completion.
+ * 
+ * @module js/views/shopping
  */
 
 import { getAllFromStore, saveItem, deleteItem } from '../db.js';
@@ -7,6 +10,13 @@ import { formatMoney, showToast } from '../utils.js';
 import { openModal } from '../components/modal.js';
 import { renderIcon } from '../icons.js';
 
+/**
+ * Render the shopping list and souvenir expense tracker view.
+ * 
+ * @param {Object} trip - The active trip model
+ * @param {Function} refreshView - Callback to refresh view after updates
+ * @returns {Promise<HTMLElement>} The shopping view DOM container
+ */
 export async function renderShoppingView(trip, refreshView) {
   if (!trip) return document.createElement('div');
 

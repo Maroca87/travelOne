@@ -1,9 +1,20 @@
 /**
  * TravelOne Responsive Navigation Component
+ * Generates the desktop sidebar, mobile header bar, and fixed bottom tab bar with dynamic module routing.
+ * 
+ * @module js/components/nav
  */
 
 import { renderIcon, renderAppLogoSVG } from '../icons.js';
 
+/**
+ * Render the complete application navigation layout.
+ * 
+ * @param {string} activeView - The currently selected view name
+ * @param {Object|null} currentTrip - The active trip model or null
+ * @param {Object|null} currentUser - The authenticated user profile or null
+ * @returns {string} Combined HTML markup for sidebar and mobile navigation
+ */
 export function renderNavigation(activeView, currentTrip, currentUser) {
   const tripName = currentTrip ? currentTrip.name : 'Sin Viaje';
   const userName = currentUser ? currentUser.name : 'Usuario';

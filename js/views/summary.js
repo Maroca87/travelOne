@@ -1,11 +1,21 @@
 /**
- * Trip Summary & Backup Export View (XML Support)
+ * TravelOne Trip Summary & Export Report View
+ * Aggregates complete trip statistics, generates print-ready executive dossiers, and provides single-trip XML backups.
+ * 
+ * @module js/views/summary
  */
 
 import { getAllFromStore, exportTripsXML } from '../db.js';
 import { formatDate, calculateDuration, formatMoney, showToast } from '../utils.js';
 import { renderIcon, renderAppLogoSVG } from '../icons.js';
 
+/**
+ * Render the consolidated trip executive summary and printable report view.
+ * 
+ * @param {Object} trip - The active trip model
+ * @param {Function} refreshView - Callback to refresh view after updates
+ * @returns {Promise<HTMLElement>} The summary view DOM container
+ */
 export async function renderSummaryView(trip, refreshView) {
   if (!trip) return document.createElement('div');
 

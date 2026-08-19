@@ -1,9 +1,16 @@
 /**
- * TravelOne Service Worker - Cache-First Offline Engine - Costa Rica Edition 🇨🇷
+ * TravelOne Service Worker - Cache-First Offline PWA Engine
+ * Provides persistent offline caching, background asset updates, and seamless navigation fallback.
+ * 
+ * @module sw
  */
 
-const CACHE_NAME = 'travelone-cr-v4';
+const CACHE_NAME = 'travelone-v5';
 
+/**
+ * Essential static assets and application modules cached for full offline operation.
+ * @type {string[]}
+ */
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -41,6 +48,10 @@ const ASSETS_TO_CACHE = [
   './js/views/summary.js'
 ];
 
+/**
+ * Service Worker Installation Event
+ * Opens cache and populates all core application assets.
+ */
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -49,6 +60,10 @@ self.addEventListener('install', (event) => {
   );
 });
 
+/**
+ * Service Worker Activation Event
+ * Purges outdated cache versions and claims active clients immediately.
+ */
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
@@ -63,6 +78,10 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+/**
+ * Service Worker Fetch Event
+ * Implements Cache-First strategy with automatic background network fallback and caching.
+ */
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
@@ -85,3 +104,4 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
+
