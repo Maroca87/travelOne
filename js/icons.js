@@ -150,8 +150,8 @@ export function renderIcon(name, options = {}) {
 
 /**
  * Render the Official TravelOne Master Logo SVG
- * Features edge-to-edge solid emerald green background (#0ea35d), subtle ambient glow ring,
- * and a crisp pure white centered jet silhouette.
+ * Features edge-to-edge solid emerald green background (#0ea35d), centered crisp white circle container (#ffffff),
+ * and a sleek centered black airplane silhouette (#0b1326).
  * Fully compatible with iOS & Android Dark Mode (opaque solid fill, no transparent margins).
  * 
  * @param {number} [size=42] - Pixel dimensions (width and height)
@@ -171,16 +171,16 @@ export function renderAppLogoSVG(size = 42, className = '') {
           <stop offset="0%" stop-color="#0ea35d" />
           <stop offset="100%" stop-color="#09874c" />
         </linearGradient>
-        <filter id="travelone-brand-shadow" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#002814" flood-opacity="0.4" />
+        <filter id="travelone-brand-circle-shadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#002814" flood-opacity="0.35" />
         </filter>
       </defs>
       <!-- Solid Emerald Green Edge-to-Edge Background -->
       <rect width="512" height="512" fill="url(#travelone-brand-grad)" />
-      <!-- Subtle Ambient Glow Ring -->
-      <circle cx="256" cy="256" r="195" fill="none" stroke="rgba(255, 255, 255, 0.28)" stroke-width="6" />
-      <!-- Crisp Pure White Centered Jet Silhouette -->
-      <polygon points="389.12,122.88 377.17,146.76 350.91,180.18 316.28,217.2 299.58,236.3 343.75,378.37 333.0,389.12 251.82,284.06 207.65,323.46 221.97,380.76 213.62,389.12 181.38,344.95 156.3,362.85 147.96,364.04 149.15,355.7 167.05,330.62 122.88,298.38 131.24,290.03 188.54,304.35 227.94,260.18 122.88,179.0 133.63,168.25 275.7,212.42 294.8,195.72 331.82,161.09 365.24,134.83" fill="#ffffff" filter="url(#travelone-brand-shadow)" />
+      <!-- Crisp Central White Circle -->
+      <circle cx="256" cy="256" r="175" fill="#ffffff" filter="url(#travelone-brand-circle-shadow)" />
+      <!-- Sleek Centered Airplane Silhouette in Solid Black -->
+      <polygon points="361.0,151.0 351.58,169.83 330.86,196.2 303.55,225.39 290.37,240.46 325.21,352.52 316.74,361.0 252.7,278.13 217.86,309.21 229.16,354.41 222.57,361.0 197.15,326.16 177.36,340.28 170.78,341.22 171.72,334.64 185.84,314.85 151.0,289.43 157.59,282.84 202.79,294.14 233.87,259.3 151.0,195.26 159.48,186.79 271.54,221.63 286.61,208.45 315.8,181.14 342.17,160.42" fill="#0b1326" />
     </svg>
   `.trim();
 }

@@ -1,6 +1,9 @@
 """
 TravelOne High-Definition Icon Generator
-Generates 100% opaque, emerald green icons with crisp white centered airplane silhouettes.
+Generates icons with:
+- Solid vibrant emerald green background (#0ea35d -> #09874c)
+- Centered crisp white circle container (#ffffff)
+- Centered sleek black airplane silhouette (#0b1326)
 Guaranteed immune to iOS Safari Dark Mode and Android maskable icon clipping.
 """
 from PIL import Image, ImageDraw, ImageFilter
@@ -27,45 +30,45 @@ def make_gradient(width, height):
     base.putpixel((1, 1), (9, 135, 76))
     return base.resize((width, height), Image.Resampling.BICUBIC).convert('RGBA')
 
-def generate_green_icon(size, filename, is_rgb=False):
+def generate_icon(size, filename, is_rgb=False):
     canvas_size = 1024
     
     # 1. Base Emerald Green Gradient (100% Solid Full Bleed)
     im = make_gradient(canvas_size, canvas_size)
-    draw = ImageDraw.Draw(im)
     
-    # 2. Subtle soft concentric glow ring
-    ring_radius = int(canvas_size * 0.38)
-    ring_cx = canvas_size // 2
-    ring_cy = canvas_size // 2
-    ring_width = max(2, int(canvas_size * 0.012))
+    # 2. Centered White Circle with subtle ambient shadow
+    circle_radius = int(canvas_size * 0.34) # Radius 348 in 1024 -> ~174 in 512
+    cx = canvas_size // 2
+    cy = canvas_size // 2
+    
+    # Shadow for white circle
+    shadow_offset_y = int(canvas_size * 0.015)
+    shadow_img = Image.new('RGBA', (canvas_size, canvas_size), (0, 0, 0, 0))
+    s_draw = ImageDraw.Draw(shadow_img)
+    s_draw.ellipse(
+        [cx - circle_radius, cy - circle_radius + shadow_offset_y, cx + circle_radius, cy + circle_radius + shadow_offset_y],
+        fill=(0, 40, 20, 90)
+    )
+    shadow_img = shadow_img.filter(ImageFilter.GaussianBlur(radius=canvas_size * 0.015))
+    im = Image.alpha_composite(im, shadow_img)
+    
+    # Draw Crisp White Circle
+    draw = ImageDraw.Draw(im)
     draw.ellipse(
-        [ring_cx - ring_radius, ring_cy - ring_radius, ring_cx + ring_radius, ring_cy + ring_radius],
-        outline=(255, 255, 255, 70),
-        width=ring_width
+        [cx - circle_radius, cy - circle_radius, cx + circle_radius, cy + circle_radius],
+        fill=(255, 255, 255, 255)
     )
     
-    # 3. Scaled & Centered Airplane Silhouette (with 24% safe margin)
-    plane_scale = (canvas_size * 0.52) / 184.08
+    # 3. Scaled & Centered Black Airplane Silhouette inside the white circle
+    plane_scale = (circle_radius * 2 * 0.60) / 184.08
     scaled_points = []
     for px, py in raw_points:
         nx = (px - cx_orig) * plane_scale + (canvas_size / 2)
         ny = (py - cy_orig) * plane_scale + (canvas_size / 2)
         scaled_points.append((nx, ny))
     
-    # Soft drop shadow for airplane
-    shadow_offset_y = int(canvas_size * 0.018)
-    shadow_points = [(x, y + shadow_offset_y) for x, y in scaled_points]
-    
-    shadow_img = Image.new('RGBA', (canvas_size, canvas_size), (0, 0, 0, 0))
-    s_draw = ImageDraw.Draw(shadow_img)
-    s_draw.polygon(shadow_points, fill=(0, 40, 20, 85))
-    shadow_img = shadow_img.filter(ImageFilter.GaussianBlur(radius=canvas_size * 0.012))
-    im = Image.alpha_composite(im, shadow_img)
-    
-    # Crisp Pure White Airplane Silhouette
-    draw = ImageDraw.Draw(im)
-    draw.polygon(scaled_points, fill=(255, 255, 255, 255))
+    # Draw Sleek Jet in Solid Black (#0b1326)
+    draw.polygon(scaled_points, fill=(11, 19, 38, 255))
     
     # Resize to target dimension with Lanczos anti-aliasing
     final_img = im.resize((size, size), Image.Resampling.LANCZOS)
@@ -86,4 +89,4 @@ if __name__ == '__main__':
         ('app-logo.png', 512, False),
         ('favicon.png', 64, False)
     ]:
-        generate_green_icon(sz, name, rgb)
+        generate_icon(sz, name, rgb)
