@@ -231,102 +231,105 @@ export async function renderHomeView(onSelectTrip, currentUser) {
       ` : ''}
 
       <!-- Grid Display -->
-      <div class="grid-3">
+      <div class="grid grid-3">
         ${activeTab === 'active' ? renderTripCards(activeTrips, false, false) : ''}
         ${activeTab === 'history' ? renderTripCards(filteredHistory, false, true) : ''}
         ${activeTab === 'trash' ? renderTripCards(trashTrips, true, false) : ''}
       </div>
     `;
 
-    // Attach Event Handlers
-    setTimeout(() => {
-      // Tab switching
-      container.querySelector('#tab-active')?.addEventListener('click', () => { activeTab = 'active'; renderContent(); });
-      container.querySelector('#tab-history')?.addEventListener('click', () => { activeTab = 'history'; renderContent(); });
-      container.querySelector('#tab-trash')?.addEventListener('click', () => { activeTab = 'trash'; renderContent(); });
+    // Attach Event Handlers Synchronously
+    // Tab switching
+    container.querySelector('#tab-active')?.addEventListener('click', () => { activeTab = 'active'; renderContent(); });
+    container.querySelector('#tab-history')?.addEventListener('click', () => { activeTab = 'history'; renderContent(); });
+    container.querySelector('#tab-trash')?.addEventListener('click', () => { activeTab = 'trash'; renderContent(); });
 
-      // Search & Filters in History
-      container.querySelector('#hist-search')?.addEventListener('input', (e) => { searchQuery = e.target.value; renderContent(); });
-      container.querySelector('#hist-year')?.addEventListener('change', (e) => { selectedYear = e.target.value; renderContent(); });
-      container.querySelector('#hist-dest')?.addEventListener('change', (e) => { selectedDestination = e.target.value; renderContent(); });
-      container.querySelector('#hist-sort')?.addEventListener('change', (e) => { sortOrder = e.target.value; renderContent(); });
+    // Search & Filters in History
+    container.querySelector('#hist-search')?.addEventListener('input', (e) => { searchQuery = e.target.value; renderContent(); });
+    container.querySelector('#hist-year')?.addEventListener('change', (e) => { selectedYear = e.target.value; renderContent(); });
+    container.querySelector('#hist-dest')?.addEventListener('change', (e) => { selectedDestination = e.target.value; renderContent(); });
+    container.querySelector('#hist-sort')?.addEventListener('change', (e) => { sortOrder = e.target.value; renderContent(); });
 
-      // Open trip
-      container.querySelectorAll('.btn-open-trip, .trip-card').forEach(el => {
-        el.addEventListener('click', (e) => {
-          if (e.target.closest('button')) return;
-          const tripId = el.getAttribute('data-id');
-          onSelectTrip(tripId);
-        });
+    // Open trip (Button & Card)
+    container.querySelectorAll('.btn-open-trip').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const tripId = btn.getAttribute('data-id');
+        if (tripId) onSelectTrip(tripId);
       });
+    });
 
-      container.querySelectorAll('.btn-open-trip').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const tripId = btn.getAttribute('data-id');
-          onSelectTrip(tripId);
-        });
+    container.querySelectorAll('.trip-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('button') || e.target.closest('a')) return;
+        const tripId = card.getAttribute('data-id');
+        if (tripId) onSelectTrip(tripId);
       });
+    });
 
-      // Add trip
-      container.querySelector('#btn-add-trip')?.addEventListener('click', () => openNewTripModal(onSelectTrip, currentUser, () => renderHomeView(onSelectTrip, currentUser)));
-      container.querySelector('#btn-create-first-trip')?.addEventListener('click', () => openNewTripModal(onSelectTrip, currentUser, () => renderHomeView(onSelectTrip, currentUser)));
+    // Add trip
+    container.querySelector('#btn-add-trip')?.addEventListener('click', () => openNewTripModal(onSelectTrip, currentUser, () => renderHomeView(onSelectTrip, currentUser)));
+    container.querySelector('#btn-create-first-trip')?.addEventListener('click', () => openNewTripModal(onSelectTrip, currentUser, () => renderHomeView(onSelectTrip, currentUser)));
 
-      // Move to Trash (Soft Delete)
-      container.querySelectorAll('.btn-move-trash-trip').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-          e.stopPropagation();
-          const tripId = btn.getAttribute('data-id');
-          await moveToTrash(tripId);
-          showToast('Viaje movido a la Papelera', 'info');
-          const updated = await getAllFromStore('trips');
-          userTrips.length = 0;
-          userTrips.push(...(currentUser ? updated.filter(t => !t.userId || t.userId === currentUser.id) : updated));
-          renderContent();
-        });
+    // Move to Trash (Soft Delete)
+    container.querySelectorAll('.btn-move-trash-trip').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const tripId = btn.getAttribute('data-id');
+        await moveToTrash(tripId);
+        showToast('Viaje movido a la Papelera', 'info');
+        const updated = await getAllFromStore('trips');
+        userTrips.length = 0;
+        userTrips.push(...(currentUser ? updated.filter(t => !t.userId || t.userId === currentUser.id) : updated));
+        renderContent();
       });
+    });
 
-      // Restore Trip
-      container.querySelectorAll('.btn-restore-trip').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-          e.stopPropagation();
-          const tripId = btn.getAttribute('data-id');
-          await restoreTrip(tripId);
-          showToast('Viaje restaurado con éxito');
-          const updated = await getAllFromStore('trips');
-          userTrips.length = 0;
-          userTrips.push(...(currentUser ? updated.filter(t => !t.userId || t.userId === currentUser.id) : updated));
-          renderContent();
-        });
+    // Restore Trip
+    container.querySelectorAll('.btn-restore-trip').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const tripId = btn.getAttribute('data-id');
+        await restoreTrip(tripId);
+        showToast('Viaje restaurado con éxito');
+        const updated = await getAllFromStore('trips');
+        userTrips.length = 0;
+        userTrips.push(...(currentUser ? updated.filter(t => !t.userId || t.userId === currentUser.id) : updated));
+        renderContent();
       });
+    });
 
-      // Permanent Delete Trip
-      container.querySelectorAll('.btn-perm-delete-trip').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-          e.stopPropagation();
-          const tripId = btn.getAttribute('data-id');
-          if (confirm('Esta acción eliminará permanentemente el viaje y toda la información asociada.')) {
-            await permanentDeleteTrip(tripId);
-            showToast('Viaje eliminado definitivamente', 'info');
-            const updated = await getAllFromStore('trips');
-            userTrips.length = 0;
-            userTrips.push(...(currentUser ? updated.filter(t => !t.userId || t.userId === currentUser.id) : updated));
-            renderContent();
-          }
-        });
-      });
-
-      // Empty Trash
-      container.querySelector('#btn-empty-trash')?.addEventListener('click', async () => {
-        if (confirm('¿Vaciar la papelera? Esta acción eliminará permanentemente todos los viajes en papelera y toda su información.')) {
-          await emptyTrash(currentUser ? currentUser.id : null);
-          showToast('Papelera vaciada');
+    // Permanent Delete Trip
+    container.querySelectorAll('.btn-perm-delete-trip').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const tripId = btn.getAttribute('data-id');
+        if (confirm('Esta acción eliminará permanentemente el viaje y toda la información asociada.')) {
+          await permanentDeleteTrip(tripId);
+          showToast('Viaje eliminado definitivamente', 'info');
           const updated = await getAllFromStore('trips');
           userTrips.length = 0;
           userTrips.push(...(currentUser ? updated.filter(t => !t.userId || t.userId === currentUser.id) : updated));
           renderContent();
         }
       });
+    });
+
+    // Empty Trash
+    container.querySelector('#btn-empty-trash')?.addEventListener('click', async () => {
+      if (confirm('¿Vaciar la papelera? Esta acción eliminará permanentemente todos los viajes en papelera y toda su información.')) {
+        await emptyTrash(currentUser ? currentUser.id : null);
+        showToast('Papelera vaciada');
+        const updated = await getAllFromStore('trips');
+        userTrips.length = 0;
+        userTrips.push(...(currentUser ? updated.filter(t => !t.userId || t.userId === currentUser.id) : updated));
+        renderContent();
+      }
+    });
 
       // Export All XML
       container.querySelector('#btn-export-all-xml')?.addEventListener('click', async () => {

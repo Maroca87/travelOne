@@ -226,14 +226,14 @@ export async function renderJournalView(trip, refreshView, initialTab = 'journal
     `;
 
     // Attach Tab Switch Listeners
-    document.getElementById('tab-sub-journal')?.addEventListener('click', () => { activeTab = 'journal'; renderContent(); });
-    document.getElementById('tab-sub-summary')?.addEventListener('click', () => { activeTab = 'summary'; renderContent(); });
+    container.querySelector('#tab-sub-journal')?.addEventListener('click', () => { activeTab = 'journal'; renderContent(); });
+    container.querySelector('#tab-sub-summary')?.addEventListener('click', () => { activeTab = 'summary'; renderContent(); });
 
     // Journal Action Handlers
-    document.getElementById('btn-add-entry')?.addEventListener('click', () => openJournalModal());
-    document.getElementById('btn-add-entry-empty')?.addEventListener('click', () => openJournalModal());
+    container.querySelector('#btn-add-entry')?.addEventListener('click', () => openJournalModal());
+    container.querySelector('#btn-add-entry-empty')?.addEventListener('click', () => openJournalModal());
 
-    document.querySelectorAll('.btn-edit-entry').forEach(btn => {
+    container.querySelectorAll('.btn-edit-entry').forEach(btn => {
       btn.addEventListener('click', () => {
         const id = parseInt(btn.getAttribute('data-id'));
         const item = journalEntries.find(j => j.id === id);
@@ -241,7 +241,7 @@ export async function renderJournalView(trip, refreshView, initialTab = 'journal
       });
     });
 
-    document.querySelectorAll('.btn-delete-entry').forEach(btn => {
+    container.querySelectorAll('.btn-delete-entry').forEach(btn => {
       btn.addEventListener('click', async () => {
         const id = parseInt(btn.getAttribute('data-id'));
         if (confirm('¿Deseas eliminar esta entrada del diario?')) {
@@ -253,11 +253,11 @@ export async function renderJournalView(trip, refreshView, initialTab = 'journal
     });
 
     // Summary Action Handlers
-    document.getElementById('btn-print-summary')?.addEventListener('click', () => {
+    container.querySelector('#btn-print-summary')?.addEventListener('click', () => {
       window.print();
     });
 
-    document.getElementById('btn-export-trip-xml')?.addEventListener('click', async () => {
+    container.querySelector('#btn-export-trip-xml')?.addEventListener('click', async () => {
       try {
         const xml = await exportTripsXML();
         const blob = new Blob([xml], { type: 'application/xml' });

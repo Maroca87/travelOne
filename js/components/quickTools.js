@@ -183,7 +183,7 @@ export function openCurrencyConverterModal(trip) {
   const modalTitle = `<span class="icon-inline">${renderIcon('calculator', { size: 20, color: 'var(--primary-cyan)' })} Herramientas de Viaje</span>`;
   openModal(modalTitle, bodyHTML, null, null);
 
-  setTimeout(() => {
+  const initModalListeners = () => {
     // Elements
     const tabConverter = document.getElementById('tab-tool-converter');
     const tabTips = document.getElementById('tab-tool-tips');
@@ -327,7 +327,10 @@ export function openCurrencyConverterModal(trip) {
     tipAmt?.addEventListener('input', updateTips);
     tipPct?.addEventListener('change', updateTips);
     tipPpl?.addEventListener('input', updateTips);
-  }, 50);
+  };
+
+  // Run modal initialization immediately
+  initModalListeners();
 }
 
 

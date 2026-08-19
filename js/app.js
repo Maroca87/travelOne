@@ -216,22 +216,23 @@ class TravelOneApp {
     viewContainer.appendChild(viewElement);
 
     // Attach navigation link event listeners
-    document.querySelectorAll('[data-view]').forEach(btn => {
+    this.appLayout.querySelectorAll('[data-view]').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         const targetView = btn.getAttribute('data-view');
-        this.setView(targetView);
+        if (targetView) this.setView(targetView);
       });
     });
 
     // Attach logout event listeners
-    document.getElementById('btn-app-logout')?.addEventListener('click', () => this.logout());
-    document.getElementById('btn-mobile-logout')?.addEventListener('click', () => this.logout());
+    this.appLayout.querySelector('#btn-app-logout')?.addEventListener('click', () => this.logout());
+    this.appLayout.querySelector('#btn-mobile-logout')?.addEventListener('click', () => this.logout());
 
     // Attach Quick Tools FAB listener
-    const fabBtn = document.getElementById('fab-quick-tools');
+    const fabBtn = this.appLayout.querySelector('#fab-quick-tools');
     if (fabBtn) {
-      fabBtn.addEventListener('click', () => {
+      fabBtn.addEventListener('click', (e) => {
+        e.preventDefault();
         openCurrencyConverterModal(this.currentTrip);
       });
     }

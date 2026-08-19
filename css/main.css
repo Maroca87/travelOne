@@ -60,10 +60,23 @@ h1, h2, h3, h4, h5, h6 {
   color: #ffffff;
 }
 
+button, a, select, input, .btn, .nav-item, .bottom-nav-item, .card-interactive, .quick-tools-fab, .tab-btn {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button, a, .btn, .nav-item, .bottom-nav-item, .card-interactive, .quick-tools-fab {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
 /* App Container Layout */
 #app-layout {
   display: flex;
   min-height: 100vh;
+  position: relative;
+  width: 100%;
 }
 
 /* Mobile Header Top Bar */

@@ -268,14 +268,14 @@ export async function renderChecklistView(trip, refreshView, initialTab = 'check
     `;
 
     // Attach Tab Switch Listeners
-    document.getElementById('tab-sub-checklist')?.addEventListener('click', () => { activeTab = 'checklist'; renderContent(); });
-    document.getElementById('tab-sub-documents')?.addEventListener('click', () => { activeTab = 'documents'; renderContent(); });
-    document.getElementById('tab-sub-contacts')?.addEventListener('click', () => { activeTab = 'contacts'; renderContent(); });
+    container.querySelector('#tab-sub-checklist')?.addEventListener('click', () => { activeTab = 'checklist'; renderContent(); });
+    container.querySelector('#tab-sub-documents')?.addEventListener('click', () => { activeTab = 'documents'; renderContent(); });
+    container.querySelector('#tab-sub-contacts')?.addEventListener('click', () => { activeTab = 'contacts'; renderContent(); });
 
     // Checklist Action Handlers
-    document.getElementById('btn-add-task')?.addEventListener('click', () => openChecklistModal());
+    container.querySelector('#btn-add-task')?.addEventListener('click', () => openChecklistModal());
 
-    document.querySelectorAll('.chk-toggle-task').forEach(chk => {
+    container.querySelectorAll('.chk-toggle-task').forEach(chk => {
       chk.addEventListener('change', async () => {
         const id = parseInt(chk.getAttribute('data-id'));
         const item = checklists.find(c => c.id === id);
@@ -288,7 +288,7 @@ export async function renderChecklistView(trip, refreshView, initialTab = 'check
       });
     });
 
-    document.querySelectorAll('.btn-edit-chk').forEach(btn => {
+    container.querySelectorAll('.btn-edit-chk').forEach(btn => {
       btn.addEventListener('click', () => {
         const id = parseInt(btn.getAttribute('data-id'));
         const item = checklists.find(c => c.id === id);
@@ -296,7 +296,7 @@ export async function renderChecklistView(trip, refreshView, initialTab = 'check
       });
     });
 
-    document.querySelectorAll('.btn-delete-chk').forEach(btn => {
+    container.querySelectorAll('.btn-delete-chk').forEach(btn => {
       btn.addEventListener('click', async () => {
         const id = parseInt(btn.getAttribute('data-id'));
         if (confirm('¿Deseas eliminar esta tarea?')) {
@@ -308,10 +308,10 @@ export async function renderChecklistView(trip, refreshView, initialTab = 'check
     });
 
     // Document Action Handlers
-    document.getElementById('btn-add-document')?.addEventListener('click', () => openDocumentModal());
-    document.getElementById('btn-add-doc-empty')?.addEventListener('click', () => openDocumentModal());
+    container.querySelector('#btn-add-document')?.addEventListener('click', () => openDocumentModal());
+    container.querySelector('#btn-add-doc-empty')?.addEventListener('click', () => openDocumentModal());
 
-    document.querySelectorAll('.btn-edit-doc').forEach(btn => {
+    container.querySelectorAll('.btn-edit-doc').forEach(btn => {
       btn.addEventListener('click', () => {
         const id = parseInt(btn.getAttribute('data-id'));
         const item = docs.find(d => d.id === id);
@@ -319,7 +319,7 @@ export async function renderChecklistView(trip, refreshView, initialTab = 'check
       });
     });
 
-    document.querySelectorAll('.btn-delete-doc').forEach(btn => {
+    container.querySelectorAll('.btn-delete-doc').forEach(btn => {
       btn.addEventListener('click', async () => {
         const id = parseInt(btn.getAttribute('data-id'));
         if (confirm('¿Deseas eliminar este documento?')) {
@@ -331,10 +331,10 @@ export async function renderChecklistView(trip, refreshView, initialTab = 'check
     });
 
     // Contact Action Handlers
-    document.getElementById('btn-add-contact')?.addEventListener('click', () => openContactModal());
-    document.getElementById('btn-add-contact-empty')?.addEventListener('click', () => openContactModal());
+    container.querySelector('#btn-add-contact')?.addEventListener('click', () => openContactModal());
+    container.querySelector('#btn-add-contact-empty')?.addEventListener('click', () => openContactModal());
 
-    document.querySelectorAll('.btn-edit-contact').forEach(btn => {
+    container.querySelectorAll('.btn-edit-contact').forEach(btn => {
       btn.addEventListener('click', () => {
         const id = parseInt(btn.getAttribute('data-id'));
         const item = contacts.find(c => c.id === id);
@@ -342,7 +342,7 @@ export async function renderChecklistView(trip, refreshView, initialTab = 'check
       });
     });
 
-    document.querySelectorAll('.btn-delete-contact').forEach(btn => {
+    container.querySelectorAll('.btn-delete-contact').forEach(btn => {
       btn.addEventListener('click', async () => {
         const id = parseInt(btn.getAttribute('data-id'));
         if (confirm('¿Deseas eliminar este contacto?')) {

@@ -59,7 +59,7 @@ export function renderNavigation(activeView, currentTrip, currentUser) {
       </div>
 
       <div class="sidebar-nav">
-        <a class="nav-item ${activeView === 'home' ? 'active' : ''}" data-view="home">
+        <a href="javascript:void(0)" role="button" tabindex="0" class="nav-item ${activeView === 'home' ? 'active' : ''}" data-view="home">
           <span class="nav-item-icon">${renderIcon('home', { size: 19 })}</span>
           <span>Mis Viajes</span>
         </a>
@@ -70,27 +70,27 @@ export function renderNavigation(activeView, currentTrip, currentUser) {
             <span>${tripName}</span>
           </div>
 
-          <a class="nav-item ${activeView === 'dashboard' ? 'active' : ''}" data-view="dashboard">
+          <a href="javascript:void(0)" role="button" tabindex="0" class="nav-item ${activeView === 'dashboard' ? 'active' : ''}" data-view="dashboard">
             <span class="nav-item-icon">${renderIcon('dashboard', { size: 19 })}</span>
             <span>Dashboard</span>
           </a>
 
-          <a class="nav-item ${['itinerary', 'places', 'reservations'].includes(activeView) ? 'active' : ''}" data-view="itinerary">
+          <a href="javascript:void(0)" role="button" tabindex="0" class="nav-item ${['itinerary', 'places', 'reservations'].includes(activeView) ? 'active' : ''}" data-view="itinerary">
             <span class="nav-item-icon">${renderIcon('calendar', { size: 19 })}</span>
             <span>Itinerario & Logística</span>
           </a>
 
-          <a class="nav-item ${['expenses', 'budget', 'shopping'].includes(activeView) ? 'active' : ''}" data-view="expenses">
+          <a href="javascript:void(0)" role="button" tabindex="0" class="nav-item ${['expenses', 'budget', 'shopping'].includes(activeView) ? 'active' : ''}" data-view="expenses">
             <span class="nav-item-icon">${renderIcon('wallet', { size: 19 })}</span>
             <span>Finanzas de Viaje</span>
           </a>
 
-          <a class="nav-item ${['checklist', 'documents', 'contacts'].includes(activeView) ? 'active' : ''}" data-view="checklist">
+          <a href="javascript:void(0)" role="button" tabindex="0" class="nav-item ${['checklist', 'documents', 'contacts'].includes(activeView) ? 'active' : ''}" data-view="checklist">
             <span class="nav-item-icon">${renderIcon('checklist', { size: 19 })}</span>
             <span>Preparativos & Equipaje</span>
           </a>
 
-          <a class="nav-item ${['journal', 'summary'].includes(activeView) ? 'active' : ''}" data-view="journal">
+          <a href="javascript:void(0)" role="button" tabindex="0" class="nav-item ${['journal', 'summary'].includes(activeView) ? 'active' : ''}" data-view="journal">
             <span class="nav-item-icon">${renderIcon('journal', { size: 19 })}</span>
             <span>Bitácora & Resumen</span>
           </a>
@@ -109,28 +109,28 @@ export function renderNavigation(activeView, currentTrip, currentUser) {
   // Mobile Bottom Navigation HTML (5 Clear Options)
   const bottomNavHTML = `
     <nav class="bottom-nav">
-      <a class="bottom-nav-item ${activeView === 'home' ? 'active' : ''}" data-view="home">
+      <a href="javascript:void(0)" role="button" tabindex="0" class="bottom-nav-item ${activeView === 'home' ? 'active' : ''}" data-view="home">
         <span class="icon">${renderIcon('home', { size: 20 })}</span>
         <span>Inicio</span>
       </a>
       ${currentTrip ? `
-        <a class="bottom-nav-item ${activeView === 'dashboard' ? 'active' : ''}" data-view="dashboard">
+        <a href="javascript:void(0)" role="button" tabindex="0" class="bottom-nav-item ${activeView === 'dashboard' ? 'active' : ''}" data-view="dashboard">
           <span class="icon">${renderIcon('dashboard', { size: 20 })}</span>
           <span>Panel</span>
         </a>
-        <a class="bottom-nav-item ${['itinerary', 'places', 'reservations'].includes(activeView) ? 'active' : ''}" data-view="itinerary">
+        <a href="javascript:void(0)" role="button" tabindex="0" class="bottom-nav-item ${['itinerary', 'places', 'reservations'].includes(activeView) ? 'active' : ''}" data-view="itinerary">
           <span class="icon">${renderIcon('calendar', { size: 20 })}</span>
           <span>Itinerario</span>
         </a>
-        <a class="bottom-nav-item ${['expenses', 'budget', 'shopping'].includes(activeView) ? 'active' : ''}" data-view="expenses">
+        <a href="javascript:void(0)" role="button" tabindex="0" class="bottom-nav-item ${['expenses', 'budget', 'shopping'].includes(activeView) ? 'active' : ''}" data-view="expenses">
           <span class="icon">${renderIcon('wallet', { size: 20 })}</span>
           <span>Finanzas</span>
         </a>
-        <a class="bottom-nav-item ${['checklist', 'documents', 'contacts'].includes(activeView) ? 'active' : ''}" data-view="checklist">
+        <a href="javascript:void(0)" role="button" tabindex="0" class="bottom-nav-item ${['checklist', 'documents', 'contacts'].includes(activeView) ? 'active' : ''}" data-view="checklist">
           <span class="icon">${renderIcon('checklist', { size: 20 })}</span>
           <span>Preparar</span>
         </a>
-        <a class="bottom-nav-item ${['journal', 'summary'].includes(activeView) ? 'active' : ''}" data-view="journal">
+        <a href="javascript:void(0)" role="button" tabindex="0" class="bottom-nav-item ${['journal', 'summary'].includes(activeView) ? 'active' : ''}" data-view="journal">
           <span class="icon">${renderIcon('journal', { size: 20 })}</span>
           <span>Bitácora</span>
         </a>

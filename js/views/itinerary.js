@@ -377,26 +377,26 @@ export async function renderItineraryView(trip, refreshView, initialTab = 'timel
     `;
 
     // Attach Tab Switch Listeners
-    document.getElementById('tab-sub-timeline')?.addEventListener('click', () => { activeTab = 'timeline'; renderContent(); });
-    document.getElementById('tab-sub-places')?.addEventListener('click', () => { activeTab = 'places'; renderContent(); });
-    document.getElementById('tab-sub-reservations')?.addEventListener('click', () => { activeTab = 'reservations'; renderContent(); });
+    container.querySelector('#tab-sub-timeline')?.addEventListener('click', () => { activeTab = 'timeline'; renderContent(); });
+    container.querySelector('#tab-sub-places')?.addEventListener('click', () => { activeTab = 'places'; renderContent(); });
+    container.querySelector('#tab-sub-reservations')?.addEventListener('click', () => { activeTab = 'reservations'; renderContent(); });
 
     // Place Filter Listeners
-    document.getElementById('filter-place-cat')?.addEventListener('change', (e) => { placeCatFilter = e.target.value; renderContent(); });
-    document.getElementById('filter-place-status')?.addEventListener('change', (e) => { placeStatusFilter = e.target.value; renderContent(); });
+    container.querySelector('#filter-place-cat')?.addEventListener('change', (e) => { placeCatFilter = e.target.value; renderContent(); });
+    container.querySelector('#filter-place-status')?.addEventListener('change', (e) => { placeStatusFilter = e.target.value; renderContent(); });
 
     // Activity Handlers
-    document.getElementById('btn-add-activity')?.addEventListener('click', () => openActivityModal());
-    document.getElementById('btn-add-act-empty')?.addEventListener('click', () => openActivityModal());
+    container.querySelector('#btn-add-activity')?.addEventListener('click', () => openActivityModal());
+    container.querySelector('#btn-add-act-empty')?.addEventListener('click', () => openActivityModal());
 
-    document.querySelectorAll('.btn-edit-act').forEach(btn => {
+    container.querySelectorAll('.btn-edit-act').forEach(btn => {
       btn.addEventListener('click', () => {
         const item = activities.find(a => a.id === parseInt(btn.getAttribute('data-id')));
         if (item) openActivityModal(item);
       });
     });
 
-    document.querySelectorAll('.btn-delete-act').forEach(btn => {
+    container.querySelectorAll('.btn-delete-act').forEach(btn => {
       btn.addEventListener('click', async () => {
         const id = parseInt(btn.getAttribute('data-id'));
         if (confirm('¿Deseas eliminar esta actividad?')) {
@@ -407,7 +407,7 @@ export async function renderItineraryView(trip, refreshView, initialTab = 'timel
       });
     });
 
-    document.querySelectorAll('.btn-toggle-act-status').forEach(btn => {
+    container.querySelectorAll('.btn-toggle-act-status').forEach(btn => {
       btn.addEventListener('click', async () => {
         const id = parseInt(btn.getAttribute('data-id'));
         const item = activities.find(a => a.id === id);
@@ -421,10 +421,10 @@ export async function renderItineraryView(trip, refreshView, initialTab = 'timel
     });
 
     // Place Handlers
-    document.getElementById('btn-add-place')?.addEventListener('click', () => openPlaceModal());
-    document.getElementById('btn-add-place-empty')?.addEventListener('click', () => openPlaceModal());
+    container.querySelector('#btn-add-place')?.addEventListener('click', () => openPlaceModal());
+    container.querySelector('#btn-add-place-empty')?.addEventListener('click', () => openPlaceModal());
 
-    document.querySelectorAll('.btn-schedule-place').forEach(btn => {
+    container.querySelectorAll('.btn-schedule-place').forEach(btn => {
       btn.addEventListener('click', () => {
         const place = places.find(p => p.id === parseInt(btn.getAttribute('data-id')));
         if (place) {
@@ -443,7 +443,7 @@ export async function renderItineraryView(trip, refreshView, initialTab = 'timel
       });
     });
 
-    document.querySelectorAll('.btn-toggle-place-visited').forEach(btn => {
+    container.querySelectorAll('.btn-toggle-place-visited').forEach(btn => {
       btn.addEventListener('click', async () => {
         const id = parseInt(btn.getAttribute('data-id'));
         const item = places.find(p => p.id === id);
@@ -456,14 +456,14 @@ export async function renderItineraryView(trip, refreshView, initialTab = 'timel
       });
     });
 
-    document.querySelectorAll('.btn-edit-place').forEach(btn => {
+    container.querySelectorAll('.btn-edit-place').forEach(btn => {
       btn.addEventListener('click', () => {
         const item = places.find(p => p.id === parseInt(btn.getAttribute('data-id')));
         if (item) openPlaceModal(item);
       });
     });
 
-    document.querySelectorAll('.btn-delete-place').forEach(btn => {
+    container.querySelectorAll('.btn-delete-place').forEach(btn => {
       btn.addEventListener('click', async () => {
         const id = parseInt(btn.getAttribute('data-id'));
         if (confirm('¿Deseas eliminar este lugar?')) {
@@ -475,17 +475,17 @@ export async function renderItineraryView(trip, refreshView, initialTab = 'timel
     });
 
     // Reservation Handlers
-    document.getElementById('btn-add-reservation')?.addEventListener('click', () => openReservationModal());
-    document.getElementById('btn-add-res-empty')?.addEventListener('click', () => openReservationModal());
+    container.querySelector('#btn-add-reservation')?.addEventListener('click', () => openReservationModal());
+    container.querySelector('#btn-add-res-empty')?.addEventListener('click', () => openReservationModal());
 
-    document.querySelectorAll('.btn-edit-res').forEach(btn => {
+    container.querySelectorAll('.btn-edit-res').forEach(btn => {
       btn.addEventListener('click', () => {
         const item = reservations.find(r => r.id === parseInt(btn.getAttribute('data-id')));
         if (item) openReservationModal(item);
       });
     });
 
-    document.querySelectorAll('.btn-delete-res').forEach(btn => {
+    container.querySelectorAll('.btn-delete-res').forEach(btn => {
       btn.addEventListener('click', async () => {
         const id = parseInt(btn.getAttribute('data-id'));
         if (confirm('¿Deseas eliminar esta reserva?')) {

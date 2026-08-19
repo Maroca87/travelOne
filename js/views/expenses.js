@@ -365,18 +365,18 @@ export async function renderExpensesView(trip, refreshView, initialTab = 'expens
     `;
 
     // Attach Tab Switch Listeners
-    document.getElementById('tab-sub-expenses')?.addEventListener('click', () => { activeTab = 'expenses'; renderContent(); });
-    document.getElementById('tab-sub-budget')?.addEventListener('click', () => { activeTab = 'budget'; renderContent(); });
-    document.getElementById('tab-sub-shopping')?.addEventListener('click', () => { activeTab = 'shopping'; renderContent(); });
+    container.querySelector('#tab-sub-expenses')?.addEventListener('click', () => { activeTab = 'expenses'; renderContent(); });
+    container.querySelector('#tab-sub-budget')?.addEventListener('click', () => { activeTab = 'budget'; renderContent(); });
+    container.querySelector('#tab-sub-shopping')?.addEventListener('click', () => { activeTab = 'shopping'; renderContent(); });
 
     // Filter Listeners
-    document.getElementById('filter-exp-cat')?.addEventListener('change', (e) => { expenseCatFilter = e.target.value; renderContent(); });
+    container.querySelector('#filter-exp-cat')?.addEventListener('change', (e) => { expenseCatFilter = e.target.value; renderContent(); });
 
     // Expense Action Handlers
-    document.getElementById('btn-add-expense')?.addEventListener('click', () => openExpenseModal());
-    document.getElementById('btn-add-exp-empty')?.addEventListener('click', () => openExpenseModal());
+    container.querySelector('#btn-add-expense')?.addEventListener('click', () => openExpenseModal());
+    container.querySelector('#btn-add-exp-empty')?.addEventListener('click', () => openExpenseModal());
 
-    document.querySelectorAll('.btn-edit-exp').forEach(btn => {
+    container.querySelectorAll('.btn-edit-exp').forEach(btn => {
       btn.addEventListener('click', () => {
         const id = parseInt(btn.getAttribute('data-id'));
         const item = expenses.find(e => e.id === id);
@@ -384,7 +384,7 @@ export async function renderExpensesView(trip, refreshView, initialTab = 'expens
       });
     });
 
-    document.querySelectorAll('.btn-delete-exp').forEach(btn => {
+    container.querySelectorAll('.btn-delete-exp').forEach(btn => {
       btn.addEventListener('click', async () => {
         const id = parseInt(btn.getAttribute('data-id'));
         if (confirm('¿Deseas eliminar este registro de gasto?')) {
@@ -396,13 +396,13 @@ export async function renderExpensesView(trip, refreshView, initialTab = 'expens
     });
 
     // Budget Edit Handler
-    document.getElementById('btn-edit-budget-limits')?.addEventListener('click', () => openBudgetModal());
+    container.querySelector('#btn-edit-budget-limits')?.addEventListener('click', () => openBudgetModal());
 
     // Shopping Action Handlers
-    document.getElementById('btn-add-shop-item')?.addEventListener('click', () => openShoppingModal());
-    document.getElementById('btn-add-shop-empty')?.addEventListener('click', () => openShoppingModal());
+    container.querySelector('#btn-add-shop-item')?.addEventListener('click', () => openShoppingModal());
+    container.querySelector('#btn-add-shop-empty')?.addEventListener('click', () => openShoppingModal());
 
-    document.querySelectorAll('.chk-toggle-bought').forEach(chk => {
+    container.querySelectorAll('.chk-toggle-bought').forEach(chk => {
       chk.addEventListener('change', async () => {
         const id = parseInt(chk.getAttribute('data-id'));
         const item = shoppingItems.find(s => s.id === id);
@@ -436,7 +436,7 @@ export async function renderExpensesView(trip, refreshView, initialTab = 'expens
       });
     });
 
-    document.querySelectorAll('.btn-edit-shop').forEach(btn => {
+    container.querySelectorAll('.btn-edit-shop').forEach(btn => {
       btn.addEventListener('click', () => {
         const id = parseInt(btn.getAttribute('data-id'));
         const item = shoppingItems.find(s => s.id === id);
@@ -444,7 +444,7 @@ export async function renderExpensesView(trip, refreshView, initialTab = 'expens
       });
     });
 
-    document.querySelectorAll('.btn-delete-shop').forEach(btn => {
+    container.querySelectorAll('.btn-delete-shop').forEach(btn => {
       btn.addEventListener('click', async () => {
         const id = parseInt(btn.getAttribute('data-id'));
         if (confirm('¿Deseas eliminar este artículo de compras?')) {

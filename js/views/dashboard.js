@@ -236,19 +236,29 @@ export async function renderDashboardView(trip, onNavigate) {
     </div>
   `;
 
-  // Attach Event Handlers
-  setTimeout(() => {
-    container.querySelectorAll('.module-shortcut').forEach(card => {
-      card.addEventListener('click', () => {
-        const targetView = card.getAttribute('data-view');
-        onNavigate(targetView);
-      });
+  // Attach Event Handlers Synchronously
+  container.querySelectorAll('.module-shortcut').forEach(card => {
+    card.addEventListener('click', (e) => {
+      e.preventDefault();
+      const targetView = card.getAttribute('data-view');
+      if (targetView) onNavigate(targetView);
     });
+  });
 
-    container.querySelector('#card-next-activity')?.addEventListener('click', () => onNavigate('itinerary'));
-    container.querySelector('#card-next-reservation')?.addEventListener('click', () => onNavigate('itinerary'));
-    container.querySelector('#btn-quick-summary')?.addEventListener('click', () => onNavigate('journal'));
-  }, 50);
+  container.querySelector('#card-next-activity')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    onNavigate('itinerary');
+  });
+
+  container.querySelector('#card-next-reservation')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    onNavigate('itinerary');
+  });
+
+  container.querySelector('#btn-quick-summary')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    onNavigate('journal');
+  });
 
   return container;
 }
