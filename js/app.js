@@ -41,7 +41,8 @@ class TravelOneApp {
   }
 
   /**
-   * Play an elegant, professional startup splash animation with glowing logo and sonar pulses upon launching the app.
+   * Play an elegant, professional startup splash animation with glowing logo, pulsing sonar rings,
+   * and nuanced progress steps upon launching the app.
    * 
    * @returns {Promise<void>} Resolves when the initial startup animation concludes
    */
@@ -50,42 +51,62 @@ class TravelOneApp {
       const overlay = document.createElement('div');
       overlay.className = 'app-startup-splash-overlay active';
       overlay.innerHTML = `
+        <div class="splash-glow-aura"></div>
         <div class="splash-icon-wrapper">
           <div class="splash-sonar-ring"></div>
           <div class="splash-sonar-ring"></div>
           <div class="splash-sonar-ring"></div>
           <div class="splash-logo-box">
-            ${renderAppLogoSVG(84)}
+            ${renderAppLogoSVG(92)}
           </div>
         </div>
 
         <div class="splash-title-group">
-          <h1 style="font-size: 2.2rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.25rem; background: linear-gradient(135deg, #ffffff 30%, var(--primary-cyan) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+          <h1 class="splash-brand-title">
             TravelOne
           </h1>
-          <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: center; gap: 0.4rem;">
-            ${renderIcon('sparkles', { size: 14, color: 'var(--accent-emerald)' })}
+          <div class="splash-tagline">
+            ${renderIcon('sparkles', { size: 15, color: 'var(--accent-emerald)' })}
             <span>Organizador Personal de Viajes Offline</span>
           </div>
 
           <div class="splash-progress-track">
-            <div class="splash-progress-bar"></div>
+            <div class="splash-progress-bar-fill" id="splash-progress-fill"></div>
           </div>
-          <div style="font-size: 0.78rem; color: var(--text-dim); margin-top: 0.75rem; font-weight: 500;">
-            Iniciando base de datos local y herramientas...
+          <div class="splash-status-text" id="splash-status-label">
+            Iniciando TravelOne...
           </div>
         </div>
       `;
 
       document.body.appendChild(overlay);
 
+      const statusLabel = overlay.querySelector('#splash-status-label');
+      const progressFill = overlay.querySelector('#splash-progress-fill');
+
+      // Nuanced multi-phase timeline
+      setTimeout(() => {
+        if (statusLabel) statusLabel.textContent = 'Cargando base de datos y memoria local...';
+        if (progressFill) progressFill.style.width = '45%';
+      }, 500);
+
+      setTimeout(() => {
+        if (statusLabel) statusLabel.textContent = 'Sincronizando herramientas, divisas y mapas...';
+        if (progressFill) progressFill.style.width = '80%';
+      }, 1100);
+
+      setTimeout(() => {
+        if (statusLabel) statusLabel.innerHTML = '<span>¡Todo listo para viajar! ✨</span>';
+        if (progressFill) progressFill.style.width = '100%';
+      }, 1600);
+
       setTimeout(() => {
         overlay.classList.add('leaving');
         setTimeout(() => {
           overlay.remove();
           resolve();
-        }, 320);
-      }, 850);
+        }, 450);
+      }, 2100);
     });
   }
 

@@ -9,27 +9,27 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "./app-logo.svg?v=20",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "./apple-touch-icon.png?v=20",
+      "src": "./apple-touch-icon.png?v=25",
       "sizes": "180x180",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "./icon-192.png?v=20",
+      "src": "./icon-192.png?v=25",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "./icon-512.png?v=20",
+      "src": "./icon-512.png?v=25",
       "sizes": "512x512",
       "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./app-logo.svg?v=25",
+      "sizes": "any",
+      "type": "image/svg+xml",
       "purpose": "any maskable"
     }
   ]

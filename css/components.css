@@ -311,16 +311,15 @@
 }
 
 /* ==========================================================================
-   App Startup & Launch Splash Animation
+   App Startup & Launch Splash Animation (Nuanced & Luxurious)
    ========================================================================== */
-.app-startup-splash-overlay,
-.trip-splash-overlay {
+.app-startup-splash-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: radial-gradient(circle at center, #13243f 0%, #0b1326 100%);
+  background: radial-gradient(circle at center, #0e3025 0%, #0d2134 45%, #070d18 100%);
   z-index: 10000;
   display: flex;
   flex-direction: column;
@@ -329,23 +328,33 @@
   padding: 2rem;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), filter 0.4s ease;
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), filter 0.5s ease;
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  overflow: hidden;
 }
 
-.app-startup-splash-overlay.active,
-.trip-splash-overlay.active {
+.app-startup-splash-overlay.active {
   opacity: 1;
   pointer-events: auto;
   transform: scale(1);
 }
 
-.app-startup-splash-overlay.leaving,
-.trip-splash-overlay.leaving {
+.app-startup-splash-overlay.leaving {
   opacity: 0;
-  transform: scale(1.08);
-  filter: blur(10px);
+  transform: scale(1.06);
+  filter: blur(14px);
+}
+
+.splash-glow-aura {
+  position: absolute;
+  width: 380px;
+  height: 380px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(14, 163, 93, 0.3) 0%, rgba(0, 242, 254, 0.15) 50%, transparent 70%);
+  filter: blur(40px);
+  pointer-events: none;
+  animation: auraPulse 3.5s infinite ease-in-out;
 }
 
 .splash-icon-wrapper {
@@ -353,145 +362,157 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 2rem;
+  margin-bottom: 2.25rem;
 }
 
 .splash-sonar-ring {
   position: absolute;
-  width: 100px;
-  height: 100px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
-  border: 2px solid var(--accent-emerald);
+  border: 2px solid rgba(14, 163, 93, 0.7);
+  box-shadow: 0 0 15px rgba(14, 163, 93, 0.3);
   opacity: 0;
-  animation: splashSonar 1.8s infinite cubic-bezier(0.2, 0.8, 0.4, 1);
+  animation: splashSonarNuanced 2.4s infinite cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .splash-sonar-ring:nth-child(2) {
-  animation-delay: 0.5s;
-  border-color: var(--primary-cyan);
+  animation-delay: 0.7s;
+  border-color: rgba(0, 242, 254, 0.6);
+  box-shadow: 0 0 15px rgba(0, 242, 254, 0.3);
 }
 
 .splash-sonar-ring:nth-child(3) {
-  animation-delay: 1s;
-  border-color: var(--accent-amber);
+  animation-delay: 1.4s;
+  border-color: rgba(246, 211, 101, 0.5);
+  box-shadow: 0 0 15px rgba(246, 211, 101, 0.25);
 }
 
 .splash-logo-box {
   position: relative;
   z-index: 2;
-  border-radius: 24px;
-  padding: 8px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6), 0 0 40px rgba(14, 163, 93, 0.45);
-  animation: splashFloat 2.2s infinite ease-in-out;
+  border-radius: 28px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6), 0 0 50px rgba(14, 163, 93, 0.5);
+  animation: splashFloatNuanced 2.8s infinite ease-in-out;
+  backdrop-filter: blur(10px);
 }
 
 .splash-title-group {
   text-align: center;
-  animation: splashFadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  position: relative;
+  z-index: 2;
+  animation: splashFadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.splash-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  background: rgba(0, 242, 254, 0.12);
-  border: 1px solid rgba(0, 242, 254, 0.25);
-  color: var(--primary-cyan);
-  padding: 0.35rem 0.85rem;
-  border-radius: var(--radius-full);
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-bottom: 0.85rem;
-}
-
-.splash-trip-name {
+.splash-brand-title {
   font-family: 'Outfit', sans-serif;
-  font-size: 2rem;
+  font-size: 2.4rem;
   font-weight: 800;
-  color: #ffffff;
-  margin-bottom: 0.35rem;
   letter-spacing: -0.02em;
-  background: linear-gradient(135deg, #ffffff 30%, var(--primary-cyan) 100%);
+  margin-bottom: 0.35rem;
+  background: linear-gradient(135deg, #ffffff 20%, #00f2fe 70%, #00b09b 100%);
+  background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  animation: titleShimmer 3s infinite linear;
 }
 
-.splash-destination {
-  font-size: 1rem;
+.splash-tagline {
+  font-size: 0.95rem;
   color: var(--text-muted);
+  margin-bottom: 1.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.4rem;
-  margin-bottom: 1.5rem;
+  gap: 0.45rem;
+  font-weight: 500;
 }
 
 .splash-progress-track {
-  width: 220px;
+  width: 240px;
   height: 6px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.09);
   border-radius: var(--radius-full);
   overflow: hidden;
   position: relative;
   margin: 0 auto;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
-.splash-progress-bar {
+.splash-progress-bar-fill {
   position: absolute;
   left: 0;
   top: 0;
   height: 100%;
-  width: 40%;
-  background: linear-gradient(90deg, var(--accent-emerald), var(--primary-cyan), var(--accent-amber));
+  width: 15%;
+  background: linear-gradient(90deg, #0ea35d, #00f2fe, #f6d365);
   border-radius: var(--radius-full);
-  animation: splashShimmer 1.2s infinite ease-in-out;
+  transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 0 10px rgba(0, 242, 254, 0.6);
 }
 
-@keyframes splashSonar {
+.splash-status-text {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-top: 0.85rem;
+  font-weight: 500;
+  min-height: 1.2rem;
+  transition: opacity 0.3s ease;
+}
+
+@keyframes auraPulse {
+  0%, 100% {
+    transform: scale(0.9);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.85;
+  }
+}
+
+@keyframes splashSonarNuanced {
   0% {
-    transform: scale(0.8);
-    opacity: 0.8;
+    transform: scale(0.75);
+    opacity: 0.85;
   }
   100% {
-    transform: scale(2.4);
+    transform: scale(2.8);
     opacity: 0;
   }
 }
 
-@keyframes splashFloat {
+@keyframes splashFloatNuanced {
   0%, 100% {
     transform: translateY(0) scale(1);
   }
   50% {
-    transform: translateY(-8px) scale(1.03);
+    transform: translateY(-9px) scale(1.025);
+  }
+}
+
+@keyframes titleShimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
   }
 }
 
 @keyframes splashFadeUp {
   0% {
     opacity: 0;
-    transform: translateY(15px);
+    transform: translateY(20px);
   }
   100% {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@keyframes splashShimmer {
-  0% {
-    left: -40%;
-    width: 30%;
-  }
-  50% {
-    width: 60%;
-  }
-  100% {
-    left: 110%;
-    width: 30%;
   }
 }
